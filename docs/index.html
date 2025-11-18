@@ -1,29 +1,21 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>Excel 自動生成ツール</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>書類自動生成システム</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>Excel 書類自動生成ツール</h2>
+<h2>書類自動作成</h2>
 
-<div class="form-container">
-  <label>点検者：</label>
-  <input id="inspector" placeholder="例：田中"><br>
+<label>点検者名：</label>
+<input type="text" id="inspector" placeholder="例：田中">
+<br><br>
 
-  <label>日付：</label>
-  <input id="date" type="date"><br>
+<button onclick="generate()">書類を生成</button>
 
-  <label>対象物：</label>
-  <input id="target" placeholder="例：滑り台"><br>
-
-  <label>評価：</label>
-  <input id="score" placeholder="良・可・不良など"><br>
-
-  <button onclick="generate()">Excelを作成</button>
-</div>
+<p id="status"></p>
 
 <script src="script.js"></script>
 </body>

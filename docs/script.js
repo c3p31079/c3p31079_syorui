@@ -1,25 +1,41 @@
 async function generate() {
-  const data = {
-    inspector: document.getElementById("inspector").value,
-    date: document.getElementById("date").value,
-    target: document.getElementById("target").value,
-    score: document.getElementById("score").value
-  };
+    const inspector = document.getElementById("inspector").value;
+    const status = document.getElementById("status");
 
+    if (!inspector) {
+        status.textContent = "点検者名を入力してください。";
+        return;
+    }
 
-  const apiUrl = "https://c3p31079-syorui.onrender.com";
+    status.textContent = "生成中...";
 
-  const res = await fetch(apiUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
+    const url = "https://c3p31079-syorui.onrender.com";
 
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ inspector })
+        });
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "output.xlsx";
-  a.click();
+        if (!response.ok) {
+            status.textContent = "エラー：ファイル生成に失敗しました。";
+            return;
+        }
+
+        // バイナリデータとして受け取る
+        const blob = await response.blob();
+
+        // ダウンロード
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "generated.xlsx";
+        link.click();
+
+        status.textContent = "生成成功 ✔  ダウンロードしました。";
+
+    } catch (error) {
+        status.textContent = "通信エラー：Render の API に接続できません。";
+        console.error(error);
+    }
 }

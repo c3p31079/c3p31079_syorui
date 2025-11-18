@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>生成ファイル一覧</title>
+</head>
+<body>
+<h2>生成された Excel 一覧</h2>
+
+<ul id="fileList"></ul>
+
+<script>
+async function loadFiles() {
+  const url = "https://api.github.com/repos/c3p31079/your-repo/contents/generated";
+
+  const res = await fetch(url);
+  const files = await res.json();
+
+  const list = document.getElementById("fileList");
+  files.forEach(f => {
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="${f.download_url}" target="_blank">${f.name}</a>`;
+    list.appendChild(li);
+  });
+}
+
+loadFiles();
+</script>
+</body>
+</html>
