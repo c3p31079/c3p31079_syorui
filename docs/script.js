@@ -1,4 +1,7 @@
-document.getElementById("generateBtn").addEventListener("click", async () => {
+const statusEl = document.getElementById("status");
+const btn = document.getElementById("generateBtn");
+
+btn.addEventListener("click", async () => {
   const inspectorName = document.getElementById("inspector").value.trim();
 
   if (!inspectorName) {
@@ -6,12 +9,14 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
     return;
   }
 
+  // 生成中の表示
+  statusEl.textContent = "Excelを生成中…";
+  btn.disabled = true;
+
   try {
     const response = await fetch("https://c3p31079-syorui.onrender.com/generate", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inspector: inspectorName })
     });
 
@@ -19,22 +24,21 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
       throw new Error(`サーバーエラー: ${response.status}`);
     }
 
-    // Blobとして受け取る
     const blob = await response.blob();
-
-    // ダウンロードリンク作成
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "generated.xlsx"; // ファイル名
+    a.download = "generated.xlsx";
     document.body.appendChild(a);
     a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
 
-    alert("Excelをダウンロードしました！");
+    statusEl.textContent = "Excelをダウンロードしました！";
   } catch (err) {
     console.error(err);
-    alert(`ファイル生成に失敗しました: ${err.message}`);
+    statusEl.textContent = `ファイル生成に失敗しました: ${err.message}`;
+  } finally {
+    btn.disabled = false;
   }
 });
