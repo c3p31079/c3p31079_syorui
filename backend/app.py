@@ -1,8 +1,10 @@
 from flask import Flask, request, send_file
 from openpyxl import load_workbook
+from flask_cors import CORS
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/generate", methods=["POST"])
 def generate():
