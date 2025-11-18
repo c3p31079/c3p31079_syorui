@@ -6,8 +6,8 @@ async function generate() {
     score: document.getElementById("score").value
   };
 
-  // ←← デプロイ後のあなたの Render API URL に書き換えて！
-  const apiUrl = "https://your-backend.onrender.com/generate";
+
+  const apiUrl = "https://c3p31079-syorui.onrender.com";
 
   const res = await fetch(apiUrl, {
     method: "POST",
