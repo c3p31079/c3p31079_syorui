@@ -1,48 +1,51 @@
 // 入力値を sessionStorage へ保存
-document.getElementById("previewBtn")?.addEventListener("click", () => {
-    const data = {
-        part: document.getElementById("part").value,
-        item: document.getElementById("item").value,
-        score: Number(document.getElementById("score").value),
-        checked: document.getElementById("checked").checked
-    };
-    sessionStorage.setItem("inspectData", JSON.stringify(data));
-    location.href = "preview.html";
-});
+const previewBtn = document.getElementById("previewBtn");
+if (previewBtn) {
+    previewBtn.addEventListener("click", () => {
+        const data = {
+            part: document.getElementById("part").value,
+            item: document.getElementById("item").value,
+            score: Number(document.getElementById("score").value),
+            checked: document.getElementById("checked").checked
+        };
+
+        sessionStorage.setItem("inspectData", JSON.stringify(data));
+        location.href = "preview.html";
+    });
+}
 
 // Excel 生成（xlsx）
-document.getElementById("excelBtn")?.addEventListener("click", () => {
-    const part = document.getElementById("part").value;
-    const item = document.getElementById("item").value;
-    const score = Number(document.getElementById("score").value);
-    const checked = document.getElementById("checked").checked;
+const excelBtn = document.getElementById("excelBtn");
+if (excelBtn) {
+    excelBtn.addEventListener("click", () => {
+        const part = document.getElementById("part").value;
+        const item = document.getElementById("item").value;
+        const score = Number(document.getElementById("score").value);
+        const checked = document.getElementById("checked").checked;
 
-    const wb = XLSX.utils.book_new();
-    const wsData = [
-        ["部位", "項目", "スコア", "点検済み"],
-        [part, item, score, checked ? "✔" : ""]
-    ];
+        const wb = XLSX.utils.book_new();
+        const wsData = [
+            ["部位", "項目", "スコア", "点検済み"],
+            [part, item, score, checked ? "✔" : ""]
+        ];
 
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, "点検データ");
-
-    XLSX.writeFile(wb, "inspection.xlsx");
-});
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, "点検データ");
+        XLSX.writeFile(wb, "inspection.xlsx");
+    });
+}
 
 // プレビュー画面：キャンバス表示
-if (document.getElementById("previewCanvas")) {
-
-    const canvas = document.getElementById("previewCanvas");
+const canvas = document.getElementById("previewCanvas");
+if (canvas) {
     const ctx = canvas.getContext("2d");
 
-    // 座標マッピング
     const coordMap = {
         "チェーン:腐食": { x: 120, y: 80 },
         "チェーン:摩耗": { x: 220, y: 160 },
         "ロープ:亀裂": { x: 340, y: 200 }
     };
 
-    // 図形描画
     function drawCircle(x, y, size=30) {
         ctx.beginPath();
         ctx.lineWidth = 4;
@@ -83,13 +86,13 @@ if (document.getElementById("previewCanvas")) {
         ctx.stroke();
     }
 
-    // プレビュー描画
     function renderPreview() {
         const raw = sessionStorage.getItem("inspectData");
         if (!raw) return;
+
         const { part, item, score, checked } = JSON.parse(raw);
 
-        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         const key = `${part}:${item}`;
         if (!(key in coordMap)) return;
