@@ -36,7 +36,6 @@ def generate():
                      as_attachment=True,
                      download_name="inspection.xlsx")
 
-
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"status": "ok"})
