@@ -1,14 +1,16 @@
 import os
 import io
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 from openpyxl.drawing.image import Image as XLImage
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
+import uuid
 
 ICON_DIR = "backend/icons"
 os.makedirs(ICON_DIR, exist_ok=True)
 
 def ensure_icons_exist():
-    # 単純な赤線で図形を作成
+    # 図形アイコン生成
     shapes = {
         "triangle": lambda: draw_triangle_icon(),
         "cross": lambda: draw_cross_icon(),
@@ -47,19 +49,36 @@ def draw_check_icon(size=50):
     return im
 
 def render_range_to_image(template_path, sheet_name="Sheet1", cell_range="A1:H37"):
-    wb = load_workbook(template_path)
+    wb = load_workbook(template_path, data_only=True)
     ws = wb[sheet_name]
-    
-    # 画像化する範囲を単純に描画（Pillowでテーブル描画）
-    width, height = 850, 650
-    im = Image.new("RGB", (width, height), (255,255,255))
+
+    # セルの範囲
+    start_col = 1; end_col = 8
+    start_row = 1; end_row = 37
+
+    # 画像サイズ計算
+    cell_w = 100; cell_h = 20
+    width = cell_w * (end_col - start_col + 1)
+    height = cell_h * (end_row - start_row + 1)
+    im = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(im)
-    # 枠線などは簡易描画
-    for i in range(0, width, int(width/8)):
-        draw.line([(i,0),(i,height)], fill=(200,200,200))
-    for j in range(0, height, int(height/37)):
-        draw.line([(0,j),(width,j)], fill=(200,200,200))
-    # PIL Image to BytesIO
+    try:
+        font = ImageFont.truetype("arial.ttf", 14)
+    except:
+        font = ImageFont.load_default()
+
+    # セル描画
+    for r in range(start_row, end_row+1):
+        for c in range(start_col, end_col+1):
+            x0 = (c-start_col)*cell_w
+            y0 = (r-start_row)*cell_h
+            x1 = x0 + cell_w
+            y1 = y0 + cell_h
+            draw.rectangle([x0,y0,x1,y1], outline=(200,200,200))
+            val = ws.cell(r,c).value
+            if val is not None:
+                draw.text((x0+4,y0+2), str(val), fill="black", font=font)
+
     buf = io.BytesIO()
     im.save(buf, format="PNG")
     buf.seek(0)
@@ -68,14 +87,18 @@ def render_range_to_image(template_path, sheet_name="Sheet1", cell_range="A1:H37
 def generate_xlsx_with_shapes(template_path, shapes, sheet_name="Sheet1", cell_range="A1:H37", save_markers=False):
     wb = load_workbook(template_path)
     ws = wb[sheet_name]
-    
+
     for s in shapes:
         icon_file = os.path.join(ICON_DIR, f"{s['type']}.png")
         if os.path.exists(icon_file):
             img = XLImage(icon_file)
             img.width, img.height = 30, 30
-            img.anchor = f"{s['x']}:{s['y']}"  # Excel座標は簡易
+            # Excel上で座標を簡単に計算
+            col = int(s['x']/100)+1
+            row = int(s['y']/20)+1
+            img.anchor = f"{get_column_letter(col)}{row}"
             ws.add_image(img)
+
     out_path = os.path.join("backend", f"output_{uuid.uuid4().hex}.xlsx")
     wb.save(out_path)
     return out_path
