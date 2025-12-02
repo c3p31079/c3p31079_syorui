@@ -1,61 +1,71 @@
-import io
 import os
 from openpyxl import load_workbook
-from openpyxl.drawing.image import Image
-from PIL import Image as PILImage, ImageDraw
+from openpyxl.drawing.image import Image as XLImage
+from PIL import Image, ImageDraw
+import io
 
-ICON_DIR = "backend/icons"
-os.makedirs(ICON_DIR, exist_ok=True)
+ICON_PATHS = {
+    "triangle": "backend/icons/triangle.png",
+    "cross": "backend/icons/cross.png",
+    "circle": "backend/icons/circle.png",
+    "check": "backend/icons/check.png"
+}
 
 def ensure_icons_exist():
-    # △/×/〇/チェックを PNG で生成
-    size = 50
-    # △
-    img = PILImage.new("RGBA", (size, size), (0,0,0,0))
-    draw = ImageDraw.Draw(img)
-    draw.polygon([(size/2,0),(0,size),(size,size)], outline="red", width=4)
-    img.save(os.path.join(ICON_DIR,"triangle.png"))
-    # ×
-    img = PILImage.new("RGBA", (size, size), (0,0,0,0))
-    draw = ImageDraw.Draw(img)
-    draw.line([(0,0),(size,size)], fill="red", width=4)
-    draw.line([(0,size),(size,0)], fill="red", width=4)
-    img.save(os.path.join(ICON_DIR,"cross.png"))
-    # ○
-    img = PILImage.new("RGBA", (size, size), (0,0,0,0))
-    draw = ImageDraw.Draw(img)
-    draw.ellipse([(0,0),(size,size)], outline="red", width=4)
-    img.save(os.path.join(ICON_DIR,"circle.png"))
-    # ✓
-    img = PILImage.new("RGBA", (size, size), (0,0,0,0))
-    draw = ImageDraw.Draw(img)
-    draw.line([(size*0.1,size*0.5),(size*0.4,size*0.8),(size*0.9,size*0.2)], fill="green", width=4)
-    img.save(os.path.join(ICON_DIR,"check.png"))
+    for name, path in ICON_PATHS.items():
+        if not os.path.exists(path):
+            # 簡単な図形PNGを自動生成
+            img = Image.new("RGBA", (50, 50), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(img)
+            if name == "triangle":
+                draw.polygon([(25,0),(0,50),(50,50)], outline="red", width=4)
+            elif name == "cross":
+                draw.line((0,0,50,50), fill="red", width=4)
+                draw.line((0,50,50,0), fill="red", width=4)
+            elif name == "circle":
+                draw.ellipse((0,0,50,50), outline="red", width=4)
+            elif name == "check":
+                draw.line((0,25,20,45), fill="green", width=4)
+                draw.line((20,45,50,5), fill="green", width=4)
+            img.save(path)
 
 def render_range_to_image(template_path, sheet_name, cell_range):
-    # openpyxl + PIL でレンダリング
+    """
+    Excel範囲を PNG に変換（簡易）
+    """
     wb = load_workbook(template_path)
     ws = wb[sheet_name]
-    img = PILImage.new("RGB", (800,600), "white")
+
+    img = Image.new("RGB", (800, 600), "white")
     draw = ImageDraw.Draw(img)
-    # 簡易描画: セル範囲の境界線などを描画
-    # （本格的には excel2img なども可）
-    draw.rectangle([0,0,799,599], outline="black")
+    draw.text((10,10), f"{cell_range} のプレビュー", fill="black")
+
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
     return buf
 
-def generate_xlsx_with_shapes(template_path, shapes, sheet_name, cell_range, save_markers=False):
+def generate_xlsx_with_shapes(template_path, shapes, sheet_name, cell_range):
+    """
+    Excel に図形を貼り付けて保存
+    """
     wb = load_workbook(template_path)
     ws = wb[sheet_name]
+
     for s in shapes:
-        icon_path = os.path.join(ICON_DIR,f"{s['type']}.png")
-        if os.path.exists(icon_path):
-            img = Image(icon_path)
-            img.width = img.height = 50
-            img.anchor = f"A1"  # 仮、座標に変換する場合は調整
+        typ = s.get("type")
+        x = s.get("x")
+        y = s.get("y")
+        icon_path = ICON_PATHS.get(typ)
+        if icon_path:
+            img = XLImage(icon_path)
+            img.width = 30
+            img.height = 30
+            img.anchor = f"A1"  # 固定位置簡易
             ws.add_image(img)
-    out_path = os.path.join("backend","output.xlsx")
+
+    output_dir = "backend/generated"
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, f"output.xlsx")
     wb.save(out_path)
     return out_path

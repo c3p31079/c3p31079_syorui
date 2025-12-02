@@ -2,70 +2,19 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title>点検入力</title>
+  <title>プレビュー</title>
   <link rel="stylesheet" href="style.css">
-  <script src="data.js"></script>
-  <script src="coords.js"></script>
-  <script src="index.js" defer></script>
 </head>
 <body>
   <div class="container">
-    <h1>点検入力</h1>
-
-    <div class="form-grid">
-      <div class="form-row">
-        <label>点検部位</label>
-        <select id="part"></select>
-      </div>
-      <div class="form-row">
-        <label>項目</label>
-        <select id="item"></select>
-      </div>
-      <div class="form-row">
-        <label>サブ項目</label>
-        <select id="subItem" multiple></select>
-      </div>
-    </div>
-
+    <h1>プレビュー</h1>
+    <canvas id="previewCanvas"></canvas>
     <div class="actions">
-      <button id="doPreview">プレビューを見る</button>
+      <button id="downloadExcel">Excelをダウンロード</button>
+      <button id="backBtn">戻る</button>
       <span id="status"></span>
     </div>
-
-    <p class="hint">プレビュー画面では Excel の A1:H37 が PNG 化され、マーカーを反映して表示されます。</p>
   </div>
-
-  <script>
-  const BACKEND_BASE = "https://c3p31079-syorui.onrender.com";
-
-  document.getElementById("doPreview").addEventListener("click", async () => {
-    const part = document.getElementById("part").value;
-    const item = document.getElementById("item").value;
-    const subSelect = document.getElementById("subItem");
-    const subItems = Array.from(subSelect.selectedOptions).map(o => o.value);
-
-    // バックエンドから A1:H37 の PNG を取得
-    const res = await fetch(`${BACKEND_BASE}/api/sheet-image`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sheet: "Sheet1", range: "A1:H37" })
-    });
-
-    if (!res.ok) {
-      alert("プレビュー画像の生成に失敗しました");
-      return;
-    }
-
-    const blob = await res.blob();
-    const reader = new FileReader();
-    reader.onload = function() {
-      const imgDataUrl = reader.result;
-      const payload = { part, item, subItems, imgDataUrl };
-      sessionStorage.setItem("previewPayload", JSON.stringify(payload));
-      location.href = "preview.html";
-    };
-    reader.readAsDataURL(blob);
-  });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>

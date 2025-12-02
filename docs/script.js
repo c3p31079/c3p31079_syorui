@@ -1,110 +1,150 @@
-// 入力値を sessionStorage へ保存
-const previewBtn = document.getElementById("previewBtn");
-if (previewBtn) {
-    previewBtn.addEventListener("click", () => {
-        const data = {
-            part: document.getElementById("part").value,
-            item: document.getElementById("item").value,
-            score: Number(document.getElementById("score").value),
-            checked: document.getElementById("checked").checked
-        };
+const BACKEND_BASE = "https://c3p31079-syorui.onrender.com";
+let coords = {};
 
-        sessionStorage.setItem("inspectData", JSON.stringify(data));
+// 初期化：点検部位・項目プルダウン
+async function initForm() {
+    const res = await fetch(`${BACKEND_BASE}/api/coords`);
+    coords = await res.json();
+
+    const partEl = document.getElementById("part");
+    const itemEl = document.getElementById("item");
+    partEl.innerHTML = "";
+    itemEl.innerHTML = "";
+
+    const parts = [...new Set(Object.keys(coords).map(k => k.split(":")[0]))];
+    parts.forEach(p => partEl.add(new Option(p, p)));
+
+    function updateItems() {
+        const selected = partEl.value;
+        itemEl.innerHTML = "";
+        Object.keys(coords)
+            .filter(k => k.startsWith(selected + ":"))
+            .map(k => k.split(":")[1])
+            .forEach(i => itemEl.add(new Option(i, i)));
+    }
+
+    partEl.addEventListener("change", updateItems);
+    updateItems();
+}
+
+document.addEventListener("DOMContentLoaded", initForm);
+
+// プレビュー処理
+document.getElementById("doPreview").addEventListener("click", async () => {
+    const part = document.getElementById("part").value;
+    const item = document.getElementById("item").value;
+    const score = document.getElementById("score").value;
+    const checksRaw = document.getElementById("checks").value;
+    const checks = checksRaw.split(",").map(s => s.trim()).filter(Boolean);
+
+    // Backend から A1:H37 PNG を取得
+    const res = await fetch(`${BACKEND_BASE}/api/sheet-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sheet: "Sheet1", range: "A1:H37" })
+    });
+
+    if (!res.ok) {
+        alert("プレビュー画像の生成に失敗しました");
+        return;
+    }
+
+    const blob = await res.blob();
+    const reader = new FileReader();
+    reader.onload = function () {
+        const imgDataUrl = reader.result;
+        const payload = { part, item, score, checks, imgDataUrl };
+        sessionStorage.setItem("previewPayload", JSON.stringify(payload));
         location.href = "preview.html";
-    });
-}
-
-// Excel 生成（xlsx）
-const excelBtn = document.getElementById("excelBtn");
-if (excelBtn) {
-    excelBtn.addEventListener("click", () => {
-        const part = document.getElementById("part").value;
-        const item = document.getElementById("item").value;
-        const score = Number(document.getElementById("score").value);
-        const checked = document.getElementById("checked").checked;
-
-        const wb = XLSX.utils.book_new();
-        const wsData = [
-            ["部位", "項目", "スコア", "点検済み"],
-            [part, item, score, checked ? "✔" : ""]
-        ];
-
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-        XLSX.utils.book_append_sheet(wb, ws, "点検データ");
-        XLSX.writeFile(wb, "inspection.xlsx");
-    });
-}
-
-// プレビュー画面：キャンバス表示
-const canvas = document.getElementById("previewCanvas");
-if (canvas) {
-    const ctx = canvas.getContext("2d");
-
-    const coordMap = {
-        "チェーン:腐食": { x: 120, y: 80 },
-        "チェーン:摩耗": { x: 220, y: 160 },
-        "ロープ:亀裂": { x: 340, y: 200 }
     };
+    reader.readAsDataURL(blob);
+});
 
-    function drawCircle(x, y, size=30) {
-        ctx.beginPath();
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = "red";
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.stroke();
-    }
+// preview.html 側の描画と Excel 生成 
+document.addEventListener("DOMContentLoaded", async () => {
+    const canvas = document.getElementById("previewCanvas");
+    if (!canvas) return;
 
-    function drawTriangle(x, y, size=30) {
-        ctx.beginPath();
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = "red";
-        ctx.moveTo(x, y-size);
-        ctx.lineTo(x-size, y+size);
-        ctx.lineTo(x+size, y+size);
-        ctx.closePath();
-        ctx.stroke();
-    }
+    const ctx = canvas.getContext("2d");
+    const payload = JSON.parse(sessionStorage.getItem("previewPayload") || "{}");
 
-    function drawCross(x, y, size=25) {
-        ctx.beginPath();
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 4;
-        ctx.moveTo(x-size, y-size);
-        ctx.lineTo(x+size, y+size);
-        ctx.moveTo(x+size, y-size);
-        ctx.lineTo(x-size, y+size);
-        ctx.stroke();
-    }
+    if (!payload.imgDataUrl) return;
 
-    function drawCheck(x, y, size=25) {
-        ctx.beginPath();
-        ctx.strokeStyle = "green";
-        ctx.lineWidth = 4;
-        ctx.moveTo(x-size, y);
-        ctx.lineTo(x-size/3, y+size);
-        ctx.lineTo(x+size, y-size/2);
-        ctx.stroke();
-    }
+    // PNG 背景描画
+    const img = new Image();
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
 
-    function renderPreview() {
-        const raw = sessionStorage.getItem("inspectData");
-        if (!raw) return;
-
-        const { part, item, score, checked } = JSON.parse(raw);
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+        // 図形描画（座標は coords.json から）
+        const part = payload.part;
+        const item = payload.item;
         const key = `${part}:${item}`;
-        if (!(key in coordMap)) return;
+        let positions = coords[key];
 
-        const { x, y } = coordMap[key];
+        if (!positions) return;
+        if (!Array.isArray(positions)) positions = [positions];
 
-        if (score >= 0.5) drawTriangle(x, y);
-        else if (score >= 0.2) drawCross(x, y);
-        else drawCircle(x, y);
+        positions.forEach(pos => {
+            const { x, y } = pos;
+            ctx.save();
+            ctx.strokeStyle = payload.score === "triangle" ? "orange" :
+                              payload.score === "cross" ? "red" : "green";
+            ctx.lineWidth = 3;
+            if (payload.score === "triangle") {
+                ctx.beginPath();
+                ctx.moveTo(x, y - 10);
+                ctx.lineTo(x - 10, y + 10);
+                ctx.lineTo(x + 10, y + 10);
+                ctx.closePath();
+                ctx.stroke();
+            } else if (payload.score === "cross") {
+                ctx.beginPath();
+                ctx.moveTo(x - 10, y - 10);
+                ctx.lineTo(x + 10, y + 10);
+                ctx.moveTo(x + 10, y - 10);
+                ctx.lineTo(x - 10, y + 10);
+                ctx.stroke();
+            } else if (payload.score === "circle") {
+                ctx.beginPath();
+                ctx.arc(x, y, 10, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.restore();
+        });
+    };
+    img.src = payload.imgDataUrl;
 
-        if (checked) drawCheck(x + 70, y - 10);
-    }
+    // Excel ダウンロード
+    const downloadBtn = document.getElementById("downloadExcel");
+    downloadBtn.addEventListener("click", async () => {
+        // Backend に図形情報送信して生成
+        const shapes = positions.map(pos => ({ type: payload.score, x: pos.x, y: pos.y }));
+        const res = await fetch(`${BACKEND_BASE}/api/generate-xlsx`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ shapes, sheet: "Sheet1", range: "A1:H37" })
+        });
 
-    renderPreview();
-}
+        if (!res.ok) {
+            alert("Excel 生成に失敗しました");
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "output.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    });
+
+    // 戻るボタン
+    document.getElementById("backBtn").addEventListener("click", () => {
+        location.href = "index.html";
+    });
+});
