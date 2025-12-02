@@ -1,31 +1,28 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from openpyxl import load_workbook
-import os
+from excel_processor import process_excel
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/")
-def home():
-    return "Backend running"
-
 @app.route("/generate", methods=["POST"])
 def generate():
-    data = request.get_json()
-    inspector = data.get("inspector", "")
+    data = request.json
 
-    template_path = "template.xlsx"
-    output_dir = "generated"
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "generated.xlsx")
+    part  = data.get("part")
+    item  = data.get("item")
+    score = float(data.get("score", 0))
 
-    wb = load_workbook(template_path)
-    ws = wb.active
-    ws["B2"] = inspector
-    wb.save(output_path)
+    output_path = "generated.xlsx"
+    process_excel(part, item, score, output_name=output_path)
 
     return send_file(output_path, as_attachment=True)
+
+
+@app.route("/", methods=["GET"])
+def home():
+    return "API is working", 200
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
