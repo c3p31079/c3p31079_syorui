@@ -6,11 +6,14 @@ from flask_cors import CORS
 from excel_utils import render_range_to_image, generate_xlsx_with_shapes, ensure_icons_exist
 
 app = Flask(__name__)
-CORS(app)
+
+# GitHub Pages のみ許可
+CORS(app, resources={
+    r"/api/*": {"origins": "https://c3p31079.github.io"}
+})
 
 TEMPLATE_PATH = "backend/template.xlsx"
 
-# 図形アイコン確認
 ensure_icons_exist()
 
 @app.route("/")
@@ -19,10 +22,6 @@ def home():
 
 @app.route("/api/sheet-image", methods=["POST"])
 def sheet_image():
-    """
-    JSON: { "sheet": "Sheet1", "range": "A1:H37" }
-    PNG を返す
-    """
     data = request.get_json() or {}
     sheet = data.get("sheet", "Sheet1")
     cell_range = data.get("range", "A1:H37")
@@ -32,14 +31,6 @@ def sheet_image():
 
 @app.route("/api/generate-xlsx", methods=["POST"])
 def generate_xlsx():
-    """
-    JSON:
-    {
-      "shapes": [{"type":"triangle","x":120,"y":80}, ...],
-      "sheet":"Sheet1",
-      "range":"A1:H37"
-    }
-    """
     data = request.get_json() or {}
     shapes = data.get("shapes", [])
     sheet = data.get("sheet", "Sheet1")
@@ -53,8 +44,12 @@ def generate_xlsx():
 
 @app.route("/api/coords", methods=["GET"])
 def get_coords():
-    # 点検部位・項目・座標マッピング
-    coords_path = "docs/coords.json"
+    coords_path = os.path.join(os.path.dirname(__file__), "..", "docs", "coords.json")
+    coords_path = os.path.abspath(coords_path)
+
+    if not os.path.exists(coords_path):
+        return jsonify({"error": "coords.json not found", "path": coords_path}), 404
+
     with open(coords_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     return jsonify(data)
