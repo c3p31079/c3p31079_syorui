@@ -2,19 +2,42 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title>プレビュー</title>
+  <title>点検入力</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>プレビュー</h1>
-    <canvas id="previewCanvas"></canvas>
+    <h1>点検入力</h1>
+
+    <div class="form-grid">
+      <div class="form-row">
+        <label>点検部位</label>
+        <select id="part"></select>
+      </div>
+      <div class="form-row">
+        <label>項目</label>
+        <select id="item"></select>
+      </div>
+      <div class="form-row">
+        <label>△/×/○</label>
+        <select id="score">
+          <option value="triangle">△</option>
+          <option value="cross">×</option>
+          <option value="circle">○</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>チェック（複数可）</label>
+        <textarea id="checks" placeholder="カンマ区切りで入力" rows="3"></textarea>
+      </div>
+    </div>
+
     <div class="actions">
-      <button id="downloadExcel">Excelをダウンロード</button>
-      <button id="backBtn">戻る</button>
+      <button id="doPreview">プレビューを見る</button>
       <span id="status"></span>
     </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
