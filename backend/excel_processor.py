@@ -1,102 +1,68 @@
 from openpyxl import load_workbook
-from openpyxl.drawing.text import RichText, Paragraph, ParagraphProperties, CharacterProperties
-from openpyxl.drawing.shape import Shape
-from mapping import POSITION_MAP
+from openpyxl.drawing.shapes import Shape
+from openpyxl.drawing.image import ShapeProperties
+from openpyxl.styles.colors import Color
+from openpyxl.drawing.line import LineProperties
+
+import uuid
+
+BASE_FILE = "templates/base.xlsx"
 
 
-# ○ △ × ✔ の図形を追加
-def add_shape(ws, shape_type, x, y, size=40):
-    shape = Shape()
-    shape.width = size
-    shape.height = size
-    shape.left = x
-    shape.top = y
+def create_shape(shape_type, x, y, size, color):
+    """
+    shape_type: circle / triangle / cross / check
+    """
 
-    # 図形の種類
-    if shape_type == "circle":
-        shape.prst = "ellipse"
-        shape.outline.solidFill = "FF0000"
+    sp = ShapeProperties()
+    sp.ln = LineProperties()
+    sp.ln.solidFill = Color(color)
 
-    elif shape_type == "triangle":
-        shape.prst = "triangle"
-        shape.outline.solidFill = "FF0000"
-
-    elif shape_type == "cross":
-        shape.prst = "lineInv"
-        shape.outline.solidFill = "FF0000"
-
-    elif shape_type == "check":  # ✔ の描画
-        shape.prst = "rect"
-        shape.outline.solidFill = "FF0000"
-
-        # 図形の中央にテキスト ✔ を入れる
-        text = RichText()
-        cp = CharacterProperties()
-        cp.b = True
-        rt = Paragraph(
-            pPr=ParagraphProperties(),
-            r=[Paragraph(rPr=cp, t="✔")]
-        )
-        shape.text = "✔"
-
-    ws._shapes.append(shape)
+    shape = Shape(
+        shape_id=str(uuid.uuid4()),
+        name=shape_type,
+        prst=shape_type,     # "ellipse" "triangle" など
+        x=x,
+        y=y,
+        cx=size,
+        cy=size,
+        sp=sp
+    )
+    return shape
 
 
-# score → 図形判定
-def decide_shape(score, part, item):
-    # △
-    if score == 0.5:
-        return "triangle"
-
-    # ×
-    if score == 0.2:
-        return "cross"
-
-    # ○ は item で決める
-    if "共通" in POSITION_MAP and item in POSITION_MAP["共通"]:
-        if POSITION_MAP["共通"][item].get("shape") == "circle":
-            return "circle"
-
-    return None
-
-
-# チェックボックスの形状（レ点）
-def checkbox_shape(is_checked):
-    if is_checked:
-        return "check"
-    return None
-
-
-# 部位 × 項目 → 座標
-def decide_position(part, item):
-    # 部位 → 項目 の条件
-    if part in POSITION_MAP:
-        if item in POSITION_MAP[part]:
-            return POSITION_MAP[part][item]["x"], POSITION_MAP[part][item]["y"]
-
-    # ○（共通）
-    if "共通" in POSITION_MAP and item in POSITION_MAP["共通"]:
-        return POSITION_MAP["共通"][item]["x"], POSITION_MAP["共通"][item]["y"]
-
-    return None, None
-
-
-# メイン処理
-def process_excel(part, item, score, is_checked, output_name="output.xlsx"):
-    wb = load_workbook("template.xlsx")
+def generate_excel(part, item, score, check, coords):
+    wb = load_workbook(BASE_FILE)
     ws = wb.active
 
-    # score + 文字条件の図形
-    shape_type = decide_shape(score, part, item)
-    x, y = decide_position(part, item)
+    # 文字書き換え例
+    ws["B2"] = part
+    ws["B3"] = item
 
-    if shape_type and x is not None:
-        add_shape(ws, shape_type, x, y, size=45)
+    # 図形を置く位置（座標が辞書で来る）
+    if coords:
+        x = coords["x"]
+        y = coords["y"]
 
-    # レ点（チェックボックス）
-    check_shape = checkbox_shape(is_checked)
-    if check_shape and x is not None:
-        add_shape(ws, check_shape, x + 50, y, size=45)  # 少し右に描く
+        # スコア判定
+        if score >= 0.5:
+            shape_type = "triangle"
+            color = "FF0000"
+        elif score >= 0.2:
+            shape_type = "cross"     # ×
+            color = "FF0000"
+        else:
+            shape_type = "ellipse"   # ○
+            color = "FF0000"
 
-    wb.save(output_name)
-    return output_name
+        shape = create_shape(shape_type, x, y, 800000, color)
+        ws._drawing.shapes.append(shape)
+
+        # チェックボックス → ✓ マーク
+        if check:
+            check_shape = create_shape("check", x+200000, y-200000, 600000, "00AA00")
+            ws._drawing.shapes.append(check_shape)
+
+    out_path = f"/tmp/result_{uuid.uuid4()}.xlsx"
+    wb.save(out_path)
+    return out_path
