@@ -1,0 +1,6 @@
+[
+  { "type": "triangle", "x": 240, "y": 120 },
+  { "type": "cross",     "x": 320, "y": 180 },
+  { "type": "circle",    "x": 420, "y": 230 },
+  { "type": "check",     "x": 520, "y": 300 }
+]
