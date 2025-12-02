@@ -1,15 +1,26 @@
 const canvas = document.getElementById("previewCanvas");
 const ctx = canvas.getContext("2d");
 
-// 図形の座標マッピング（例）
+// A4 サイズに合わせた大きさ
+canvas.width = 900;
+canvas.height = 1280;
+
+// 点検部位＋項目 → 座標マッピング！必要に応じて追加していくよ！
 const coordMap = {
-    "チェーン:腐食": { x: 120, y: 80 },
-    "チェーン:摩耗": { x: 220, y: 160 },
-    "ロープ:亀裂": { x: 340, y: 200 }
+    "チェーン:腐食": { x: 200, y: 180 },
+    "チェーン:摩耗": { x: 300, y: 260 },
+    "ロープ:亀裂":   { x: 450, y: 320 }
 };
 
-// ◯ / △ / × の描画関数
-function drawCircle(x, y, size = 30) {
+// チェック専用の図形座標
+const checkCoords = {
+    "整備班で対応予定": { x: 120, y: 780 },
+    "修繕工事で対応予定": { x: 120, y: 830 },
+    "本格的な使用禁止": { x: 120, y: 880 }
+};
+
+// 図形描画関数
+function drawCircle(x, y, size = 35) {
     ctx.beginPath();
     ctx.lineWidth = 4;
     ctx.strokeStyle = "red";
@@ -17,7 +28,7 @@ function drawCircle(x, y, size = 30) {
     ctx.stroke();
 }
 
-function drawTriangle(x, y, size = 30) {
+function drawTriangle(x, y, size = 35) {
     ctx.beginPath();
     ctx.lineWidth = 4;
     ctx.strokeStyle = "red";
@@ -28,7 +39,7 @@ function drawTriangle(x, y, size = 30) {
     ctx.stroke();
 }
 
-function drawCross(x, y, size = 25) {
+function drawCross(x, y, size = 30) {
     ctx.beginPath();
     ctx.strokeStyle = "red";
     ctx.lineWidth = 4;
@@ -39,7 +50,7 @@ function drawCross(x, y, size = 25) {
     ctx.stroke();
 }
 
-function drawCheck(x, y, size = 25) {
+function drawCheck(x, y, size = 30) {
     ctx.beginPath();
     ctx.strokeStyle = "green";
     ctx.lineWidth = 4;
@@ -54,36 +65,47 @@ function updatePreview() {
     const part = document.getElementById("part").value;
     const item = document.getElementById("item").value;
     const score = Number(document.getElementById("score").value);
-    const checked = document.getElementById("check").checked;
 
-    // キャンバスクリア
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // チェック項目（複数ある）
+    const checkboxes = document.querySelectorAll(".fix-check");
 
+    // プレビュークリア（白背景）
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 点検部位＋項目の図形
     const key = `${part}:${item}`;
-    if (!(key in coordMap)) return; // 対応なし
+    if (coordMap[key]) {
+        const { x, y } = coordMap[key];
 
-    const { x, y } = coordMap[key];
-
-    // スコアに応じた図形
-    if (score >= 0.5) {
-        drawTriangle(x, y);
-    } else if (score >= 0.2) {
-        drawCross(x, y);
-    } else {
-        drawCircle(x, y); // 例：スコアが小さい場合は○
+        if (score >= 0.5) {
+            drawTriangle(x, y);
+        } else if (score >= 0.2) {
+            drawCross(x, y);
+        } else {
+            drawCircle(x, y);
+        }
     }
 
-    // チェックボックス → レ点追加
-    if (checked) {
-        drawCheck(x + 70, y - 10);
-    }
+    // チェックボックスのレ点描画
+    checkboxes.forEach(cb => {
+        if (cb.checked) {
+            const coord = checkCoords[cb.value];
+            if (coord) drawCheck(coord.x, coord.y);
+        }
+    });
 }
 
-// 入力変更イベントでリアルタイム更新
-["part", "item", "score", "check"].forEach(id => {
+// 入力で更新
+["part", "item", "score"].forEach(id => {
     document.getElementById(id).addEventListener("input", updatePreview);
     document.getElementById(id).addEventListener("change", updatePreview);
 });
 
-// 初期状態
+// チェックボックス
+document.querySelectorAll(".fix-check").forEach(cb => {
+    cb.addEventListener("change", updatePreview);
+});
+
+// 初期描画
 updatePreview();
