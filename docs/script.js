@@ -1,150 +1,176 @@
-const BACKEND_BASE = "https://c3p31079-syorui.onrender.com";
-let coords = {};
+// 共通フロント処理：index.html と preview.html 両方で読み込む
+const BACKEND_BASE = window.BACKEND_BASE || "https://c3p31079-syorui.onrender.com";
+let coordsMap = {};
 
-// 初期化：点検部位・項目プルダウン
-async function initForm() {
-    const res = await fetch(`${BACKEND_BASE}/api/coords`);
-    coords = await res.json();
+// バックエンドからcoords.jsonを取得
+async function loadCoords() {
+  const res = await fetch(`${BACKEND_BASE}/api/coords`);
+  if (!res.ok) throw new Error("coords fetch failed: " + res.status);
+  const data = await res.json();
+  coordsMap = data;
+  return data;
+}
 
+/* index.html 側 */
+if (document.getElementById("doPreview")) {
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      await loadCoords();
+      initForm();
+    } catch (e) {
+      console.error(e);
+      document.getElementById("status").textContent = "座標データの読み込みに失敗しました";
+    }
+  });
+
+  function initForm() {
     const partEl = document.getElementById("part");
     const itemEl = document.getElementById("item");
+    // 部位リスト（coordsMap のキーから抽出）
+    const parts = [...new Set(Object.keys(coordsMap).map(k => k.split(":")[0]))];
     partEl.innerHTML = "";
-    itemEl.innerHTML = "";
-
-    const parts = [...new Set(Object.keys(coords).map(k => k.split(":")[0]))];
     parts.forEach(p => partEl.add(new Option(p, p)));
 
     function updateItems() {
-        const selected = partEl.value;
-        itemEl.innerHTML = "";
-        Object.keys(coords)
-            .filter(k => k.startsWith(selected + ":"))
-            .map(k => k.split(":")[1])
-            .forEach(i => itemEl.add(new Option(i, i)));
+      const part = partEl.value;
+      const items = [...new Set(Object.keys(coordsMap)
+        .filter(k => k.startsWith(part + ":"))
+        .map(k => k.split(":")[1]))];
+      itemEl.innerHTML = "";
+      items.forEach(it => itemEl.add(new Option(it, it)));
     }
 
     partEl.addEventListener("change", updateItems);
     updateItems();
+
+    document.getElementById("doPreview").addEventListener("click", async () => {
+      const part = partEl.value;
+      const item = itemEl.value;
+      const symbol = document.getElementById("symbol").value;
+      const checks = document.getElementById("checks").value.split(",").map(s => s.trim()).filter(Boolean);
+
+      document.getElementById("status").textContent = "生成中…";
+
+      try {
+        const res = await fetch(`${BACKEND_BASE}/api/sheet-image`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sheet: "Sheet1", range: "A1:H37" })
+        });
+        if (!res.ok) throw new Error("sheet-image failed: " + res.status);
+        const blob = await res.blob();
+        const reader = new FileReader();
+        reader.onload = function () {
+          const imgDataUrl = reader.result;
+          const payload = { part, item, symbol, checks, imgDataUrl };
+          sessionStorage.setItem("previewPayload", JSON.stringify(payload));
+          location.href = "preview.html";
+        };
+        reader.readAsDataURL(blob);
+      } catch (e) {
+        console.error(e);
+        alert("プレビュー生成に失敗しました: " + e.message);
+        document.getElementById("status").textContent = "";
+      }
+    });
+  }
 }
 
-document.addEventListener("DOMContentLoaded", initForm);
-
-// プレビュー処理
-document.getElementById("doPreview").addEventListener("click", async () => {
-    const part = document.getElementById("part").value;
-    const item = document.getElementById("item").value;
-    const score = document.getElementById("score").value;
-    const checksRaw = document.getElementById("checks").value;
-    const checks = checksRaw.split(",").map(s => s.trim()).filter(Boolean);
-
-    // Backend から A1:H37 PNG を取得
-    const res = await fetch(`${BACKEND_BASE}/api/sheet-image`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sheet: "Sheet1", range: "A1:H37" })
-    });
-
-    if (!res.ok) {
-        alert("プレビュー画像の生成に失敗しました");
-        return;
+/* preview.html 側 */
+if (document.getElementById("previewCanvas")) {
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      if (!Object.keys(coordsMap).length) await loadCoords();
+      renderPreview();
+    } catch (e) {
+      console.error(e);
+      document.getElementById("status").textContent = "プレビュー読み込み失敗";
     }
+  });
 
-    const blob = await res.blob();
-    const reader = new FileReader();
-    reader.onload = function () {
-        const imgDataUrl = reader.result;
-        const payload = { part, item, score, checks, imgDataUrl };
-        sessionStorage.setItem("previewPayload", JSON.stringify(payload));
-        location.href = "preview.html";
-    };
-    reader.readAsDataURL(blob);
-});
+  function drawShapeOnCtx(ctx, type, x, y) {
+    ctx.lineWidth = 3;
+    if (type === "triangle") {
+      ctx.strokeStyle = "orange";
+      ctx.beginPath(); ctx.moveTo(x, y-12); ctx.lineTo(x-12, y+12); ctx.lineTo(x+12, y+12); ctx.closePath(); ctx.stroke();
+    } else if (type === "none") {
+      ctx.strokeStyle = "red";
+      ctx.beginPath(); ctx.moveTo(x-10,y-10); ctx.lineTo(x+10,y+10); ctx.moveTo(x+10,y-10); ctx.lineTo(x-10,y+10); ctx.stroke();
+    } else if (type === "circle") {
+      ctx.strokeStyle = "red";
+      ctx.beginPath(); ctx.arc(x,y,12,0,Math.PI*2); ctx.stroke();
+    } else if (type === "check") {
+      ctx.strokeStyle = "green";
+      ctx.beginPath(); ctx.moveTo(x-8,y); ctx.lineTo(x-3,y+12); ctx.lineTo(x+12,y-10); ctx.stroke();
+    }
+  }
 
-// preview.html 側の描画と Excel 生成 
-document.addEventListener("DOMContentLoaded", async () => {
-    const canvas = document.getElementById("previewCanvas");
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
+  async function renderPreview() {
     const payload = JSON.parse(sessionStorage.getItem("previewPayload") || "{}");
+    if (!payload || !payload.imgDataUrl) { alert("プレビュー情報がありません"); return; }
 
-    if (!payload.imgDataUrl) return;
-
-    // PNG 背景描画
+    const canvas = document.getElementById("previewCanvas");
+    const ctx = canvas.getContext("2d");
     const img = new Image();
     img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
+      // キャンバスのピクセルサイズを画像の本来のサイズに設定
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // 図形描画（座標は coords.json から）
-        const part = payload.part;
-        const item = payload.item;
-        const key = `${part}:${item}`;
-        let positions = coords[key];
+      // 図形描画：coordsMap のキー "部位:項目" -> 座標配列
+      const key = `${payload.part}:${payload.item}`;
+      let poses = coordsMap[key] || [];
+      if (!Array.isArray(poses)) poses = [poses];
 
-        if (!positions) return;
-        if (!Array.isArray(positions)) positions = [positions];
+      poses.forEach(pos => {
+        drawShapeOnCtx(ctx, payload.symbol, pos.x, pos.y);
+      });
 
-        positions.forEach(pos => {
-            const { x, y } = pos;
-            ctx.save();
-            ctx.strokeStyle = payload.score === "triangle" ? "orange" :
-                              payload.score === "cross" ? "red" : "green";
-            ctx.lineWidth = 3;
-            if (payload.score === "triangle") {
-                ctx.beginPath();
-                ctx.moveTo(x, y - 10);
-                ctx.lineTo(x - 10, y + 10);
-                ctx.lineTo(x + 10, y + 10);
-                ctx.closePath();
-                ctx.stroke();
-            } else if (payload.score === "cross") {
-                ctx.beginPath();
-                ctx.moveTo(x - 10, y - 10);
-                ctx.lineTo(x + 10, y + 10);
-                ctx.moveTo(x + 10, y - 10);
-                ctx.lineTo(x - 10, y + 10);
-                ctx.stroke();
-            } else if (payload.score === "circle") {
-                ctx.beginPath();
-                ctx.arc(x, y, 10, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-            ctx.restore();
+      // checks はページ右などに列挙して表示しておく
+      if (payload.checks && payload.checks.length) {
+        ctx.font = "14px sans-serif";
+        ctx.fillStyle = "#333";
+        let y = 20;
+        payload.checks.forEach(ch => {
+          ctx.fillText("・ " + ch, canvas.width - 260, y);
+          y += 18;
         });
+      }
     };
     img.src = payload.imgDataUrl;
 
-    // Excel ダウンロード
-    const downloadBtn = document.getElementById("downloadExcel");
-    downloadBtn.addEventListener("click", async () => {
-        // Backend に図形情報送信して生成
-        const shapes = positions.map(pos => ({ type: payload.score, x: pos.x, y: pos.y }));
+    // ダウンロード（Excel 生成）
+    document.getElementById("downloadExcel").addEventListener("click", async () => {
+      const key = `${payload.part}:${payload.item}`;
+      let poses = coordsMap[key] || [];
+      if (!Array.isArray(poses)) poses = [poses];
+      const shapes = poses.map(p => ({ type: payload.symbol, x: p.x, y: p.y }));
+      try {
         const res = await fetch(`${BACKEND_BASE}/api/generate-xlsx`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ shapes, sheet: "Sheet1", range: "A1:H37" })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shapes, sheet: "Sheet1", range: "A1:H37" })
         });
-
-        if (!res.ok) {
-            alert("Excel 生成に失敗しました");
-            return;
-        }
-
+        if (!res.ok) throw new Error("generate-xlsx failed: " + res.status);
         const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "output.xlsx";
+        a.download = "inspection.xlsx";
         document.body.appendChild(a);
         a.click();
         a.remove();
-        window.URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.error(e);
+        alert("Excel生成に失敗しました: " + e.message);
+      }
     });
 
-    // 戻るボタン
     document.getElementById("backBtn").addEventListener("click", () => {
-        location.href = "index.html";
+      history.back();
     });
-});
+  }
+}

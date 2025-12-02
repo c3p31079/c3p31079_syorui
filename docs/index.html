@@ -1,43 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>点検入力</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<title>点検入力</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>点検入力</h1>
+<div class="container">
+  <h1>点検入力</h1>
 
-    <div class="form-grid">
-      <div class="form-row">
-        <label>点検部位</label>
-        <select id="part"></select>
-      </div>
-      <div class="form-row">
-        <label>項目</label>
-        <select id="item"></select>
-      </div>
-      <div class="form-row">
-        <label>△/×/○</label>
-        <select id="score">
-          <option value="triangle">△</option>
-          <option value="cross">×</option>
-          <option value="circle">○</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>チェック（複数可）</label>
-        <textarea id="checks" placeholder="カンマ区切りで入力" rows="3"></textarea>
-      </div>
+  <div class="form-grid">
+    <div class="form-row">
+      <label>点検部位</label>
+      <select id="part"></select>
     </div>
-
-    <div class="actions">
-      <button id="doPreview">プレビューを見る</button>
-      <span id="status"></span>
+    <div class="form-row">
+      <label>項目</label>
+      <select id="item"></select>
+    </div>
+    <div class="form-row">
+      <label>記号</label>
+      <select id="symbol">
+        <option value="triangle">△</option>
+        <option value="none">×</option>
+        <option value="circle">○</option>
+        <option value="check">✓</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>チェック（カンマ区切り）</label>
+      <textarea id="checks" rows="2" placeholder="例: 整備班で対応予定, 撤去予定"></textarea>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <div class="actions">
+    <button id="doPreview">プレビューを見る</button>
+    <span id="status"></span>
+  </div>
+  <p class="hint">プレビュー画面で確認後、Excelを生成できます。</p>
+</div>
+
+<script>
+const BACKEND_BASE = "https://c3p31079-syorui.onrender.com"; // Render の公開 URL
+</script>
+<script src="script.js"></script>
 </body>
 </html>
