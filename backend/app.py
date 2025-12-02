@@ -20,6 +20,11 @@ def sheet_image():
     img_buf = render_range_to_image(TEMPLATE_PATH, sheet, cell_range)
     return send_file(img_buf, mimetype="image/png", as_attachment=False, download_name="sheet.png")
 
+@app.route("/")
+def home():
+    return "Backend running"
+
+
 @app.route("/api/generate-xlsx", methods=["POST"])
 def generate_xlsx():
     """
@@ -49,3 +54,4 @@ def list_icons():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
