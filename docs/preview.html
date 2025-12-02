@@ -1,20 +1,110 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<title>プレビュー</title>
-<link rel="stylesheet" href="style.css">
-<link rel="icon" href="favicon.ico">
+  <meta charset="utf-8">
+  <title>プレビュー</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="coords.js"></script>
 </head>
 <body>
-<div class="container">
-  <h1>プレビュー</h1>
-  <canvas id="previewCanvas" width="800" height="600" style="border:1px solid #ccc;"></canvas>
-  <div class="actions">
-    <button id="downloadExcel">Excelをダウンロード</button>
-    <button id="goBack">戻る</button>
+  <div class="container">
+    <h1>プレビュー画面</h1>
+    <canvas id="previewCanvas"></canvas>
+
+    <div class="actions">
+      <button id="downloadExcel">Excelをダウンロード</button>
+      <button id="backBtn">戻る</button>
+      <span id="status"></span>
+    </div>
   </div>
-</div>
-<script src="preview.js"></script>
+
+  <script>
+  const BACKEND_BASE = "https://c3p31079-syorui.onrender.com";
+
+  const canvas = document.getElementById("previewCanvas");
+  const ctx = canvas.getContext("2d");
+
+  function drawShape(type,x,y){
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = type==="check"?"green":"red";
+    if(type==="triangle"){
+      ctx.beginPath();
+      ctx.moveTo(x,y-25);
+      ctx.lineTo(x-25,y+25);
+      ctx.lineTo(x+25,y+25);
+      ctx.closePath();
+      ctx.stroke();
+    }else if(type==="cross"){
+      ctx.beginPath();
+      ctx.moveTo(x-25,y-25);
+      ctx.lineTo(x+25,y+25);
+      ctx.moveTo(x+25,y-25);
+      ctx.lineTo(x-25,y+25);
+      ctx.stroke();
+    }else if(type==="circle"){
+      ctx.beginPath();
+      ctx.arc(x,y,25,0,2*Math.PI);
+      ctx.stroke();
+    }else if(type==="check"){
+      ctx.beginPath();
+      ctx.moveTo(x-12,y);
+      ctx.lineTo(x-8,y+25);
+      ctx.lineTo(x+25,y-12);
+      ctx.stroke();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    const payload = JSON.parse(sessionStorage.getItem("previewPayload"));
+    if(!payload){ alert("プレビュー情報がありません"); return; }
+
+    const img = new Image();
+    img.onload = ()=>{
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img,0,0);
+
+      const { part, item, subItems } = payload;
+      const keys = Array.isArray(subItems)?subItems:[];
+      keys.forEach(sub=>{
+        const key = [part,item,sub].filter(Boolean).join(":");
+        if(coordMap[key]){
+          drawShape("triangle",coordMap[key].x,coordMap[key].y);
+        }
+      });
+    };
+    img.src = payload.imgDataUrl;
+  });
+
+  document.getElementById("backBtn").addEventListener("click",()=>{
+    history.back();
+  });
+
+  document.getElementById("downloadExcel").addEventListener("click", async ()=>{
+    const payload = JSON.parse(sessionStorage.getItem("previewPayload"));
+    if(!payload){ alert("データがありません"); return; }
+
+    // 生成リクエスト
+    const shapes = (payload.subItems||[]).map(sub=>{
+      const key = [payload.part,payload.item,sub].filter(Boolean).join(":");
+      const coord = coordMap[key];
+      return coord ? {type:"triangle",x:coord.x,y:coord.y} : null;
+    }).filter(Boolean);
+
+    const res = await fetch(`${BACKEND_BASE}/api/generate-xlsx`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({shapes, sheet:"Sheet1", range:"A1:H37"})
+    });
+
+    if(!res.ok){ alert("Excel生成失敗"); return; }
+
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "inspection.xlsx";
+    a.click();
+  });
+  </script>
 </body>
 </html>
