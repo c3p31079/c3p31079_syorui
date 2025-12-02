@@ -1,16 +1,59 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>Excel生成</title>
+    <meta charset="UTF-8">
+    <title>Excel 出力＋プレビュー</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <h2>点検者情報入力</h2>
-  <label for="inspector">点検者名：</label>
-  <input type="text" id="inspector" placeholder="田中">
-  <button id="generateBtn">Excelを生成</button>
-  <p id="status" style="color: blue;"></p>
 
-  <script src="script.js"></script>
+<body>
+<div class="container">
+    <h1>点検シート生成</h1>
+    <p class="lead">Excel に記入される内容をリアルタイムでプレビューできます。</p>
+
+    <!-- ▶ フォーム -------------------------------------------------- -->
+    <div class="form-grid">
+
+        <div class="form-row">
+            <label>点検部位</label>
+            <input id="part" type="text" placeholder="例：チェーン">
+        </div>
+
+        <div class="form-row">
+            <label>項目</label>
+            <input id="item" type="text" placeholder="例：腐食">
+        </div>
+
+        <div class="form-row">
+            <label>スコア (0〜1)</label>
+            <input id="score" type="number" step="0.01" min="0" max="1">
+        </div>
+
+        <div class="form-row">
+            <label>チェック</label>
+            <div class="checkbox-row">
+                <input id="check" type="checkbox">
+                <span>レ点を付ける</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="actions">
+        <button id="generateBtn">Excel 生成</button>
+        <span id="status"></span>
+    </div>
+
+    <p class="hint">入力すると下のプレビューに反映されます。</p>
+
+    <!-- ▶ プレビュー -------------------------------------------------- -->
+    <h2>プレビュー</h2>
+    <canvas id="previewCanvas" width="600" height="400"
+            style="background:#fff; border:1px solid #ddd; border-radius:8px;">
+    </canvas>
+</div>
+
+<script src="preview.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

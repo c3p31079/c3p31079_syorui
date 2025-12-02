@@ -1,31 +1,44 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from openpyxl import load_workbook
-import os
+import json
+from excel_generator import generate_excel
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/")
-def home():
-    return "Backend running"
+# 座標マッピング読込
+with open("coord_map.json", encoding="utf-8") as f:
+    COORD_MAP = json.load(f)
+
 
 @app.route("/generate", methods=["POST"])
 def generate():
-    data = request.get_json()
-    inspector = data.get("inspector", "")
+    data = request.json
 
-    template_path = "template.xlsx"
-    output_dir = "generated"
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "generated.xlsx")
+    part = data.get("part")
+    item = data.get("item")
+    score = float(data.get("score"))
+    check = bool(data.get("check"))
 
-    wb = load_workbook(template_path)
-    ws = wb.active
-    ws["B2"] = inspector
-    wb.save(output_path)
+    key = f"{part}:{item}"
+    coords = COORD_MAP.get(key, None)
 
-    return send_file(output_path, as_attachment=True)
+    output_path = generate_excel(
+        part=part,
+        item=item,
+        score=score,
+        check=check,
+        coords=coords
+    )
+
+    return send_file(output_path,
+                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                     as_attachment=True,
+                     download_name="inspection.xlsx")
+
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"status": "ok"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

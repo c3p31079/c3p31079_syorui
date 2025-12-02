@@ -1,44 +1,43 @@
+const generateBtn = document.getElementById("generateBtn");
 const statusEl = document.getElementById("status");
-const btn = document.getElementById("generateBtn");
 
-btn.addEventListener("click", async () => {
-  const inspectorName = document.getElementById("inspector").value.trim();
+generateBtn.addEventListener("click", async () => {
+    generateBtn.disabled = true;
+    statusEl.textContent = "生成中…";
+    statusEl.className = "";
 
-  if (!inspectorName) {
-    alert("点検者名を入力してください！");
-    return;
-  }
+    const payload = {
+        part: document.getElementById("part").value,
+        item: document.getElementById("item").value,
+        score: Number(document.getElementById("score").value),
+        check: document.getElementById("check").checked
+    };
 
-  // 生成中の表示
-  statusEl.textContent = "Excelを生成中…";
-  btn.disabled = true;
+    try {
+        const response = await fetch("https://c3p31079-syorui.onrender.com/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-  try {
-    const response = await fetch("https://c3p31079-syorui.onrender.com/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inspector: inspectorName })
-    });
+        if (!response.ok) throw new Error("Excel 生成失敗");
 
-    if (!response.ok) {
-      throw new Error(`サーバーエラー: ${response.status}`);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "inspection.xlsx";
+        a.click();
+
+        statusEl.textContent = "生成完了！";
+        statusEl.className = "success";
+
+    } catch (err) {
+        statusEl.textContent = "エラー: " + err.message;
+        statusEl.className = "error";
+
+    } finally {
+        generateBtn.disabled = false;
     }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "generated.xlsx";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-
-    statusEl.textContent = "Excelをダウンロードしました！";
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = `ファイル生成に失敗しました: ${err.message}`;
-  } finally {
-    btn.disabled = false;
-  }
 });
