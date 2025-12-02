@@ -8,6 +8,7 @@ import uuid
 
 BASE_FILE = "templates/base.xlsx"
 
+
 def create_shape(shape_type, x, y, size, color):
     """
     shape_type: circle / triangle / cross / check

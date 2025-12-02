@@ -36,9 +36,11 @@ def generate():
                      as_attachment=True,
                      download_name="inspection.xlsx")
 
+
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"status": "ok"})
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
