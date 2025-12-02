@@ -1,75 +1,37 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>点検入力</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>点検フォーム</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>点検入力</h1>
-
-    <div class="form-grid">
-      <div class="form-row">
-        <label>点検部位</label>
-        <input id="part" type="text" value="チェーン">
-      </div>
-      <div class="form-row">
-        <label>項目</label>
-        <input id="item" type="text" value="腐食">
-      </div>
-      <div class="form-row">
-        <label>score (0〜1)</label>
-        <input id="score" type="number" step="0.01" min="0" max="1" value="0.5">
-      </div>
-      <div class="form-row">
-        <label>チェック（複数可）</label>
-        <textarea id="checks" placeholder="チェック項目をカンマ区切りで入れてください（例：整備班で対応予定,撤去予定）" rows="3"></textarea>
-      </div>
+<div class="container">
+    <h1>点検フォーム</h1>
+    <div class="form-row">
+        <label for="part">点検部位</label>
+        <input type="text" id="part">
     </div>
-
+    <div class="form-row">
+        <label for="item">項目</label>
+        <input type="text" id="item">
+    </div>
+    <div class="form-row">
+        <label for="score">スコア</label>
+        <input type="number" id="score" step="0.1" min="0" max="1">
+    </div>
+    <div class="checkbox-row">
+        <input type="checkbox" id="check">
+        <label for="check">チェック</label>
+    </div>
     <div class="actions">
-      <button id="doPreview">プレビューを見る</button>
-      <span id="status"></span>
+        <button id="previewBtn">プレビューを見る</button>
     </div>
-
-    <p class="hint">「プレビューを見る」を押すとプレビュー画面が開きます。プレビュー内でExcelダウンロード可能。</p>
-  </div>
-
-  <script>
-  const BACKEND_BASE = "https://c3p31079-syorui.onrender.com";
-
-  document.getElementById("doPreview").addEventListener("click", async () => {
-    const part = document.getElementById("part").value;
-    const item = document.getElementById("item").value;
-    const score = Number(document.getElementById("score").value);
-    const checksRaw = document.getElementById("checks").value;
-    const checks = checksRaw.split(",").map(s => s.trim()).filter(Boolean);
-
-    // バックエンドからシート画像を取得
-    const res = await fetch(`${BACKEND_BASE}/api/sheet-image`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sheet: "Sheet1", range: "A1:H37" })
-    });
-    if (!res.ok) {
-      alert("プレビュー画像の生成に失敗しました");
-      return;
-    }
-    const blob = await res.blob();
-    // sessionStorageに保存
-    const reader = new FileReader();
-    reader.onload = function() {
-      const imgDataUrl = reader.result;
-      const payload = {
-        part, item, score, checks, imgDataUrl
-      };
-      sessionStorage.setItem("previewPayload", JSON.stringify(payload));
-      // プレビューページへ移動
-      location.href = "preview.html";
-    };
-    reader.readAsDataURL(blob);
-  });
-  </script>
+</div>
+<script>
+document.getElementById("previewBtn").addEventListener("click", function(){
+    window.location.href="preview.html";
+});
+</script>
 </body>
 </html>

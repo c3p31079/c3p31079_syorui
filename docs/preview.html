@@ -1,135 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>プレビュー</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>プレビュー</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container" id="previewContainer" style="max-width:900px;">
-    <h1>プレビュー（A1:H37）</h1>
-
-    <div style="display:flex; gap:12px; align-items:flex-start;">
-      <div style="flex:1; position:relative;">
-        <img id="sheetImg" src="" alt="sheet preview" style="width:100%; display:block; border:1px solid #ccc; border-radius:8px;">
-        <div id="overlay" style="position:absolute; left:0; top:0; pointer-events:none;"></div>
-      </div>
-
-      <div style="width:220px;">
-        <button id="downloadXlsx">Excelとしてダウンロード</button>
-        <button id="backBtn" style="margin-top:8px;">戻る</button>
-
-        <div style="margin-top:12px;">
-          <label>図形一覧 (編集用)</label>
-          <textarea id="shapeJson" style="width:100%; height:240px;"></textarea>
-        </div>
-      </div>
+<div class="container">
+    <h1>プレビュー (A1:H37)</h1>
+    <canvas id="previewCanvas" width="850" height="650" style="border:1px solid #ccc;"></canvas>
+    <div class="actions">
+        <button id="downloadBtn">Excelを生成</button>
+        <button id="backBtn">戻る</button>
     </div>
-  </div>
-
-<script>
-const BACKEND_BASE = "https://{YOUR_RENDER_URL}";
-
-function createImgElement(src, left, top, size=32) {
-  const img = document.createElement("img");
-  img.src = src;
-  img.style.position = "absolute";
-  img.style.left = left + "px";
-  img.style.top = top + "px";
-  img.style.width = size + "px";
-  img.style.height = "auto";
-  img.style.pointerEvents = "none";
-  return img;
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  const payloadRaw = sessionStorage.getItem("previewPayload");
-  if (!payloadRaw) {
-    alert("プレビュー用のデータが見つかりません。入力画面に戻ります。");
-    location.href = "index.html";
-    return;
-  }
-  const payload = JSON.parse(payloadRaw);
-  const sheetImg = document.getElementById("sheetImg");
-  sheetImg.src = payload.imgDataUrl;
-
-  // load shapes.json from docs (initial)
-  fetch("shapes.json").then(r => r.json()).then(shapes => {
-    // show shapes text for editing
-    document.getElementById("shapeJson").value = JSON.stringify(shapes, null, 2);
-    // render overlay using shapes
-    const overlay = document.getElementById("overlay");
-    // when image loads, set overlay size and render
-    sheetImg.onload = () => {
-      overlay.style.width = sheetImg.clientWidth + "px";
-      overlay.style.height = sheetImg.clientHeight + "px";
-      overlay.innerHTML = ""; // clear
-      // overlay shapes: we need to scale px maybe if image is resized in browser.
-      const naturalW = sheetImg.naturalWidth;
-      const displayW = sheetImg.clientWidth;
-      const scale = displayW / naturalW;
-
-      shapes.forEach(s => {
-        const left = s.x * scale;
-        const top = s.y * scale;
-        // choose icon path inside docs/icons/
-        const iconPath = `icons/${s.type}.png`;
-        const el = createImgElement(iconPath, left, top, s.size? s.size*scale : 32*scale);
-        overlay.appendChild(el);
-      });
-
-      // also consider checks from payload.checks -> draw check icons too
-      (payload.checks || []).forEach((chk, idx) => {
-        // find shape with type "check" and name match? Here, shapes.json lists check positions by index
-        // For simplicity, place check icons at all shapes with type 'check'
-        shapes.filter(z => z.type === "check").forEach(s => {
-          const left = s.x * scale;
-          const top = s.y * scale;
-          const el = createImgElement('icons/check.png', left, top, 32*scale);
-          overlay.appendChild(el);
-        });
-      });
-    };
-  });
-
-  document.getElementById("backBtn").addEventListener("click", ()=> {
-    location.href = "index.html";
-  });
-
-  document.getElementById("downloadXlsx").addEventListener("click", async () => {
-    // take shapes from textarea (user may have edited)
-    let shapes;
-    try {
-      shapes = JSON.parse(document.getElementById("shapeJson").value);
-    } catch(e) {
-      alert("図形JSONの形式が不正です");
-      return;
-    }
-
-    // call backend to create xlsx with shapes
-    const res = await fetch(`${BACKEND_BASE}/api/generate-xlsx`, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        sheet: "Sheet1",
-        range: "A1:H37",
-        shapes: shapes
-      })
-    });
-    if (!res.ok) {
-      alert("Excel生成に失敗しました");
-      return;
-    }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "inspection_with_shapes.xlsx";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-});
-</script>
+</div>
+<script src="preview.js"></script>
 </body>
 </html>
