@@ -19,3 +19,4 @@ POSITION_MAP = {
         "注意":   {"x": 620, "y": 150, "shape": "circle"},
     }
 }
+
