@@ -1,73 +1,97 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>点検入力</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<title>点検入力</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.ico">
 </head>
 <body>
-  <div class="container">
-    <h1>点検入力</h1>
+<div class="container">
+  <h1>点検入力</h1>
 
-    <div class="form-grid">
-      <div class="form-row">
-        <label>点検部位</label>
-        <input id="part" type="text" value="チェーン">
-      </div>
-      <div class="form-row">
-        <label>項目</label>
-        <input id="item" type="text" value="腐食">
-      </div>
-      <div class="form-row">
-        <label>score (0〜1)</label>
-        <input id="score" type="number" step="0.01" min="0" max="1" value="0.5">
-      </div>
-      <div class="form-row">
-        <label>チェック（複数可）</label>
-        <textarea id="checks" placeholder="チェック項目をカンマ区切りで入れてください（例：整備班で対応予定,撤去予定）" rows="3"></textarea>
-      </div>
+  <div class="form-grid">
+    <div class="form-row">
+      <label>点検部位</label>
+      <select id="part">
+        <option value="チェーン">チェーン</option>
+        <option value="安全柵">安全柵</option>
+        <option value="ロープ">ロープ</option>
+      </select>
     </div>
 
-    <div class="actions">
-      <button id="doPreview">プレビューを見る</button>
-      <span id="status"></span>
+    <div class="form-row">
+      <label>項目</label>
+      <select id="item"></select>
     </div>
 
-    <p class="hint">「プレビューを見る」を押すとプレビュー画面が開きます。プレビュー内でExcelダウンロード可能。</p>
+    <div class="form-row" id="subItemRow" style="display:none">
+      <label>詳細選択</label>
+      <select id="subItem" multiple></select>
+    </div>
   </div>
 
-  <script>
-  const BACKEND_BASE = "http://localhost:5000";
+  <div class="actions">
+    <button id="doPreview">プレビューを見る</button>
+    <span id="status"></span>
+  </div>
+  <p class="hint">「プレビューを見る」を押すとプレビュー画面が開きます。プレビュー内でExcelダウンロード可能。</p>
+</div>
 
-  document.getElementById("doPreview").addEventListener("click", async () => {
-    const part = document.getElementById("part").value;
-    const item = document.getElementById("item").value;
-    const score = Number(document.getElementById("score").value);
-    const checksRaw = document.getElementById("checks").value;
-    const checks = checksRaw.split(",").map(s => s.trim()).filter(Boolean);
+<script>
+const BACKEND_BASE = "http://127.0.0.1:5000"; // ローカル
 
-    // バックエンドからシート画像を取得
-    const res = await fetch(`${BACKEND_BASE}/api/sheet-image`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sheet: "Sheet1", range: "A1:H37" })
-    });
-    if (!res.ok) {
-      alert("プレビュー画像の生成に失敗しました");
-      return;
-    }
-    const blob = await res.blob();
-    const reader = new FileReader();
-    reader.onload = function() {
-      const imgDataUrl = reader.result;
-      const payload = {
-        part, item, score, checks, imgDataUrl
-      };
-      sessionStorage.setItem("previewPayload", JSON.stringify(payload));
-      location.href = "preview.html";
-    };
-    reader.readAsDataURL(blob);
+const partSelect = document.getElementById("part");
+const itemSelect = document.getElementById("item");
+const subItemSelect = document.getElementById("subItem");
+const subItemRow = document.getElementById("subItemRow");
+
+const itemMap = {"チェーン":["腐食","摩耗"],"安全柵":["緩み"],"ロープ":["亀裂"]};
+const subItemMap = {"摩耗":["×:1/3以上","使用禁止:1/2以上"],"緩み":["ボルト","接合部"]};
+
+function updateItems(){
+  const part = partSelect.value;
+  itemSelect.innerHTML="";
+  itemMap[part].forEach(i=>{
+    const opt=document.createElement("option"); opt.value=i; opt.textContent=i;
+    itemSelect.appendChild(opt);
   });
-  </script>
+  updateSubItems();
+}
+function updateSubItems(){
+  const item=itemSelect.value;
+  if(subItemMap[item]){
+    subItemRow.style.display="block";
+    subItemSelect.innerHTML="";
+    subItemMap[item].forEach(si=>{
+      const opt=document.createElement("option"); opt.value=si; opt.textContent=si;
+      subItemSelect.appendChild(opt);
+    });
+  }else{subItemRow.style.display="none";}
+}
+
+partSelect.addEventListener("change",updateItems);
+itemSelect.addEventListener("change",updateSubItems);
+updateItems();
+
+document.getElementById("doPreview").addEventListener("click", async ()=>{
+  const part=partSelect.value;
+  const item=itemSelect.value;
+  const subItem=Array.from(subItemSelect.selectedOptions).map(o=>o.value);
+
+  const res=await fetch(`${BACKEND_BASE}/api/sheet-image`,{
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({sheet:"Sheet1",range:"A1:H37"})
+  });
+  if(!res.ok){alert("プレビュー取得失敗"); return;}
+  const blob=await res.blob();
+  const reader=new FileReader();
+  reader.onload=function(){
+    sessionStorage.setItem("previewPayload",JSON.stringify({part,item,subItem,imgDataUrl:reader.result}));
+    location.href="preview.html";
+  };
+  reader.readAsDataURL(blob);
+});
+</script>
 </body>
 </html>

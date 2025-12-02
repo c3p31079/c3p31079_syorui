@@ -4,42 +4,34 @@ from flask_cors import CORS
 from excel_utils import render_range_to_image, generate_xlsx_with_shapes, ensure_icons_exist
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # ローカル用に全許可
 
-TEMPLATE_PATH = os.path.join("backend", "template.xlsx")
+TEMPLATE_PATH = "backend/template.xlsx"
 ensure_icons_exist()
 
 @app.route("/api/sheet-image", methods=["POST"])
 def sheet_image():
     """
     JSON: { "sheet": "Sheet1", "range": "A1:H37" }
-    PNG を返す（プレビュー用）
+    PNGを返す
     """
     data = request.get_json() or {}
     sheet = data.get("sheet", "Sheet1")
     cell_range = data.get("range", "A1:H37")
-    
     img_buf = render_range_to_image(TEMPLATE_PATH, sheet, cell_range)
     return send_file(img_buf, mimetype="image/png", as_attachment=False, download_name="sheet.png")
 
 @app.route("/api/generate-xlsx", methods=["POST"])
 def generate_xlsx():
     """
-    JSON:
-    {
-      "shapes": [ {"type":"triangle","x":120,"y":80}, ... ],
-      "sheet":"Sheet1",
-      "range":"A1:H37",
-      "save_markers": false
-    }
+    JSON: { "shapes": [...], "sheet":"Sheet1", "range":"A1:H37" }
+    Excelを返す
     """
     data = request.get_json() or {}
     shapes = data.get("shapes", [])
     sheet = data.get("sheet", "Sheet1")
     rng = data.get("range", "A1:H37")
-    save_markers = data.get("save_markers", False)
-
-    out_path = generate_xlsx_with_shapes(TEMPLATE_PATH, shapes, sheet, rng, save_markers=save_markers)
+    out_path = generate_xlsx_with_shapes(TEMPLATE_PATH, shapes, sheet, rng)
     return send_file(out_path,
                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                      as_attachment=True,

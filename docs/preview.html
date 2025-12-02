@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <title>プレビュー</title>
 <link rel="stylesheet" href="style.css">
+<link rel="icon" href="favicon.ico">
 </head>
 <body>
 <div class="container">
-    <h1>プレビュー (A1:H37)</h1>
-    <canvas id="previewCanvas" width="850" height="650" style="border:1px solid #ccc;"></canvas>
-    <div class="actions">
-        <button id="downloadBtn">Excelを生成</button>
-        <button id="backBtn">戻る</button>
-    </div>
+  <h1>プレビュー</h1>
+  <canvas id="previewCanvas" width="800" height="600" style="border:1px solid #ccc;"></canvas>
+  <div class="actions">
+    <button id="downloadExcel">Excelをダウンロード</button>
+    <button id="goBack">戻る</button>
+  </div>
 </div>
 <script src="preview.js"></script>
 </body>
