@@ -1,44 +1,27 @@
-const statusEl = document.getElementById("status");
-const btn = document.getElementById("generateBtn");
+function generate() {
+    document.getElementById("status").innerText = "生成中...";
 
-btn.addEventListener("click", async () => {
-  const inspectorName = document.getElementById("inspector").value.trim();
+    const part = document.getElementById("part").value;
+    const item = document.getElementById("item").value;
+    const score = document.getElementById("score").value;
+    const checked = document.getElementById("checked").checked;
 
-  if (!inspectorName) {
-    alert("点検者名を入力してください！");
-    return;
-  }
-
-  // 生成中の表示
-  statusEl.textContent = "Excelを生成中…";
-  btn.disabled = true;
-
-  try {
-    const response = await fetch("https://c3p31079-syorui.onrender.com/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ inspector: inspectorName })
+    fetch("https://c3p31079-syorui.onrender.com/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ part, item, score, checked })
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "result.xlsx";
+        a.click();
+        document.getElementById("status").innerText = "生成完了!";
+    })
+    .catch(err => {
+        console.error(err);
+        document.getElementById("status").innerText = "エラーが発生しました";
     });
-
-    if (!response.ok) {
-      throw new Error(`サーバーエラー: ${response.status}`);
-    }
-
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "generated.xlsx";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-
-    statusEl.textContent = "Excelをダウンロードしました！";
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = `ファイル生成に失敗しました: ${err.message}`;
-  } finally {
-    btn.disabled = false;
-  }
-});
+}
