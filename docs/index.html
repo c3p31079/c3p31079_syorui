@@ -1,31 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>点検入力</title>
+  <meta charset="UTF-8">
+  <title>点検表作成</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-  <h1>点検入力</h1>
-
-  <div id="formContainer">
-    <!-- 動的にフォーム行追加 -->
-  </div>
-
-  <button id="addRow">＋ 行追加</button>
-
+  <h1>点検表作成</h1>
+  
+  <label>点検者名: <input type="text" id="inspector"></label>
+  
+  <div id="entryContainer"></div>
+  <button id="addEntryBtn">＋項目追加</button>
+  
   <h3>チェック項目</h3>
   <div id="checkContainer"></div>
+  
+  <button id="downloadExcelBtn">Excel ダウンロード</button>
 
-  <div class="actions">
-    <button id="downloadExcel">Excel ダウンロード</button>
-    <button id="downloadPDF">PDF ダウンロード</button>
-    <span id="status"></span>
-  </div>
-</div>
-
-<script src="data.js"></script>
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

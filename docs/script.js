@@ -1,114 +1,84 @@
-const formContainer = document.getElementById("formContainer");
+const inspectorInput = document.getElementById("inspector");
+const entryContainer = document.getElementById("entryContainer");
+const addEntryBtn = document.getElementById("addEntryBtn");
 const checkContainer = document.getElementById("checkContainer");
-const addRowBtn = document.getElementById("addRow");
-const downloadExcelBtn = document.getElementById("downloadExcel");
-const downloadPDFBtn = document.getElementById("downloadPDF");
-const statusEl = document.getElementById("status");
+const downloadExcelBtn = document.getElementById("downloadExcelBtn");
 
-// チェックボックス生成
-fetch("https://c3p31079-syorui.onrender.com/backend/check_coord_map.json")
-  .then(r => r.json())
-  .then(data => {
-    Object.keys(data).forEach(k => {
-      const label = document.createElement("label");
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.value = k;
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(k));
-      checkContainer.appendChild(label);
-      checkContainer.appendChild(document.createElement("br"));
-    });
-  });
+let coordMap = {};
+let checkCoordMap = {};
 
-// フォーム行追加
-function addRow() {
-  const div = document.createElement("div");
-  div.className = "formRow";
-
-  // 点検部位
-  const partSelect = document.createElement("select");
-  partSelect.innerHTML = Object.keys(itemMap).map(p => `<option>${p}</option>`).join("");
-  div.appendChild(partSelect);
-
-  // 項目
-  const itemSelect = document.createElement("select");
-  div.appendChild(itemSelect);
-
-  // サブ項目
-  const subSelect = document.createElement("select");
-  div.appendChild(subSelect);
-
-  // 記号
-  const shapeSelect = document.createElement("select");
-  ["△","×","○","✓"].forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s;
-    opt.textContent = s;
-    shapeSelect.appendChild(opt);
-  });
-  div.appendChild(shapeSelect);
-
-  // 項目変更時にサブ項目更新
-  partSelect.addEventListener("change", () => updateItem(partSelect, itemSelect));
-  itemSelect.addEventListener("change", () => updateSub(itemSelect, subSelect));
-
-  updateItem(partSelect, itemSelect);
-  updateSub(itemSelect, subSelect);
-
-  formContainer.appendChild(div);
+// 初期データ取得
+async function init() {
+  coordMap = await (await fetch("/api/coord_map")).json();
+  checkCoordMap = await (await fetch("/api/check_coord_map")).json();
+  renderCheckItems();
 }
+init();
 
-function updateItem(partSelect, itemSelect){
-  const part = partSelect.value;
-  itemSelect.innerHTML = itemMap[part].map(i => `<option>${i}</option>`).join("");
-}
-
-function updateSub(itemSelect, subSelect){
-  const item = itemSelect.value;
-  if(subItemMap[item]){
-    subSelect.innerHTML = subItemMap[item].map(s => `<option>${s}</option>`).join("");
-  } else {
-    subSelect.innerHTML = "";
+// チェック項目をチェックボックスで表示
+function renderCheckItems() {
+  for (const key of Object.keys(checkCoordMap)) {
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = key;
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(key));
+    checkContainer.appendChild(label);
+    checkContainer.appendChild(document.createElement("br"));
   }
 }
 
-addRowBtn.addEventListener("click", addRow);
-addRow(); // 初期行
+// 項目フォーム追加
+addEntryBtn.addEventListener("click", () => {
+  const div = document.createElement("div");
+  
+  const 部位 = document.createElement("select");
+  部位.innerHTML = Object.keys(coordMap).map(k => `<option>${k}</option>`).join("");
+  const 項目 = document.createElement("input");
+  項目.type = "text";
+  const 評価 = document.createElement("input");
+  評価.type = "text";
+  
+  div.appendChild(部位);
+  div.appendChild(項目);
+  div.appendChild(評価);
+  entryContainer.appendChild(div);
+});
 
-async function download(type){
-  const rows = [];
-  document.querySelectorAll(".formRow").forEach(div => {
-    rows.push({
-      part: div.children[0].value,
-      item: div.children[1].value,
-      subItem: div.children[2].value,
-      shape: div.children[3].value
-    });
-  });
-  const checks = Array.from(checkContainer.querySelectorAll("input:checked")).map(i=>i.value);
-  const payload = { rows, checks };
+// Excel ダウンロード
+downloadExcelBtn.addEventListener("click", async () => {
+  const entries = [];
+  
+  for (const div of entryContainer.children) {
+    const 部位 = div.children[0].value;
+    const 項目 = div.children[1].value;
+    const 評価 = div.children[2].value;
+    entries.push({ 部位, 項目, 評価 });
+  }
 
-  statusEl.textContent = `${type.toUpperCase()}生成中…`;
-  try{
-    const res = await fetch(`https://c3p31079-syorui.onrender.com/api/download-${type}`, {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(payload)
+  // チェック項目も評価として追加
+  for (const input of checkContainer.querySelectorAll("input[type=checkbox]")) {
+    if (input.checked) entries.push({ 部位: "チェック項目", 項目: input.value, 評価: "✓" });
+  }
+
+  try {
+    const response = await fetch("/api/download-excel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ inspector: inspectorInput.value.trim(), entries })
     });
-    if(!res.ok) throw new Error(res.statusText);
-    const blob = await res.blob();
+    if (!response.ok) throw new Error(`サーバーエラー: ${response.status}`);
+    
+    const blob = await response.blob();
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = type==="excel"?"output.xlsx":"output.pdf";
+    a.href = window.URL.createObjectURL(blob);
+    a.download = "inspection.xlsx";
     document.body.appendChild(a);
     a.click();
     a.remove();
-    statusEl.textContent = `${type.toUpperCase()}をダウンロードしました`;
-  } catch(err){
-    statusEl.textContent = `エラー: ${err.message}`;
+    window.URL.revokeObjectURL(a.href);
+  } catch (err) {
+    alert(`Excel ダウンロードに失敗しました: ${err.message}`);
   }
-}
-
-downloadExcelBtn.addEventListener("click", ()=>download("excel"));
-downloadPDFBtn.addEventListener("click", ()=>download("pdf"));
+});
