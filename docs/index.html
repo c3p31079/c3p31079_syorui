@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>点検システム</title>
+  <meta charset="utf-8">
+  <title>点検入力</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="container">
+  <h1>点検入力</h1>
 
-<h2>点検入力フォーム</h2>
+  <div id="formContainer">
+    <!-- 動的にフォーム行追加 -->
+  </div>
 
-<table id="inputTable">
-  <thead>
-    <tr>
-      <th>点検部位</th>
-      <th>項目</th>
-      <th>評価（記号）</th>
-      <th>チェック項目</th>
-      <th>追加</th>
-    </tr>
-  </thead>
-  <tbody id="rows"></tbody>
-</table>
+  <button id="addRow">＋ 行追加</button>
 
-<button id="addRowBtn">＋ 行追加</button>
-<button id="generateBtn">プレビュー生成</button>
+  <h3>チェック項目</h3>
+  <div id="checkContainer"></div>
 
-<p id="status"></p>
+  <div class="actions">
+    <button id="downloadExcel">Excel ダウンロード</button>
+    <button id="downloadPDF">PDF ダウンロード</button>
+    <span id="status"></span>
+  </div>
+</div>
 
+<script src="data.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

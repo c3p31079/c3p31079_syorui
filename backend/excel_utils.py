@@ -1,139 +1,107 @@
-import os
-import io
-import uuid
+import json
 from openpyxl import load_workbook
-from openpyxl.drawing.image import Image as XLImage
-from openpyxl.utils import get_column_letter
-from PIL import Image, ImageDraw, ImageFont
+from openpyxl.drawing.image import Image
+from PIL import Image as PILImage
+from io import BytesIO
+import os
 
-BASE_DIR = os.path.dirname(__file__)
-ICON_DIR = os.path.join(BASE_DIR, "icons")
-GENERATED_DIR = os.path.join(BASE_DIR, "generated")
-os.makedirs(ICON_DIR, exist_ok=True)
-os.makedirs(GENERATED_DIR, exist_ok=True)
+# 座標マップの読み込み
+with open("backend/coord_map.json", "r", encoding="utf-8") as f:
+    COORD_MAP = json.load(f)
+with open("backend/check_coord_map.json", "r", encoding="utf-8") as f:
+    CHECK_COORD_MAP = json.load(f)
 
-# 論理記号タイプのマッピング
-ICON_FILENAMES = {
-    "triangle": "triangle.png",
-    "cross": "none.png",   # none.png にマッピング
-    "none": "none.png",
-    "circle": "circle.png",
-    "check": "check.png"
+# アイコン画像パス
+ICON_PATHS = {
+    "△": "backend/icons/triangle.png",
+    "×": "backend/icons/cross.png",
+    "○": "backend/icons/circle.png",
+    "✓": "backend/icons/check.png"
 }
 
-def ensure_icons_exist():
+TEMPLATE_PATH = "backend/template.xlsx"
+GENERATED_DIR = "generated"
+os.makedirs(GENERATED_DIR, exist_ok=True)
+
+# Excel生成関数
+def generate_excel(data):
     """
-    If icons are missing, create simple fallback PNGs (so Render won't crash).
-    Prefer to place your own PNGs into backend/icons/ (32x32, transparent).
+    入力データをもとにExcelを生成し、保存パスを返す
+    data: {
+        "rows": [
+            {"part": "...", "item": "...", "subItem": "...", "shape": "△"},
+            ...
+        ],
+        "checks": ["整備班で対応予定", ...]
+    }
     """
-    for key, fname in ICON_FILENAMES.items():
-        path = os.path.join(ICON_DIR, fname)
-        if not os.path.exists(path):
-            # ファイル名として一度だけ作成
-            try:
-                im = Image.new("RGBA", (32, 32), (0,0,0,0))
-                d = ImageDraw.Draw(im)
-                if "tri" in key:
-                    d.polygon([(16,2),(2,30),(30,30)], outline=(200,50,50), width=3)
-                elif key in ("cross","none"):
-                    d.line([(4,4),(28,28)], fill=(200,50,50), width=3)
-                    d.line([(28,4),(4,28)], fill=(200,50,50), width=3)
-                elif "circle" in key:
-                    d.ellipse([(4,4),(28,28)], outline=(200,50,50), width=3)
-                elif key == "check":
-                    d.line([(4,18),(12,26),(28,6)], fill=(20,150,20), width=3)
-                im.save(path)
-            except Exception:
-                os.makedirs(ICON_DIR, exist_ok=True)
-                im.save(path)
+    wb = load_workbook(TEMPLATE_PATH)
+    ws = wb.active
 
-def get_icon_path(symbol_type):
-    fname = ICON_FILENAMES.get(symbol_type)
-    if not fname:
-        return None
-    p = os.path.join(ICON_DIR, fname)
-    return p if os.path.exists(p) else None
+    # 図形配置
+    for row in data.get("rows", []):
+        key = f"{row['part']}:{row['item']}"
+        if key in COORD_MAP:
+            coord = COORD_MAP[key]
+            shape_type = row.get("shape")
+            if shape_type in ICON_PATHS:
+                img = Image(ICON_PATHS[shape_type])
+                img.anchor = f"A1"  # 初期位置は左上。後で座標計算
+                img.width = 20
+                img.height = 20
+                # openpyxlではセル座標にピクセル指定できないので、行列で近似
+                ws.add_image(img, f"{_coord_to_cell(coord['x'], coord['y'])}")
 
-def render_range_to_image(template_path, sheet_name="Sheet1", cell_range="A1:H37"):
+    # チェック項目配置
+    for chk in data.get("checks", []):
+        if chk in CHECK_COORD_MAP:
+            coord = CHECK_COORD_MAP[chk]
+            img = Image(ICON_PATHS["✓"])
+            img.anchor = f"A1"
+            img.width = 20
+            img.height = 20
+            ws.add_image(img, f"{_coord_to_cell(coord['x'], coord['y'])}")
+
+    output_path = os.path.join(GENERATED_DIR, "output.xlsx")
+    wb.save(output_path)
+    return output_path
+
+# PDF生成関数
+def generate_pdf(data):
     """
-    Render Excel A1:H37 to PNG (simple grid + cell values).
-    This is a simple renderer using Pillow for preview only.
+    ExcelをPNG経由でPDFに変換
     """
-    wb = load_workbook(template_path, data_only=True)
-    ws = wb[sheet_name]
+    excel_path = generate_excel(data)
+    from openpyxl import load_workbook
+    from openpyxl.utils import get_column_letter
+    import pandas as pd
+    import matplotlib.pyplot as plt
 
-    # セル範囲をA1:H37！
-    start_col = 1; end_col = 8
-    start_row = 1; end_row = 37
+    wb = load_workbook(excel_path)
+    ws = wb.active
 
-    cell_w = 100
-    cell_h = 20
-    width = cell_w * (end_col - start_col + 1)
-    height = cell_h * (end_row - start_row + 1)
+    # Excel内容をPandasで取得
+    data_list = []
+    for row in ws.iter_rows(values_only=True):
+        data_list.append(list(row))
 
-    im = Image.new("RGB", (width, height), (255,255,255))
-    draw = ImageDraw.Draw(im)
-    try:
-        font = ImageFont.truetype("DejaVuSans.ttf", 12)
-    except Exception:
-        font = ImageFont.load_default()
+    df = pd.DataFrame(data_list)
+    fig, ax = plt.subplots(figsize=(8, 10))
+    ax.axis('off')
+    table = ax.table(cellText=df.values, loc='center', cellLoc='center')
+    table.auto_set_font_size(False)
+    table.set_fontsize(10)
+    table.scale(1, 1.5)
 
-    # グリッドとテキストを描画
-    for r in range(start_row, end_row + 1):
-        for c in range(start_col, end_col + 1):
-            x0 = (c - start_col) * cell_w
-            y0 = (r - start_row) * cell_h
-            x1 = x0 + cell_w
-            y1 = y0 + cell_h
-            draw.rectangle([x0, y0, x1, y1], outline=(200,200,200))
-            val = ws.cell(row=r, column=c).value
-            if val is not None:
-                draw.text((x0 + 4, y0 + 2), str(val), fill=(0,0,0), font=font)
+    pdf_path = os.path.join(GENERATED_DIR, "output.pdf")
+    plt.savefig(pdf_path, bbox_inches='tight')
+    plt.close()
+    return pdf_path
 
-    buf = io.BytesIO()
-    im.save(buf, format="PNG")
-    buf.seek(0)
-    return buf
-
-def px_to_cell(x_px, y_px, cell_w=100, cell_h=20, start_col=1, start_row=1):
+def _coord_to_cell(x, y):
     """
-    Convert pixel coordinate (x_px,y_px) used by front-end into approximate Excel cell (like 'B3').
-    This is a best-effort mapping (openpyxl does not place images by pixel).
+    x, yピクセル座標から近似セルに変換
     """
-    col_index = int(x_px // cell_w) + start_col
-    row_index = int(y_px // cell_h) + start_row
-    col_letter = get_column_letter(col_index)
-    return f"{col_letter}{row_index}"
-
-def generate_xlsx_with_shapes(template_path, shapes, sheet_name="Sheet1", cell_range="A1:H37"):
-    """
-    shapes: [{type: 'triangle'|'cross'|'circle'|'check', x: px, y: px}, ...]
-    Place images on corresponding approximate cell addresses and save a new workbook.
-    """
-    wb = load_workbook(template_path)
-    ws = wb[sheet_name]
-
-    for s in shapes:
-        typ = s.get("type")
-        x = s.get("x")
-        y = s.get("y")
-        # 正規化タイプの許可部分
-        if typ == "none":
-            typ = "cross"
-        icon_path = get_icon_path(typ)
-        if not icon_path:
-            continue
-        cell_addr = px_to_cell(x, y)
-        img = XLImage(icon_path)
-        img.width = 32
-        img.height = 32
-        try:
-            ws.add_image(img, cell_addr)
-        except Exception:
-            #アンカーが失敗した場合はA1に配置するよ
-            ws.add_image(img, "A1")
-
-    out_name = f"output_{uuid.uuid4().hex}.xlsx"
-    out_path = os.path.join(GENERATED_DIR, out_name)
-    wb.save(out_path)
-    return out_path
+    col = chr(min(72, int(x / 64) + 65))  # A〜H固定
+    row = min(37, int(y / 20) + 1)
+    return f"{col}{row}"

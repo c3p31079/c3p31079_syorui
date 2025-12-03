@@ -1,25 +1,60 @@
 body {
-  font-family: sans-serif;
-  padding: 20px;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
 }
 
-table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-bottom: 20px;
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-th, td {
-  border: 1px solid #aaa;
-  padding: 6px;
+h1 {
+    text-align: center;
 }
 
-#previewImg {
-  width: 800px;
-  border: 1px solid #ccc;
+.formRow {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
 }
 
-#loading {
-  font-size: 20px;
-  color: #444;
+.formRow select {
+    padding: 5px;
+    min-width: 100px;
+}
+
+#checkContainer label {
+    margin-right: 15px;
+}
+
+button {
+    padding: 8px 15px;
+    margin-top: 10px;
+    cursor: pointer;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.actions {
+    margin-top: 20px;
+}
+
+#status {
+    margin-left: 15px;
+    font-weight: bold;
+    color: #333;
 }

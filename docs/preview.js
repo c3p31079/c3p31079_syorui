@@ -1,19 +1,19 @@
-function getParam(name) {
-  return new URLSearchParams(window.location.search).get(name);
-}
+// sessionStorage に保存したプレビュー画像を表示
+window.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("preview-container");
+  const src = sessionStorage.getItem("previewImg");
 
-const imgPath = getParam("img");
+  const status = document.createElement("p");
+  status.textContent = "プレビューを表示中…";
+  container.appendChild(status);
 
-const img = document.getElementById("previewImg");
-const loading = document.getElementById("loading");
-
-img.src = "https://c3p31079-syorui.onrender.com" + imgPath;
-
-img.onload = () => {
-  loading.style.display = "none";
-  img.style.display = "block";
-};
-
-function downloadExcel() {
-  window.location.href = "https://c3p31079-syorui.onrender.com/api/download";
-}
+  if (src) {
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.width = "100%";
+    container.appendChild(img);
+    status.textContent = "プレビュー表示完了";
+  } else {
+    status.textContent = "プレビュー画像がありません";
+  }
+});
