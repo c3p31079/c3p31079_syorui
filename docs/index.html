@@ -1,48 +1,32 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<title>点検入力</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>点検システム</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-  <h1>点検入力</h1>
 
-  <div class="form-grid">
-    <div class="form-row">
-      <label>点検部位</label>
-      <select id="part"></select>
-    </div>
-    <div class="form-row">
-      <label>項目</label>
-      <select id="item"></select>
-    </div>
-    <div class="form-row">
-      <label>記号</label>
-      <select id="symbol">
-        <option value="triangle">△</option>
-        <option value="none">×</option>
-        <option value="circle">○</option>
-        <option value="check">✓</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <label>チェック（カンマ区切り）</label>
-      <textarea id="checks" rows="2" placeholder="例: 整備班で対応予定, 撤去予定"></textarea>
-    </div>
-  </div>
+<h2>点検入力フォーム</h2>
 
-  <div class="actions">
-    <button id="doPreview">プレビューを見る</button>
-    <span id="status"></span>
-  </div>
-  <p class="hint">プレビュー画面で確認後、Excelを生成できます。</p>
-</div>
+<table id="inputTable">
+  <thead>
+    <tr>
+      <th>点検部位</th>
+      <th>項目</th>
+      <th>評価（記号）</th>
+      <th>チェック項目</th>
+      <th>追加</th>
+    </tr>
+  </thead>
+  <tbody id="rows"></tbody>
+</table>
 
-<script>
-const BACKEND_BASE = "https://c3p31079-syorui.onrender.com"; // Render の公開 URL
-</script>
+<button id="addRowBtn">＋ 行追加</button>
+<button id="generateBtn">プレビュー生成</button>
+
+<p id="status"></p>
+
 <script src="script.js"></script>
 </body>
 </html>

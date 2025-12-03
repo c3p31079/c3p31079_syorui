@@ -1,76 +1,79 @@
-# backend/app.py
-import os
-import json
+# Excel に図形を配置し、Excel と PNG を返す API
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from excel_utils import render_range_to_image, generate_xlsx_with_shapes, ensure_icons_exist
+import os
+import json
+
+from excel_render import render_range_to_png
+from shape_utils import place_shapes_on_excel
 
 app = Flask(__name__)
-# /api/* に対して任意オリジンからのアクセスを許可（Render + GitHub Pages 対応）
-CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app)
 
-BASE_DIR = os.path.dirname(__file__)
-TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
-COORDS_PATH = os.path.join(os.path.dirname(BASE_DIR), "docs", "coords.json")  # docs/coords.json
+TEMPLATE_PATH = "backend/template.xlsx"
+GENERATED_DIR = "backend/generated/"
+COORD_PATH = "backend/coord_map.json"
+CHECK_COORD_PATH = "backend/check_coord_map.json"
 
-# アイコン存在確認（無ければ簡易生成しておく：Render 起動で失敗しないため）
-ensure_icons_exist()
+# 生成ファイルを置くフォルダ
+os.makedirs(GENERATED_DIR, exist_ok=True)
+
 
 @app.route("/")
 def home():
     return "Backend running"
 
-@app.route("/api/sheet-image", methods=["POST"])
-def sheet_image():
-    """
-    Request JSON: { "sheet":"Sheet1", "range":"A1:H37" }
-    Returns PNG (BytesIO) of the range for preview.
-    """
-    data = request.get_json() or {}
-    sheet = data.get("sheet", "Sheet1")
-    cell_range = data.get("range", "A1:H37")
-    try:
-        img_buf = render_range_to_image(TEMPLATE_PATH, sheet, cell_range)
-        return send_file(img_buf, mimetype="image/png", as_attachment=False, download_name="sheet.png")
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
-@app.route("/api/generate-xlsx", methods=["POST"])
-def generate_xlsx():
+# ① Excel に図形を置き、PNG を返す
+@app.route("/api/generate", methods=["POST"])
+def generate():
     """
-    Request JSON:
-    {
-      "shapes": [{"type":"triangle","x":120,"y":80}, ...],
-      "sheet":"Sheet1",
-      "range":"A1:H37"
-    }
-    Returns generated xlsx file.
+    入力されたデータ（点検部位/項目/記号など）をもとに、
+    Excel に図形を配置 → PNG 作成 → PNG(Base64) を返す。
     """
-    data = request.get_json() or {}
-    shapes = data.get("shapes", [])
-    sheet = data.get("sheet", "Sheet1")
-    cell_range = data.get("range", "A1:H37")
+    data = request.json
+    items = data.get("items", [])  # 複数行入力
 
-    try:
-        out_path = generate_xlsx_with_shapes(TEMPLATE_PATH, shapes, sheet, cell_range)
-        return send_file(out_path,
-                         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                         as_attachment=True,
-                         download_name=os.path.basename(out_path))
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    coord_map = json.load(open(COORD_PATH, encoding="utf-8"))
+    check_coord_map = json.load(open(CHECK_COORD_PATH, encoding="utf-8"))
 
-@app.route("/api/coords", methods=["GET"])
-def api_coords():
-    # docs/coords.json を返す（フロントはこれを使ってプルダウン・座標取得）
-    try:
-        with open(COORDS_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    excel_path = GENERATED_DIR + "output.xlsx"
+
+    # Excel に図形を配置
+    place_shapes_on_excel(
+        template_path=TEMPLATE_PATH,
+        output_path=excel_path,
+        items=items,
+        coord_map=coord_map,
+        check_coord_map=check_coord_map
+    )
+
+    # PNG 生成
+    png_path = GENERATED_DIR + "preview.png"
+    render_range_to_png(
+        excel_path,
+        "Sheet1",
+        "A1:H37",
+        png_path
+    )
+
+    # PNG をフロントに返す（URL 形式）
+    return jsonify({"preview": "/generated/preview.png"})
+
+
+# ② Excel のダウンロード
+@app.route("/api/download")
+def download():
+    excel_path = GENERATED_DIR + "output.xlsx"
+    return send_file(excel_path, as_attachment=True)
+
+
+# ③ Render 用の静的ファイルルーティング
+@app.route("/generated/<path:path>")
+def serve_generated(path):
+    return send_file(GENERATED_DIR + path)
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    # Render expects 0.0.0.0 and PORT env var
     app.run(host="0.0.0.0", port=port)

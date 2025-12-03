@@ -1,25 +1,18 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<title>プレビュー</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>プレビュー</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
-  <h1>プレビュー</h1>
-  <canvas id="previewCanvas" style="border:1px solid #ccc; width:100%; max-width:900px;"></canvas>
 
-  <div class="actions">
-    <button id="downloadExcel">Excelをダウンロード</button>
-    <button id="backBtn">戻る</button>
-    <span id="status"></span>
-  </div>
-</div>
+<h2>Excel プレビュー</h2>
+<div id="loading">プレビュー画像を作成中...</div>
+<img id="previewImg" style="display:none;">
 
-<script>
-const BACKEND_BASE = "https://c3p31079-syorui.onrender.com";
-</script>
-<script src="script.js"></script>
+<button onclick="downloadExcel()">Excel ダウンロード</button>
+
+<script src="preview.js"></script>
 </body>
 </html>
