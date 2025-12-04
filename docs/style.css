@@ -1,3 +1,47 @@
-body { font-family: Arial, sans-serif; padding: 20px; }
-input, select { margin-right: 10px; }
-#entryContainer > div { margin-bottom: 5px; }
+body {
+    font-family: "Yu Gothic", sans-serif;
+    margin: 20px;
+}
+
+h1 {
+    margin-bottom: 30px;
+}
+
+.section {
+    margin-bottom: 40px;
+    padding: 20px;
+    border: solid 1px #aaa;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid #bbb;
+    padding: 8px;
+    text-align: center;
+}
+
+button {
+    padding: 8px 15px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#checkboxArea {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.checkbox-item {
+    border: 1px solid #ddd;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #fff;
+}

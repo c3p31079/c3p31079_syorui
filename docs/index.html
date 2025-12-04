@@ -1,23 +1,49 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>点検表作成</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>点検結果 Excel 生成</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <h1>点検表作成</h1>
-  
-  <label>点検者名: <input type="text" id="inspector"></label>
-  
-  <div id="entryContainer"></div>
-  <button id="addEntryBtn">＋項目追加</button>
-  
-  <h3>チェック項目</h3>
-  <div id="checkContainer"></div>
-  
-  <button id="downloadExcelBtn">Excel ダウンロード</button>
 
-  <script src="script.js"></script>
+<body>
+    <h1>点検記録 生成ツール</h1>
+
+    <!-- 点検部位・項目入力（プルダウン） -->
+    <div class="section">
+        <h2>① 点検部位・項目の入力</h2>
+        <button id="addRowBtn">＋ 行を追加</button>
+
+        <table id="itemTable">
+            <thead>
+                <tr>
+                    <th>点検部位</th>
+                    <th>項目</th>
+                    <th>記号</th>
+                    <th>削除</th>
+                </tr>
+            </thead>
+            <tbody id="itemBody">
+                <!-- JSで追加 -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- チェック項目（check_coord_map.json → チェックボックス） -->
+    <div class="section">
+        <h2>② チェック項目（✓ を置きたい項目）</h2>
+        <div id="checkboxArea">
+            <!-- JSで生成 -->
+        </div>
+    </div>
+
+    <!-- ダウンロードボタン -->
+    <div class="section">
+        <h2>③ Excel ダウンロード</h2>
+        <button id="downloadExcelBtn">Excel をダウンロード</button>
+        <p id="status"></p>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

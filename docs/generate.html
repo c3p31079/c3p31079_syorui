@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Excel 生成</title>
+<script src="script.js"></script>
+</head>
+<body>
+<h1>Excel 点検表 作成</h1>
+
+
+<label>点検部位：</label>
+<select id="partSelect"></select><br><br>
+
+
+<label>点検項目：</label>
+<select id="itemSelect"></select><br><br>
+
+
+<h3>チェック項目</h3>
+<div id="checkboxArea"></div>
+
+
+<button onclick="downloadExcel()">Excelを生成してダウンロード</button>
+</body>
+</html>
