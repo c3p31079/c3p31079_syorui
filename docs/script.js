@@ -150,3 +150,34 @@ function downloadExcel() {
             status.textContent = "Excel ダウンロード失敗… " + err;
         });
 }
+
+document.getElementById("downloadExcel").addEventListener("click", () => {
+    const payload = {
+        part: document.getElementById("partSelect").value,
+        item: document.getElementById("itemSelect").value,
+        checks: getSelectedChecks()   // チェックボックスの値リスト
+    };
+
+    fetch("/api/generate-excel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("Server error: " + res.status);
+        }
+        return res.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "inspection_result.xlsx";
+        a.click();
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+        alert("Excel ダウンロードに失敗しました: " + err.message);
+    });
+});
