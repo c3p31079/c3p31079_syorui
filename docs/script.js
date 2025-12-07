@@ -1,138 +1,106 @@
-// JSON読み込み
-let coordMap = {};  // 点検部位・項目用
-let checkMap = [];  // チェック項目用
+const rowsContainer = document.getElementById("rows-container");
+const addRowBtn = document.getElementById("add-row");
+const downloadBtn = document.getElementById("download-btn");
+const checkContainer = document.getElementById("check-container");
 
-fetch("coord_map.json")
-  .then(res => res.json())
-  .then(data => coordMap = data)
-  .catch(err => console.error(err));
+let coordMap = {};
+let checkCoordMap = {};
+let itemMap = {};
+let subItemMap = {};
 
-fetch("check_coord_map.json")
-  .then(res => res.json())
-  .then(data => checkMap = Object.keys(data))
-  .catch(err => console.error(err));
+// JSON 読み込み
+async function loadJSON() {
+  coordMap = await (await fetch("coord_map.json")).json();
+  checkCoordMap = await (await fetch("check_coord_map.json")).json();
+  itemMap = await (await fetch("map.json")).then(res => res.json());
+  subItemMap = await (await fetch("subitem_map.json")).then(res => res.json());
+}
 
-const itemsTable = document.getElementById("itemsTable");
-const addRowBtn = document.getElementById("addRowBtn");
-const checksContainer = document.getElementById("checksContainer");
-const downloadBtn = document.getElementById("downloadBtn");
+// プルダウン生成
+function createRow() {
+  const div = document.createElement("div");
+  div.className = "row-item";
+
+  const partSelect = document.createElement("select");
+  partSelect.innerHTML = `<option value="">--点検部位--</option>`;
+  Object.keys(coordMap).forEach(p => {
+    partSelect.innerHTML += `<option value="${p}">${p}</option>`;
+  });
+
+  const itemSelect = document.createElement("select");
+  itemSelect.innerHTML = `<option value="">--項目--</option>`;
+
+  const evalSelect = document.createElement("select");
+  evalSelect.innerHTML = `<option value="triangle">△</option><option value="cross">×</option>`;
+
+  partSelect.onchange = () => {
+    itemSelect.innerHTML = `<option value="">--項目--</option>`;
+    if (coordMap[partSelect.value]) {
+      Object.keys(coordMap[partSelect.value]).forEach(i => {
+        itemSelect.innerHTML += `<option value="${i}">${i}</option>`;
+      });
+    }
+  };
+
+  div.appendChild(partSelect);
+  div.appendChild(itemSelect);
+  div.appendChild(evalSelect);
+  rowsContainer.appendChild(div);
+}
 
 // チェックボックス生成
 function createCheckBoxes() {
-  checksContainer.innerHTML = "";
-  checkMap.forEach(label => {
-    const div = document.createElement("div");
-    div.className = "check-item";
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.value = label;
-    input.id = `check-${label}`;
-    const labelEl = document.createElement("label");
-    labelEl.htmlFor = `check-${label}`;
-    labelEl.textContent = label;
-    div.appendChild(input);
-    div.appendChild(labelEl);
-    checksContainer.appendChild(div);
+  checkContainer.innerHTML = "";
+  Object.keys(checkCoordMap).forEach(c => {
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = c;
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(c));
+    checkContainer.appendChild(label);
   });
 }
 
-// 新しい行追加
-function addRow(part="", item="", shape="triangle") {
-  const row = document.createElement("tr");
-
-  // 点検部位
-  const partTd = document.createElement("td");
-  const partSelect = document.createElement("select");
-  partSelect.className = "partSelect";
-  Object.keys(coordMap).forEach(key => {
-    const opt = document.createElement("option");
-    opt.value = key;
-    opt.textContent = key;
-    if(key === part) opt.selected = true;
-    partSelect.appendChild(opt);
-  });
-  partTd.appendChild(partSelect);
-  row.appendChild(partTd);
-
-  // 項目
-  const itemTd = document.createElement("td");
-  const itemSelect = document.createElement("select");
-  itemSelect.className = "itemSelect";
-  function updateItemOptions() {
-    itemSelect.innerHTML = "";
-    const selectedPart = partSelect.value;
-    if(coordMap[selectedPart]) {
-      Object.keys(coordMap[selectedPart]).forEach(i => {
-        const opt = document.createElement("option");
-        opt.value = i;
-        opt.textContent = i;
-        if(i === item) opt.selected = true;
-        itemSelect.appendChild(opt);
-      });
-    }
-  }
-  updateItemOptions();
-  partSelect.addEventListener("change", updateItemOptions);
-  itemTd.appendChild(itemSelect);
-  row.appendChild(itemTd);
-
-  // 評価（図形）
-  const shapeTd = document.createElement("td");
-  const shapeSelect = document.createElement("select");
-  ["triangle","cross","circle"].forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s;
-    opt.textContent = s;
-    if(s===shape) opt.selected=true;
-    shapeSelect.appendChild(opt);
-  });
-  shapeTd.appendChild(shapeSelect);
-  row.appendChild(shapeTd);
-
-  itemsTable.querySelector("tbody").appendChild(row);
-}
-
-// 初期化
-addRow();       // 最低1行
-createCheckBoxes();
-
-// 行追加ボタン
-addRowBtn.addEventListener("click", ()=> addRow());
-
-// Excelダウンロード
-downloadBtn.addEventListener("click", async ()=>{
-  try {
-    const rows = itemsTable.querySelectorAll("tbody tr");
-    const items = Array.from(rows).map(tr=>{
-      return {
-        part: tr.querySelector(".partSelect").value,
-        item: tr.querySelector(".itemSelect").value,
-        shape: tr.querySelector("select:nth-child(1)").value
-      };
+// ダウンロード
+downloadBtn.onclick = async () => {
+  const rows = [];
+  document.querySelectorAll(".row-item").forEach(row => {
+    const selects = row.querySelectorAll("select");
+    rows.push({
+      part: selects[0].value,
+      item: selects[1].value,
+      evaluation: selects[2].value
     });
-    const checks = Array.from(checksContainer.querySelectorAll("input[type=checkbox]:checked"))
-      .map(cb => cb.value);
+  });
 
+  const checks = [];
+  document.querySelectorAll("#check-container input:checked").forEach(cb => {
+    checks.push(cb.value);
+  });
+
+  try {
     const res = await fetch("/api/download-excel", {
       method: "POST",
-      headers: { "Content-Type":"application/json" },
-      body: JSON.stringify({ items, checks })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rows, checks })
     });
 
-    if(!res.ok) throw new Error(res.status);
-
+    if (!res.ok) throw new Error(`Error ${res.status}`);
     const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
+    a.href = URL.createObjectURL(blob);
     a.download = "inspection.xlsx";
-    document.body.appendChild(a);
     a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-
-  } catch(e) {
-    alert("Excel ダウンロードに失敗しました: " + e);
-    console.error(e);
+  } catch (err) {
+    alert("Excel ダウンロードに失敗しました: " + err);
   }
+};
+
+// 初期化
+loadJSON().then(() => {
+  createRow();
+  createCheckBoxes();
 });
+
+addRowBtn.onclick = createRow;

@@ -1,7 +1,7 @@
-body { font-family: sans-serif; margin: 20px; }
-h1, h2 { margin-bottom: 10px; }
-form { display: flex; flex-direction: column; gap: 10px; }
-.row { display: flex; gap: 10px; align-items: center; }
-select { padding: 4px; }
-button { padding: 6px 12px; cursor: pointer; }
-#checkContainer div { margin-bottom: 4px; }
+.row-item {
+  margin-bottom: 10px;
+}
+
+#check-container label {
+  margin-right: 10px;
+}
