@@ -1,5 +1,4 @@
-const BACKEND_URL = "http://localhost:5000"; 
-// Render使用時は https://xxx.onrender.com に変更
+const BACKEND_URL = "https://c3p31079-syorui.onrender.com"; 
 
 const partSelect = document.getElementById("partSelect");
 const itemSelect = document.getElementById("itemSelect");
@@ -9,7 +8,7 @@ const downloadBtn = document.getElementById("downloadBtn");
 let partItemMap = {};
 let checkCoordMap = {};
 
-/* ---------- 初期化 ---------- */
+/* 初期化 */
 async function init() {
   // 点検部位・項目
   const res1 = await fetch("map.json");
@@ -23,7 +22,7 @@ async function init() {
   initCheckList();
 }
 
-/* ---------- プルダウン ---------- */
+/* プルダウン */
 function initPartSelect() {
   partSelect.innerHTML = "";
   Object.keys(partItemMap).forEach(part => {
@@ -49,7 +48,7 @@ function updateItemSelect() {
 
 partSelect.onchange = updateItemSelect;
 
-/* ---------- チェックボックス ---------- */
+/* チェックボックス */
 function initCheckList() {
   checkList.innerHTML = "";
   Object.keys(checkCoordMap).forEach(key => {
@@ -62,7 +61,7 @@ function initCheckList() {
   });
 }
 
-/* ---------- ダウンロード ---------- */
+/* ダウンロード */
 downloadBtn.onclick = async () => {
   const part = partSelect.value;
   const item = itemSelect.value;
