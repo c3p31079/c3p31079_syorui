@@ -1,4 +1,7 @@
 Flask
 flask-cors
 openpyxl
-Pillow
+pillow
+pandas
+matplotlib
+gunicorn
