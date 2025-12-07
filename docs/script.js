@@ -13,7 +13,7 @@ async function init() {
     coordMap = await loadJSON(coordMapUrl);
     checkCoordMap = await loadJSON(checkCoordMapUrl);
 
-    // プルダウン生成
+    // 部位選択
     const partSelect = document.getElementById("partSelect");
     Object.keys(coordMap).forEach(part => {
         const option = document.createElement("option");
@@ -24,7 +24,7 @@ async function init() {
 
     // チェック項目表示
     const checkContainer = document.getElementById("checkContainer");
-    Object.keys(checkCoordMap).forEach(key => {
+    checkCoordMap.forEach(key => {
         const label = document.createElement("label");
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
@@ -37,10 +37,9 @@ async function init() {
 
 document.getElementById("downloadBtn").onclick = async () => {
     const selectedPart = document.getElementById("partSelect").value;
-    const selectedItems = [/* 選択された項目 */];
     const selectedChecks = Array.from(document.querySelectorAll("#checkContainer input:checked"))
                                 .map(c => c.value);
-    const payload = { parts: selectedPart, items: selectedItems, checks: selectedChecks };
+    const payload = { parts: selectedPart, items: [], checks: selectedChecks };
 
     try {
         const res = await fetch("https://YOUR_FLASK_SERVER/api/download-excel", {

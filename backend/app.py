@@ -1,9 +1,8 @@
-# backend/app.py
 import os
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 import json
-from excel_utils import generate_excel_with_shapes  # 仮想関数
+from excel_utils import generate_excel_with_shapes  # 実装済み関数を前提
 
 app = Flask(__name__)
 CORS(app)
@@ -13,7 +12,6 @@ COORD_MAP_PATH = os.path.join(BASE_DIR, "coord_map.json")
 CHECK_COORD_MAP_PATH = os.path.join(BASE_DIR, "check_coord_map.json")
 TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
 
-# JSONロード
 with open(COORD_MAP_PATH, encoding="utf-8") as f:
     coord_map = json.load(f)
 with open(CHECK_COORD_MAP_PATH, encoding="utf-8") as f:
@@ -31,7 +29,6 @@ def get_check_coord_map():
 def download_excel():
     try:
         data = request.json
-        # data = { "parts": ..., "items": ..., "checks": [...] }
         file_path = generate_excel_with_shapes(TEMPLATE_PATH, data, coord_map, check_coord_map)
         return send_file(file_path, as_attachment=True, download_name="inspection.xlsx")
     except Exception as e:

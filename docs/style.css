@@ -1,7 +1,2 @@
-.row-item {
-  margin-bottom: 10px;
-}
-
-#check-container label {
-  margin-right: 10px;
-}
+body { font-family: Arial, sans-serif; padding: 20px; }
+#checkContainer label { display: block; margin: 5px 0; }
