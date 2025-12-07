@@ -29,5 +29,16 @@ def generate_excel():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/inspection/<int:inspection_id>/results")
+def get_results(inspection_id):
+    # 例：JSONを返す
+    return jsonify({
+        "parts": [
+            {"part": "chain", "grade": "A", "confidence": 0.9, "is_ai_predicted": True},
+            {"part": "joint", "grade": "B", "confidence": 0.7, "is_ai_predicted": False}
+        ]
+    })
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
