@@ -2,36 +2,39 @@ import openpyxl
 import os
 from openpyxl.drawing.image import Image
 
-def generate_excel_with_shapes(template_path, data, icon_dir):
+def generate_excel_with_shapes(template_path, data):
+    """
+    template_path: Excelテンプレート
+    data: JSON {parts: [], checks: [], remarks: "文字列"}
+    """
     wb = openpyxl.load_workbook(template_path)
     ws = wb.active
 
-    # 部位・評価をテーブルに反映
-    for i, part in enumerate(data.get("parts", []), start=2):
-        ws[f"A{i}"] = part.get("part", "")
-        ws[f"B{i}"] = ""  # 項目名固定ならテンプレにあるので空でもOK
-        grade = part.get("grade", "")
-        if grade:
-            icon_file = os.path.join(icon_dir, f"{grade.lower()}.png")
-            if os.path.exists(icon_file):
-                img = Image(icon_file)
-                ws.add_image(img, f"C{i}")  # Excel上の列は適宜調整
+    # 点検部位・チェック項目書き込み
+    start_row = 2
+    for i, part in enumerate(data.get("parts", []), start=start_row):
+        ws[f"A{i}"] = part.get("part_name", "")
+        ws[f"B{i}"] = part.get("item", "")
+        ws[f"C{i}"] = part.get("grade", "")  # A/B/C
+        ws[f"D{i}"] = part.get("comment", "")
 
-    # チェックボックスに応じた check.png を任意セルに貼る
-    for i, check in enumerate(data.get("checks", []), start=2):
-        icon_file = os.path.join(icon_dir, "check.png")
-        if os.path.exists(icon_file):
-            img = Image(icon_file)
-            ws.add_image(img, f"D{i}")  # 任意の列に配置
+    # チェック項目を check.png で描画
+    for chk in data.get("checks", []):
+        img_path = os.path.join(os.path.dirname(__file__), "../static/img/check.png")
+        img = Image(img_path)
+        row = chk.get("row", start_row)
+        col = chk.get("col", 5)  # E列など指定
+        ws.add_image(img, f"{openpyxl.utils.get_column_letter(col)}{row}")
 
-    # 自由記述欄を追加
-    for remark in data.get("remarks", []):
-        cell = ws[remark["name"]]  # テンプレに事前にセル指定しておく
-        if cell.value:
-            cell.value += f"\n{remark['value']}"
-        else:
-            cell.value = remark["value"]
+    # 備考欄書き込み（既存文字の改行追加）
+    remarks_text = data.get("remarks", "")
+    remarks_cell = ws["H12"]  # 例: H12
+    if remarks_cell.value:
+        remarks_cell.value += f"\n{remarks_text}"
+    else:
+        remarks_cell.value = remarks_text
 
+    # 保存
     output_path = os.path.join(os.path.dirname(template_path), "inspection.xlsx")
     wb.save(output_path)
     return output_path

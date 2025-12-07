@@ -1,44 +1,37 @@
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("📄 CheckSheet ページ読み込み");
+document.getElementById("downloadBtn").addEventListener("click", async () => {
+    const parts = [];  // 部位・項目・評価
+    const rows = document.querySelectorAll("tbody tr");
+    rows.forEach(row => {
+        const partName = row.dataset.part;
+        const grade = row.querySelector(`input[type=radio]:checked`)?.value || "";
+        const comment = "";  // 自由記述は後で取得
+        const item = row.children[1]?.textContent || "";
+        parts.push({part_name: partName, item: item, grade: grade, comment: comment});
+    });
 
-    const downloadBtn = document.getElementById("downloadBtn");
-    if (downloadBtn) {
-        downloadBtn.addEventListener("click", async () => {
-            const partsData = Array.from(document.querySelectorAll("table.CheckSheet_list tbody tr"))
-                .map(row => {
-                    const part = row.dataset.part;
-                    const grade = row.querySelector(`input[type=radio]:checked`)?.value || "";
-                    return { part, grade };
-                });
+    const checks = Array.from(document.querySelectorAll("input[type=checkbox]:checked"))
+                        .map(el => {
+                            return {row: el.dataset.row || 2, col: el.dataset.col || 5};
+                        });
 
-            const checksData = Array.from(document.querySelectorAll(".CheckSheet_measure_area input[type=checkbox]:checked"))
-                .map(el => ({ name: el.name, value: el.value }));
+    const remarks = document.getElementById("remarks").value;
 
-            // 自由記述欄
-            const remarksData = Array.from(document.querySelectorAll("textarea"))
-                .map(el => ({ name: el.id, value: el.value }));
+    const response = await fetch("/api/generate-excel", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({parts: parts, checks: checks, remarks: remarks})
+    });
 
-            const payload = { parts: partsData, checks: checksData, remarks: remarksData };
-
-            try {
-                const response = await fetch("/api/generate-excel", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error("Excel生成に失敗");
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "inspection.xlsx";
-                a.click();
-                window.URL.revokeObjectURL(url);
-            } catch (err) {
-                alert(err.message);
-            }
-        });
+    if (!response.ok) {
+        alert("Excel生成に失敗しました");
+        return;
     }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "inspection.xlsx";
+    a.click();
+    window.URL.revokeObjectURL(url);
 });
