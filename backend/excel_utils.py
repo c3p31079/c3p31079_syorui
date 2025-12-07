@@ -1,23 +1,51 @@
-import openpyxl, os
+import openpyxl
+from openpyxl.drawing.image import Image
+import os
 
-def generate_excel_with_shapes(template_path, data, coord_map, check_coord_map):
+def generate_excel_with_shapes(template_path, data, icon_dir):
     wb = openpyxl.load_workbook(template_path)
     ws = wb.active
 
-    # 部位・項目・評価をテーブル形式で書き込む
-    parts = data.get("parts", [])
-    for row_idx, part in enumerate(parts, start=2):
-        ws[f"A{row_idx}"] = part.get("part", "")
-        ws[f"B{row_idx}"] = part.get("item", "")
-        ws[f"C{row_idx}"] = part.get("evaluation", "")
+    # 部位・項目・評価
+    start_row = 2
+    for i, part in enumerate(data.get("parts", []), start=start_row):
+        ws[f"A{i}"] = part.get("part", "")
+        ws[f"B{i}"] = part.get("item", "")
+        ws[f"C{i}"] = part.get("evaluation", "")
 
-    # チェック項目を横軸に書き込む
-    checks = data.get("checks", [])
-    for idx, check in enumerate(checks):
-        coord = check_coord_map.get(check, {"x": 0, "y": 0})
-        col = coord["x"] // 10 + 1  # 適当にセル換算
-        ws.cell(row=1, column=col, value=check)
+        # 評価アイコン
+        symbol = part.get("symbol")
+        if symbol:
+            img_path = os.path.join(icon_dir, f"{symbol}.png")
+            if os.path.exists(img_path):
+                img = Image(img_path)
+                img.width = 15
+                img.height = 15
+                ws.add_image(img, f"D{i}")
 
+    # チェック項目
+    check_start_row = 10
+    for j, check in enumerate(data.get("checks", [])):
+        ws[f"E{check_start_row + j}"] = check
+        img_path = os.path.join(icon_dir, "check.png")
+        if os.path.exists(img_path):
+            img = Image(img_path)
+            img.width = 15
+            img.height = 15
+            ws.add_image(img, f"F{check_start_row + j}")
+
+    # 自由記述欄（指定セルに追記）
+    for cu in data.get("cell_updates", []):
+        start_cell = cu.get("start")
+        text = cu.get("text", "")
+        if start_cell and text:
+            existing = ws[start_cell].value or ""
+            if existing:
+                ws[start_cell].value = f"{existing}\n{text}"
+            else:
+                ws[start_cell].value = text
+
+    # 保存
     output_path = os.path.join(os.path.dirname(template_path), "inspection.xlsx")
     wb.save(output_path)
     return output_path
