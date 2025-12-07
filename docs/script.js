@@ -11,7 +11,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const checkContainer = document.getElementById("checkContainer");
     checkContainer.innerHTML = "";
-    Object.keys(checkMapData).forEach((key, idx) => {
+
+    Object.keys(checkMapData).forEach(key => {
         const label = document.createElement("label");
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
