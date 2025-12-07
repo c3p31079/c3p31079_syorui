@@ -2,20 +2,20 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>点検表</title>
+<title>点検システム</title>
 <link rel="stylesheet" href="style.css">
+<script defer src="script.js"></script>
 </head>
 <body>
-<h1>点検シート</h1>
-
+<h1>点検システム</h1>
+<label for="partSelect">部位選択:</label>
 <select id="partSelect">
-  <option value="">部位を選択</option>
+    <option value="">--選択--</option>
 </select>
 
+<h2>チェック項目</h2>
 <div id="checkContainer"></div>
 
-<button id="downloadBtn">Excel ダウンロード</button>
-
-<script src="script.js"></script>
+<button id="downloadBtn">Excelダウンロード</button>
 </body>
 </html>

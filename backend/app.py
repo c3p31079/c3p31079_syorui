@@ -34,5 +34,14 @@ def download_excel():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/generate-excel", methods=["POST"])
+def generate_excel():
+    data = request.json  # JSONデータを受け取る
+    try:
+        output_path = generate_excel_with_shapes(TEMPLATE_PATH, data, coord_map={}, check_coord_map={})
+        return send_file(output_path, as_attachment=True)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -1,2 +1,4 @@
 body { font-family: Arial, sans-serif; padding: 20px; }
-#checkContainer label { display: block; margin: 5px 0; }
+h1, h2 { color: #333; }
+label { display: block; margin: 5px 0; }
+button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
