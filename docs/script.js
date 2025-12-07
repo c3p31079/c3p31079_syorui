@@ -1,106 +1,63 @@
-const rowsContainer = document.getElementById("rows-container");
-const addRowBtn = document.getElementById("add-row");
-const downloadBtn = document.getElementById("download-btn");
-const checkContainer = document.getElementById("check-container");
-
+const coordMapUrl = "./map.json";
+const checkCoordMapUrl = "./check_coord_map.json";
 let coordMap = {};
 let checkCoordMap = {};
-let itemMap = {};
-let subItemMap = {};
 
-// JSON 読み込み
-async function loadJSON() {
-  coordMap = await (await fetch("coord_map.json")).json();
-  checkCoordMap = await (await fetch("check_coord_map.json")).json();
-  itemMap = await (await fetch("map.json")).then(res => res.json());
-  subItemMap = await (await fetch("subitem_map.json")).then(res => res.json());
+async function loadJSON(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`${url} が取得できません`);
+    return res.json();
 }
 
-// プルダウン生成
-function createRow() {
-  const div = document.createElement("div");
-  div.className = "row-item";
+async function init() {
+    coordMap = await loadJSON(coordMapUrl);
+    checkCoordMap = await loadJSON(checkCoordMapUrl);
 
-  const partSelect = document.createElement("select");
-  partSelect.innerHTML = `<option value="">--点検部位--</option>`;
-  Object.keys(coordMap).forEach(p => {
-    partSelect.innerHTML += `<option value="${p}">${p}</option>`;
-  });
+    // プルダウン生成
+    const partSelect = document.getElementById("partSelect");
+    Object.keys(coordMap).forEach(part => {
+        const option = document.createElement("option");
+        option.value = part;
+        option.text = part;
+        partSelect.appendChild(option);
+    });
 
-  const itemSelect = document.createElement("select");
-  itemSelect.innerHTML = `<option value="">--項目--</option>`;
+    // チェック項目表示
+    const checkContainer = document.getElementById("checkContainer");
+    Object.keys(checkCoordMap).forEach(key => {
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = key;
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(key));
+        checkContainer.appendChild(label);
+    });
+}
 
-  const evalSelect = document.createElement("select");
-  evalSelect.innerHTML = `<option value="triangle">△</option><option value="cross">×</option>`;
+document.getElementById("downloadBtn").onclick = async () => {
+    const selectedPart = document.getElementById("partSelect").value;
+    const selectedItems = [/* 選択された項目 */];
+    const selectedChecks = Array.from(document.querySelectorAll("#checkContainer input:checked"))
+                                .map(c => c.value);
+    const payload = { parts: selectedPart, items: selectedItems, checks: selectedChecks };
 
-  partSelect.onchange = () => {
-    itemSelect.innerHTML = `<option value="">--項目--</option>`;
-    if (coordMap[partSelect.value]) {
-      Object.keys(coordMap[partSelect.value]).forEach(i => {
-        itemSelect.innerHTML += `<option value="${i}">${i}</option>`;
-      });
+    try {
+        const res = await fetch("https://YOUR_FLASK_SERVER/api/download-excel", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "inspection.xlsx";
+        a.click();
+    } catch (e) {
+        alert("Excel ダウンロードに失敗しました:\n" + e);
     }
-  };
-
-  div.appendChild(partSelect);
-  div.appendChild(itemSelect);
-  div.appendChild(evalSelect);
-  rowsContainer.appendChild(div);
-}
-
-// チェックボックス生成
-function createCheckBoxes() {
-  checkContainer.innerHTML = "";
-  Object.keys(checkCoordMap).forEach(c => {
-    const label = document.createElement("label");
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.value = c;
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(c));
-    checkContainer.appendChild(label);
-  });
-}
-
-// ダウンロード
-downloadBtn.onclick = async () => {
-  const rows = [];
-  document.querySelectorAll(".row-item").forEach(row => {
-    const selects = row.querySelectorAll("select");
-    rows.push({
-      part: selects[0].value,
-      item: selects[1].value,
-      evaluation: selects[2].value
-    });
-  });
-
-  const checks = [];
-  document.querySelectorAll("#check-container input:checked").forEach(cb => {
-    checks.push(cb.value);
-  });
-
-  try {
-    const res = await fetch("/api/download-excel", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rows, checks })
-    });
-
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    const blob = await res.blob();
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "inspection.xlsx";
-    a.click();
-  } catch (err) {
-    alert("Excel ダウンロードに失敗しました: " + err);
-  }
 };
 
-// 初期化
-loadJSON().then(() => {
-  createRow();
-  createCheckBoxes();
-});
-
-addRowBtn.onclick = createRow;
+window.onload = init;
