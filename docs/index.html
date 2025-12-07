@@ -2,44 +2,27 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>点検表作成（Excel出力）</title>
+  <title>点検入力</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>点検表作成</h1>
+<h2>点検入力</h2>
 
-<section>
-  <h2>点検項目</h2>
+<label>
+  点検部位
+  <select id="partSelect"></select>
+</label>
 
-  <table id="inspectTable">
-    <thead>
-      <tr>
-        <th>点検部位</th>
-        <th>項目</th>
-        <th>評価</th>
-        <th>削除</th>
-      </tr>
-    </thead>
-    <tbody id="inspectBody"></tbody>
-  </table>
+<label>
+  点検項目
+  <select id="itemSelect"></select>
+</label>
 
-  <button id="addRowBtn">＋ 行を追加</button>
-</section>
+<h3>チェック項目</h3>
+<div id="checkList"></div>
 
-<hr>
-
-<section>
-  <h2>チェック項目（✓）</h2>
-  <div id="checkList"></div>
-</section>
-
-<hr>
-
-<section>
-  <button id="downloadBtn">Excelをダウンロード</button>
-  <p id="status"></p>
-</section>
+<button id="downloadBtn">Excelダウンロード</button>
 
 <script src="script.js"></script>
 </body>
