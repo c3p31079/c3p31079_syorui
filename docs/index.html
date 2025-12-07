@@ -1,40 +1,39 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>点検表ダウンロード</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>点検表作成</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>点検表作成</h1>
+  <h1>点検表作成</h1>
 
-<div id="inspection-form">
-  <table id="items-table">
-    <thead>
-      <tr>
-        <th>点検部位</th>
-        <th>項目</th>
-        <th>評価</th>
-      </tr>
-    </thead>
-    <tbody id="items-body">
-      <!-- ここに行が追加される -->
-    </tbody>
-  </table>
-  <button id="add-row-btn">＋ 行を追加</button>
-</div>
+  <form id="inspectionForm">
+    <table id="inspectionTable">
+      <thead>
+        <tr>
+          <th>点検部位</th>
+          <th>項目</th>
+          <th>評価</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 行は script.js で追加 -->
+      </tbody>
+    </table>
+    <button type="button" id="addRow">＋ 行追加</button>
+  </form>
 
-<div id="check-section">
-  <h3>チェック項目</h3>
-  <div id="checks-container">
-    <!-- チェックボックスがここに入る -->
+  <h2>チェック項目</h2>
+  <div id="checkItems">
+    <!-- チェックボックスは script.js で生成 -->
   </div>
-</div>
 
-<button id="download-btn">Excelをダウンロード</button>
+  <button id="downloadBtn">Excel ダウンロード</button>
 
-<script src="map.json" type="application/json" id="map-data"></script>
-<script src="check_coord_map.json" type="application/json" id="check-data"></script>
-<script src="script.js"></script>
+  <script src="map.json"></script>
+  <script src="check_coord_map.json"></script>
+  <script src="script.js"></script>
 </body>
 </html>

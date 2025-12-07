@@ -2,24 +2,26 @@ body {
   font-family: Arial, sans-serif;
   margin: 20px;
 }
+
 table {
   border-collapse: collapse;
-  width: 80%;
+  width: 100%;
   margin-bottom: 10px;
 }
+
 th, td {
-  border: 1px solid #aaa;
-  padding: 5px;
-  text-align: left;
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
 }
+
 button {
-  margin-top: 10px;
-  padding: 5px 10px;
+  padding: 6px 12px;
+  margin: 5px 0;
+  cursor: pointer;
 }
-#check-section {
-  margin-top: 20px;
-}
-#checks-container label {
-  display: inline-block;
-  margin-right: 10px;
+
+#checkItems label {
+  display: block;
+  margin: 2px 0;
 }
