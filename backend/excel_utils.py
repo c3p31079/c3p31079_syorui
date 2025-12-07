@@ -1,107 +1,90 @@
-import json
-from openpyxl import load_workbook
-from openpyxl.drawing.image import Image
-from PIL import Image as PILImage
-from io import BytesIO
-import os
+# Excel上にピクセル座標で画像を配置するヘルパー
+from openpyxl.utils import get_column_letter
+from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor, Extent
+from openpyxl.drawing.image import Image as XLImage
 
-# 座標マップの読み込み
-with open("backend/coord_map.json", "r", encoding="utf-8") as f:
-    COORD_MAP = json.load(f)
-with open("backend/check_coord_map.json", "r", encoding="utf-8") as f:
-    CHECK_COORD_MAP = json.load(f)
+EMU_PER_PIXEL = 9525  # EMU 単位（OpenXML の仕様でおおよそこの値）
 
-# アイコン画像パス
-ICON_PATHS = {
-    "△": "backend/icons/triangle.png",
-    "×": "backend/icons/cross.png",
-    "○": "backend/icons/circle.png",
-    "✓": "backend/icons/check.png"
-}
+def col_width_to_pixels(width):
+    # openpyxlの column_dimensions.width は "Excelの列幅" 単位
+    # 簡易換算：幅 * 7 + 5 の目安（完璧ではないが調整可能）
+    if width is None:
+        width = 8.43
+    return int(width * 7 + 5)
 
-TEMPLATE_PATH = "backend/template.xlsx"
-GENERATED_DIR = "generated"
-os.makedirs(GENERATED_DIR, exist_ok=True)
+def row_height_to_pixels(height):
+    # row_dimensions.height はポイント（pt）. 1pt ≒ 1.333px (おおよその換算)
+    if height is None:
+        # Excelのデフォルト行高は約15ポイント（環境で違う）
+        return 15
+    return int(height)
 
-# Excel生成関数
-def generate_excel(data):
+def pixel_to_cell(ws, x, y):
     """
-    入力データをもとにExcelを生成し、保存パスを返す
-    data: {
-        "rows": [
-            {"part": "...", "item": "...", "subItem": "...", "shape": "△"},
-            ...
-        ],
-        "checks": ["整備班で対応予定", ...]
-    }
+    (x,y) px が Excel のどのセル上（左上原点0,0）に入るかを計算し、
+    (col_index, row_index, offset_x_emu, offset_y_emu) を返す。
+    col_index, row_index は 1-origin
     """
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb.active
+    total_x = 0
+    col = 1
+    # カラム幅は column_dimensions[col_letter].width
+    while True:
+        col_letter = get_column_letter(col)
+        col_dim = ws.column_dimensions.get(col_letter)
+        width = None
+        if col_dim is not None and col_dim.width is not None:
+            width = col_dim.width
+        w_px = col_width_to_pixels(width)
+        if total_x + w_px > x:
+            offset_x = x - total_x
+            break
+        total_x += w_px
+        col += 1
 
-    # 図形配置
-    for row in data.get("rows", []):
-        key = f"{row['part']}:{row['item']}"
-        if key in COORD_MAP:
-            coord = COORD_MAP[key]
-            shape_type = row.get("shape")
-            if shape_type in ICON_PATHS:
-                img = Image(ICON_PATHS[shape_type])
-                img.anchor = f"A1"  # 初期位置は左上。後で座標計算
-                img.width = 20
-                img.height = 20
-                # openpyxlではセル座標にピクセル指定できないので、行列で近似
-                ws.add_image(img, f"{_coord_to_cell(coord['x'], coord['y'])}")
+        # セーフティ
+        if col > 200: break
 
-    # チェック項目配置
-    for chk in data.get("checks", []):
-        if chk in CHECK_COORD_MAP:
-            coord = CHECK_COORD_MAP[chk]
-            img = Image(ICON_PATHS["✓"])
-            img.anchor = f"A1"
-            img.width = 20
-            img.height = 20
-            ws.add_image(img, f"{_coord_to_cell(coord['x'], coord['y'])}")
+    total_y = 0
+    row = 1
+    while True:
+        row_dim = ws.row_dimensions.get(row)
+        height = None
+        if row_dim is not None and row_dim.height is not None:
+            height = row_dim.height
+        h_px = row_height_to_pixels(height)
+        if total_y + h_px > y:
+            offset_y = y - total_y
+            break
+        total_y += h_px
+        row += 1
 
-    output_path = os.path.join(GENERATED_DIR, "output.xlsx")
-    wb.save(output_path)
-    return output_path
+        if row > 1000: break
 
-# PDF生成関数
-def generate_pdf(data):
+    # EMU に変換
+    off_x_emu = int(offset_x * EMU_PER_PIXEL)
+    off_y_emu = int(offset_y * EMU_PER_PIXEL)
+
+    return col, row, off_x_emu, off_y_emu
+
+def place_image_xy(ws, img_path, x_px, y_px):
     """
-    ExcelをPNG経由でPDFに変換
+    ws: worksheet
+    img_path: 画像パス
+    x_px, y_px: 左上基準のピクセル座標
     """
-    excel_path = generate_excel(data)
-    from openpyxl import load_workbook
-    from openpyxl.utils import get_column_letter
-    import pandas as pd
-    import matplotlib.pyplot as plt
+    img = XLImage(img_path)
+    # width/height がない場合はデフォルトを設定
+    try:
+        img_w = img.width
+        img_h = img.height
+    except Exception:
+        img_w, img_h = 32, 32
 
-    wb = load_workbook(excel_path)
-    ws = wb.active
-
-    # Excel内容をPandasで取得
-    data_list = []
-    for row in ws.iter_rows(values_only=True):
-        data_list.append(list(row))
-
-    df = pd.DataFrame(data_list)
-    fig, ax = plt.subplots(figsize=(8, 10))
-    ax.axis('off')
-    table = ax.table(cellText=df.values, loc='center', cellLoc='center')
-    table.auto_set_font_size(False)
-    table.set_fontsize(10)
-    table.scale(1, 1.5)
-
-    pdf_path = os.path.join(GENERATED_DIR, "output.pdf")
-    plt.savefig(pdf_path, bbox_inches='tight')
-    plt.close()
-    return pdf_path
-
-def _coord_to_cell(x, y):
-    """
-    x, yピクセル座標から近似セルに変換
-    """
-    col = chr(min(72, int(x / 64) + 65))  # A〜H固定
-    row = min(37, int(y / 20) + 1)
-    return f"{col}{row}"
+    col, row, off_x_emu, off_y_emu = pixel_to_cell(ws, x_px, y_px)
+    # マーカーを作る
+    marker = AnchorMarker(col=col-1, colOff=off_x_emu, row=row-1, rowOff=off_y_emu)
+    # 画像の ext（幅・高さ）を EMU に
+    ext = Extent(cx=int(img_w * EMU_PER_PIXEL), cy=int(img_h * EMU_PER_PIXEL))
+    anchor = OneCellAnchor(_from=marker, ext=ext)
+    img.anchor = anchor
+    ws.add_image(img)
