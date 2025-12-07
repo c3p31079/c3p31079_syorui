@@ -1,35 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>点検表作成</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>点検表作成</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>点検表作成</h1>
-
-  <form id="inspectionForm">
-    <table id="inspectionTable">
-      <thead>
-        <tr>
-          <th>点検部位</th>
-          <th>項目</th>
-          <th>評価</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
-    <button type="button" id="addRow">＋ 行追加</button>
-  </form>
-
-  <h2>チェック項目</h2>
-  <div id="checkItems">
-  </div>
-
-  <button id="downloadBtn">Excel ダウンロード</button>
-
-  <script src="script.js"></script>
+    <h1>点検表作成</h1>
+    <form id="inspectionForm">
+        <div id="rowsContainer"></div>
+        <button type="button" id="addRowBtn">＋ 行を追加</button>
+        <h2>チェック項目</h2>
+        <div id="checkContainer"></div>
+        <button type="button" id="downloadBtn">Excel ダウンロード</button>
+    </form>
+    <script src="script.js"></script>
 </body>
 </html>
