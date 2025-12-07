@@ -3,6 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <title>遊具管理システム | 点検チェックシートページ</title>
+        <meta charset="UTF-8">
+        <title>遊具管理システム | 点検チェックシート</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css@1.0.15/destyle.css"/>
         <link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css') }}">
@@ -358,7 +360,7 @@
             </div>
         </div>
 
-        <script>
+        <script src="{{ url_for('static', filename='JS/script.js') }}">
             // AI判定結果の読み込みと反映（前回と同じ）
             document.addEventListener('DOMContentLoaded', async function() {
                 console.log('📄 CheckSheet ページ読み込み');
