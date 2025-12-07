@@ -49,3 +49,4 @@ def generate_excel_with_shapes(template_path, data, icon_dir):
     output_path = os.path.join(os.path.dirname(template_path), "inspection.xlsx")
     wb.save(output_path)
     return output_path
+
