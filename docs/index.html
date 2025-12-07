@@ -1,37 +1,55 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>点検Excel生成</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<title>点検シート作成</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>点検記録 → Excel出力</h1>
+<h1>点検シート作成</h1>
 
-  <div class="block">
-    <label>点検部位</label>
-    <select id="partSelect"></select>
-  </div>
+<div id="inspection-form">
+  <table id="inspection-table">
+    <thead>
+      <tr>
+        <th>点検部位</th>
+        <th>項目</th>
+        <th>評価</th>
+        <th>削除</th>
+      </tr>
+    </thead>
+    <tbody id="inspection-tbody">
+      <tr>
+        <td>
+          <select class="part-select">
+            <option value="">選択してください</option>
+          </select>
+        </td>
+        <td>
+          <select class="item-select">
+            <option value="">選択してください</option>
+          </select>
+        </td>
+        <td>
+          <select class="mark-select">
+            <option value="triangle">△</option>
+            <option value="cross">×</option>
+          </select>
+        </td>
+        <td><button class="remove-row">-</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <button id="add-row">＋ 行追加</button>
+</div>
 
-  <div class="block">
-    <label>点検項目</label>
-    <select id="itemSelect"></select>
-  </div>
+<h2>チェック項目</h2>
+<div id="checks-container"></div>
 
-  <div class="block">
-    <label>評価</label>
-    <select id="evalSelect">
-      <option value="">選択</option>
-      <option value="△">△</option>
-      <option value="×">×</option>
-    </select>
-  </div>
+<button id="download-excel">Excel ダウンロード</button>
 
-  <h2>対応内容（チェック）</h2>
-  <div id="checkContainer" class="checks"></div>
-
-  <button id="downloadBtn">Excelダウンロード</button>
-
-  <script src="script.js"></script>
+<script src="map.json" type="module"></script>
+<script src="check_coord_map.json" type="module"></script>
+<script src="script.js" type="module"></script>
 </body>
 </html>

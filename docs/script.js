@@ -1,98 +1,125 @@
-const API_URL = "https://c3p31079-syorui.onrender.com/api/download-excel";
+import { itemMap } from './map.json';
+import { checkList } from './check_coord_map.json';
 
-let mapData = {};
-let checkItems = [];
+const tbody = document.getElementById('inspection-tbody');
+const addRowBtn = document.getElementById('add-row');
+const downloadBtn = document.getElementById('download-excel');
+const checksContainer = document.getElementById('checks-container');
 
-// 初期ロード
-async function loadData() {
-  mapData = await fetch("map.json").then(res => res.json());
-  checkItems = await fetch("check_coord_map.json").then(res => res.json());
-
-  const partSelect = document.getElementById("partSelect");
-  partSelect.innerHTML = '<option value="">選択</option>';
-
-  Object.keys(mapData).forEach(part => {
-    const opt = document.createElement("option");
-    opt.value = part;
-    opt.textContent = part;
-    partSelect.appendChild(opt);
-  });
-
-  renderChecks();
+// 初期プルダウン設定
+function populatePartSelect(select) {
+    select.innerHTML = '<option value="">選択してください</option>';
+    for (let part in itemMap) {
+        const opt = document.createElement('option');
+        opt.value = part;
+        opt.textContent = part;
+        select.appendChild(opt);
+    }
 }
 
-// 点検項目連動
-document.getElementById("partSelect").onchange = e => {
-  const itemSelect = document.getElementById("itemSelect");
-  itemSelect.innerHTML = '<option value="">選択</option>';
+// 項目プルダウン
+function populateItemSelect(select, part) {
+    select.innerHTML = '<option value="">選択してください</option>';
+    if (part && itemMap[part]) {
+        itemMap[part].forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item;
+            opt.textContent = item;
+            select.appendChild(opt);
+        });
+    }
+}
 
-  const part = e.target.value;
-  if (!part) return;
-
-  Object.keys(mapData[part]).forEach(item => {
-    const opt = document.createElement("option");
-    opt.value = item;
-    opt.textContent = item;
-    itemSelect.appendChild(opt);
-  });
-};
-
-// チェック項目描画
+// チェックボックス生成
 function renderChecks() {
-  const container = document.getElementById("checkContainer");
-  container.innerHTML = "";
-
-  checkItems.forEach(label => {
-    const div = document.createElement("div");
-
-    const cb = document.createElement("input");
-    cb.type = "checkbox";
-    cb.value = label;
-
-    const span = document.createElement("span");
-    span.textContent = label;
-
-    div.appendChild(cb);
-    div.appendChild(span);
-    container.appendChild(div);
-  });
+    checksContainer.innerHTML = '';
+    checkList.forEach(check => {
+        const label = document.createElement('label');
+        label.className = 'check-item';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = check;
+        label.appendChild(input);
+        label.append(check);
+        checksContainer.appendChild(label);
+    });
 }
 
-// Excel ダウンロード
-document.getElementById("downloadBtn").onclick = async () => {
-  const part = document.getElementById("partSelect").value;
-  const item = document.getElementById("itemSelect").value;
-  const evaluation = document.getElementById("evalSelect").value;
+// 行追加
+addRowBtn.onclick = () => {
+    const tr = document.createElement('tr');
 
-  const checks = Array.from(
-    document.querySelectorAll("#checkContainer input:checked")
-  ).map(cb => cb.value);
+    const tdPart = document.createElement('td');
+    const partSelect = document.createElement('select');
+    partSelect.className = 'part-select';
+    populatePartSelect(partSelect);
+    tdPart.appendChild(partSelect);
 
-  const payload = {
-    part,
-    item,
-    evaluation,
-    checks
-  };
+    const tdItem = document.createElement('td');
+    const itemSelect = document.createElement('select');
+    itemSelect.className = 'item-select';
+    tdItem.appendChild(itemSelect);
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+    partSelect.onchange = () => populateItemSelect(itemSelect, partSelect.value);
 
-  if (!res.ok) {
-    alert("Excel ダウンロードに失敗しました: " + res.status);
-    return;
-  }
+    const tdMark = document.createElement('td');
+    const markSelect = document.createElement('select');
+    markSelect.className = 'mark-select';
+    markSelect.innerHTML = `
+        <option value="triangle">△</option>
+        <option value="cross">×</option>
+    `;
+    tdMark.appendChild(markSelect);
 
-  const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "inspection_result.xlsx";
-  a.click();
-  URL.revokeObjectURL(url);
+    const tdRemove = document.createElement('td');
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = '-';
+    removeBtn.onclick = () => tr.remove();
+    tdRemove.appendChild(removeBtn);
+
+    tr.appendChild(tdPart);
+    tr.appendChild(tdItem);
+    tr.appendChild(tdMark);
+    tr.appendChild(tdRemove);
+    tbody.appendChild(tr);
 };
 
-loadData();
+// 初期設定
+document.querySelectorAll('.part-select').forEach(select => populatePartSelect(select));
+
+// チェックボックス描画
+renderChecks();
+
+// ダウンロード
+downloadBtn.onclick = async () => {
+    const items = [];
+    tbody.querySelectorAll('tr').forEach(tr => {
+        const part = tr.querySelector('.part-select').value;
+        const item = tr.querySelector('.item-select').value;
+        const mark = tr.querySelector('.mark-select').value;
+        if (part && item) items.push({ part, item, mark });
+    });
+
+    const checks = [];
+    checksContainer.querySelectorAll('input[type=checkbox]:checked').forEach(chk => {
+        checks.push(chk.value);
+    });
+
+    try {
+        const res = await fetch('/api/download-excel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items, checks })
+        });
+        if (!res.ok) throw new Error(res.statusText);
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'inspection.xlsx';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    } catch (err) {
+        alert('Excel ダウンロードに失敗しました: ' + err);
+    }
+};
