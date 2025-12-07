@@ -1,90 +1,102 @@
 import os
 import json
+import io
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 from openpyxl import load_workbook
-from openpyxl.drawing.image import Image as XLImage
+from openpyxl.drawing.image import Image
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
+COORD_MAP_PATH = os.path.join(BASE_DIR, "coord_map.json")
+CHECK_COORD_MAP_PATH = os.path.join(BASE_DIR, "check_coord_map.json")
+ICON_DIR = os.path.join(BASE_DIR, "icons")
+
+ICON_MAP = {
+    "check": os.path.join(ICON_DIR, "check.png"),
+    "triangle": os.path.join(ICON_DIR, "triangle.png"),
+    "cross": os.path.join(ICON_DIR, "cross.png"),
+}
 
 app = Flask(__name__)
 CORS(app)
 
-# パス設定
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
-GENERATED_DIR = os.path.join(BASE_DIR, "generated")
-os.makedirs(GENERATED_DIR, exist_ok=True)
+# Excel に画像を xy 座標で貼る
+def paste_icon(ws, icon_path, x, y, size=20):
+    img = Image(icon_path)
+    img.width = size
+    img.height = size
+    img.anchor = f"A1"
+    img._from.colOff = int(x * 9525)   # px → EMU
+    img._from.rowOff = int(y * 9525)
+    ws.add_image(img)
 
-# アイコンディレクトリ
-ICON_DIR = os.path.join(BASE_DIR, "icons")
-
-# 起動確認
-@app.route("/", methods=["GET"])
-def home():
-    return "Backend running"
-
-# Excel ダウンロード API
 @app.route("/api/download-excel", methods=["POST"])
 def download_excel():
-    """
-    フロントから受け取った情報をもとに
-    template.xlsx に図形（画像）を貼り付け、
-    Excel を生成して返す
-    """
+    try:
+        data = request.json
 
-    # リクエスト取得
-    data = request.get_json(silent=True)
-    if data is None:
-        return jsonify({"error": "JSON が不正です"}), 400
+        part = data.get("part")             # 点検部位
+        item = data.get("item")             # 点検項目
+        evaluation = data.get("evaluation") # △ or ×
+        checks = data.get("checks", [])     # チェックボックス配列
 
-    shapes = data.get("shapes", [])
-    checks = data.get("checks", [])
+        wb = load_workbook(TEMPLATE_PATH)
+        ws = wb.active
 
-    # Excel 読み込み
-    if not os.path.exists(TEMPLATE_PATH):
-        return jsonify({"error": "template.xlsx が見つかりません"}), 500
+        # JSON 読み込み
+        with open(COORD_MAP_PATH, encoding="utf-8") as f:
+            coord_map = json.load(f)
 
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb.active
+        with open(CHECK_COORD_MAP_PATH, encoding="utf-8") as f:
+            check_coord_map = json.load(f)
 
-    # 図形配置（xy指定）
-    def add_icon(icon_name, x, y):
-        icon_path = os.path.join(ICON_DIR, icon_name)
-        if not os.path.exists(icon_path):
-            raise FileNotFoundError(icon_path)
+        # △ / × を貼る
+        if part and item and evaluation:
+            mark = "triangle" if evaluation == "△" else "cross"
 
-        img = XLImage(icon_path)
-        img.anchor = f"A1"
-        img.anchor._from.colOff = int(x * 9525)
-        img.anchor._from.rowOff = int(y * 9525)
-        ws.add_image(img)
+            if part in coord_map and item in coord_map[part]:
+                mark_info = coord_map[part][item].get(mark)
+                if mark_info:
+                    paste_icon(
+                        ws,
+                        ICON_MAP[mark],
+                        mark_info["x"],
+                        mark_info["y"]
+                    )
 
-    # 点検部位＋項目（△ / ×）
-    for s in shapes:
-        add_icon(
-            s["icon"],   # triangle.png / none.png
-            s["x"],
-            s["y"]
+        # ✓ を貼る
+        for label in checks:
+            if label in check_coord_map:
+                info = check_coord_map[label]
+                paste_icon(
+                    ws,
+                    ICON_MAP["check"],
+                    info["x"],
+                    info["y"]
+                )
+
+        # Excel 出力
+        output = io.BytesIO()
+        wb.save(output)
+        output.seek(0)
+
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name="inspection_result.xlsx",
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
-    # チェック項目（✓）
-    for c in checks:
-        add_icon(
-            "check.png",
-            c["x"],
-            c["y"]
-        )
+    except Exception as e:
+        print("❌ ERROR:", e)
+        return jsonify({"error": str(e)}), 500
 
-    # 保存 
-    output_path = os.path.join(GENERATED_DIR, "inspection_result.xlsx")
-    wb.save(output_path)
 
-    # 返却
-    return send_file(
-        output_path,
-        as_attachment=True,
-        download_name="inspection_result.xlsx"
-    )
+@app.route("/")
+def index():
+    return "Backend running ✅"
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)

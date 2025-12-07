@@ -1,29 +1,37 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>点検入力</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>点検Excel生成</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <h1>点検記録 → Excel出力</h1>
 
-<h2>点検入力</h2>
+  <div class="block">
+    <label>点検部位</label>
+    <select id="partSelect"></select>
+  </div>
 
-<label>
-  点検部位
-  <select id="partSelect"></select>
-</label>
+  <div class="block">
+    <label>点検項目</label>
+    <select id="itemSelect"></select>
+  </div>
 
-<label>
-  点検項目
-  <select id="itemSelect"></select>
-</label>
+  <div class="block">
+    <label>評価</label>
+    <select id="evalSelect">
+      <option value="">選択</option>
+      <option value="△">△</option>
+      <option value="×">×</option>
+    </select>
+  </div>
 
-<h3>チェック項目</h3>
-<div id="checkList"></div>
+  <h2>対応内容（チェック）</h2>
+  <div id="checkContainer" class="checks"></div>
 
-<button id="downloadBtn">Excelダウンロード</button>
+  <button id="downloadBtn">Excelダウンロード</button>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

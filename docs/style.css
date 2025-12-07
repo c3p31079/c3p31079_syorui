@@ -3,11 +3,24 @@ body {
   padding: 20px;
 }
 
-label {
-  display: block;
+.block {
   margin-bottom: 10px;
 }
 
-#checkList label {
-  display: block;
+select {
+  width: 240px;
+  padding: 4px;
+}
+
+.checks {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 6px 20px;
+  margin-bottom: 20px;
+}
+
+button {
+  padding: 8px 20px;
+  font-size: 16px;
+  cursor: pointer;
 }
