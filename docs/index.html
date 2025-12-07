@@ -2,54 +2,39 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>点検シート作成</title>
+<title>点検表ダウンロード</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>点検シート作成</h1>
+<h1>点検表作成</h1>
 
 <div id="inspection-form">
-  <table id="inspection-table">
+  <table id="items-table">
     <thead>
       <tr>
         <th>点検部位</th>
         <th>項目</th>
         <th>評価</th>
-        <th>削除</th>
       </tr>
     </thead>
-    <tbody id="inspection-tbody">
-      <tr>
-        <td>
-          <select class="part-select">
-            <option value="">選択してください</option>
-          </select>
-        </td>
-        <td>
-          <select class="item-select">
-            <option value="">選択してください</option>
-          </select>
-        </td>
-        <td>
-          <select class="mark-select">
-            <option value="triangle">△</option>
-            <option value="cross">×</option>
-          </select>
-        </td>
-        <td><button class="remove-row">-</button></td>
-      </tr>
+    <tbody id="items-body">
+      <!-- ここに行が追加される -->
     </tbody>
   </table>
-  <button id="add-row">＋ 行追加</button>
+  <button id="add-row-btn">＋ 行を追加</button>
 </div>
 
-<h2>チェック項目</h2>
-<div id="checks-container"></div>
+<div id="check-section">
+  <h3>チェック項目</h3>
+  <div id="checks-container">
+    <!-- チェックボックスがここに入る -->
+  </div>
+</div>
 
-<button id="download-excel">Excel ダウンロード</button>
+<button id="download-btn">Excelをダウンロード</button>
 
-<script src="map.json" type="module"></script>
-<script src="check_coord_map.json" type="module"></script>
-<script src="script.js" type="module"></script>
+<script src="map.json" type="application/json" id="map-data"></script>
+<script src="check_coord_map.json" type="application/json" id="check-data"></script>
+<script src="script.js"></script>
 </body>
 </html>

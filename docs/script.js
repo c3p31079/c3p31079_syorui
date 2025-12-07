@@ -1,125 +1,83 @@
-import { itemMap } from './map.json';
-import { checkList } from './check_coord_map.json';
+// JSON データ読み込み
+const mapData = JSON.parse(document.getElementById("map-data").textContent);
+const checkData = JSON.parse(document.getElementById("check-data").textContent);
 
-const tbody = document.getElementById('inspection-tbody');
-const addRowBtn = document.getElementById('add-row');
-const downloadBtn = document.getElementById('download-excel');
-const checksContainer = document.getElementById('checks-container');
+const itemsBody = document.getElementById("items-body");
+const addRowBtn = document.getElementById("add-row-btn");
+const checksContainer = document.getElementById("checks-container");
+const downloadBtn = document.getElementById("download-btn");
 
-// 初期プルダウン設定
-function populatePartSelect(select) {
-    select.innerHTML = '<option value="">選択してください</option>';
-    for (let part in itemMap) {
-        const opt = document.createElement('option');
-        opt.value = part;
-        opt.textContent = part;
-        select.appendChild(opt);
-    }
+// 初期化: チェック項目を表示
+checkData.forEach(item => {
+  const label = document.createElement("label");
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.value = item;
+  label.appendChild(checkbox);
+  label.appendChild(document.createTextNode(item));
+  checksContainer.appendChild(label);
+});
+
+// 行追加関数
+function addRow() {
+  const tr = document.createElement("tr");
+
+  const partTd = document.createElement("td");
+  const partSelect = document.createElement("select");
+  partSelect.innerHTML = Object.keys(mapData).map(p => `<option value="${p}">${p}</option>`).join("");
+  partTd.appendChild(partSelect);
+
+  const itemTd = document.createElement("td");
+  const itemSelect = document.createElement("select");
+  const updateItems = () => {
+    const part = partSelect.value;
+    itemSelect.innerHTML = Object.keys(mapData[part]).map(i => `<option value="${i}">${i}</option>`).join("");
+  };
+  partSelect.addEventListener("change", updateItems);
+  updateItems();
+  itemTd.appendChild(itemSelect);
+
+  const markTd = document.createElement("td");
+  const markSelect = document.createElement("select");
+  markSelect.innerHTML = `<option value="triangle">△</option><option value="cross">×</option>`;
+  markTd.appendChild(markSelect);
+
+  tr.appendChild(partTd);
+  tr.appendChild(itemTd);
+  tr.appendChild(markTd);
+  itemsBody.appendChild(tr);
 }
 
-// 項目プルダウン
-function populateItemSelect(select, part) {
-    select.innerHTML = '<option value="">選択してください</option>';
-    if (part && itemMap[part]) {
-        itemMap[part].forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item;
-            opt.textContent = item;
-            select.appendChild(opt);
-        });
-    }
-}
+addRowBtn.addEventListener("click", addRow);
+addRow(); // 最初の行
 
-// チェックボックス生成
-function renderChecks() {
-    checksContainer.innerHTML = '';
-    checkList.forEach(check => {
-        const label = document.createElement('label');
-        label.className = 'check-item';
-        const input = document.createElement('input');
-        input.type = 'checkbox';
-        input.value = check;
-        label.appendChild(input);
-        label.append(check);
-        checksContainer.appendChild(label);
+// ダウンロードボタン
+downloadBtn.addEventListener("click", async () => {
+  const items = [];
+  document.querySelectorAll("#items-body tr").forEach(tr => {
+    const part = tr.querySelector("td:nth-child(1) select").value;
+    const item = tr.querySelector("td:nth-child(2) select").value;
+    const mark = tr.querySelector("td:nth-child(3) select").value;
+    items.push({ part, item, mark });
+  });
+
+  const checks = Array.from(document.querySelectorAll("#checks-container input:checked")).map(c => c.value);
+
+  try {
+    const res = await fetch("/api/download-excel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items, checks })
     });
-}
-
-// 行追加
-addRowBtn.onclick = () => {
-    const tr = document.createElement('tr');
-
-    const tdPart = document.createElement('td');
-    const partSelect = document.createElement('select');
-    partSelect.className = 'part-select';
-    populatePartSelect(partSelect);
-    tdPart.appendChild(partSelect);
-
-    const tdItem = document.createElement('td');
-    const itemSelect = document.createElement('select');
-    itemSelect.className = 'item-select';
-    tdItem.appendChild(itemSelect);
-
-    partSelect.onchange = () => populateItemSelect(itemSelect, partSelect.value);
-
-    const tdMark = document.createElement('td');
-    const markSelect = document.createElement('select');
-    markSelect.className = 'mark-select';
-    markSelect.innerHTML = `
-        <option value="triangle">△</option>
-        <option value="cross">×</option>
-    `;
-    tdMark.appendChild(markSelect);
-
-    const tdRemove = document.createElement('td');
-    const removeBtn = document.createElement('button');
-    removeBtn.textContent = '-';
-    removeBtn.onclick = () => tr.remove();
-    tdRemove.appendChild(removeBtn);
-
-    tr.appendChild(tdPart);
-    tr.appendChild(tdItem);
-    tr.appendChild(tdMark);
-    tr.appendChild(tdRemove);
-    tbody.appendChild(tr);
-};
-
-// 初期設定
-document.querySelectorAll('.part-select').forEach(select => populatePartSelect(select));
-
-// チェックボックス描画
-renderChecks();
-
-// ダウンロード
-downloadBtn.onclick = async () => {
-    const items = [];
-    tbody.querySelectorAll('tr').forEach(tr => {
-        const part = tr.querySelector('.part-select').value;
-        const item = tr.querySelector('.item-select').value;
-        const mark = tr.querySelector('.mark-select').value;
-        if (part && item) items.push({ part, item, mark });
-    });
-
-    const checks = [];
-    checksContainer.querySelectorAll('input[type=checkbox]:checked').forEach(chk => {
-        checks.push(chk.value);
-    });
-
-    try {
-        const res = await fetch('/api/download-excel', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items, checks })
-        });
-        if (!res.ok) throw new Error(res.statusText);
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'inspection.xlsx';
-        a.click();
-        window.URL.revokeObjectURL(url);
-    } catch (err) {
-        alert('Excel ダウンロードに失敗しました: ' + err);
-    }
-};
+    if (!res.ok) throw new Error(res.status);
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "inspection.xlsx";
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert(`Excel ダウンロードに失敗しました: ${err}`);
+  }
+});
