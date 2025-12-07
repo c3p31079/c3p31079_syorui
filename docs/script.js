@@ -1,54 +1,66 @@
-let mapData = {};
-let checkMapData = {};
+let coordMap = {};
+let checkCoordMap = {};
 
-async function loadJSON() {
-    mapData = await fetch("map.json").then(res => res.json());
-    checkMapData = await fetch("check_coord_map.json").then(res => res.json());
+async function loadJSON(url) {
+    const res = await fetch(url);
+    return await res.json();
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-    await loadJSON();
+async function init() {
+    coordMap = await loadJSON("map.json");
+    checkCoordMap = await loadJSON("check_coord_map.json");
 
+    // 点検部位セレクト
+    const partSelect = document.getElementById("partSelect");
+    Object.keys(coordMap).forEach(part => {
+        const opt = document.createElement("option");
+        opt.value = part;
+        opt.textContent = part;
+        partSelect.appendChild(opt);
+    });
+
+    // チェック項目
     const checkContainer = document.getElementById("checkContainer");
-    checkContainer.innerHTML = "";
-
-    Object.keys(checkMapData).forEach(key => {
+    Object.keys(checkCoordMap).forEach(check => {
         const label = document.createElement("label");
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.value = key;
-        label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(key));
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = check;
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(check));
         checkContainer.appendChild(label);
-        checkContainer.appendChild(document.createElement("br"));
+    });
+}
+
+document.getElementById("downloadBtn").addEventListener("click", async () => {
+    const part = document.getElementById("partSelect").value;
+    const checks = Array.from(document.querySelectorAll("#checkContainer input[type=checkbox]:checked"))
+                        .map(el => el.value);
+
+    // フロントから Render の API へ
+    const response = await fetch("https://c3p31079-syorui.onrender.com/api/generate-excel", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            parts: [
+                { part: part, item: "サンプル項目", evaluation: "良" }
+            ],
+            checks: checks
+        })
     });
 
-    document.getElementById("downloadBtn").addEventListener("click", async () => {
-        const part = document.getElementById("partSelect").value;
-        const checks = Array.from(checkContainer.querySelectorAll("input[type=checkbox]:checked"))
-                            .map(el => el.value);
+    if (!response.ok) {
+        alert("Excel生成に失敗しました");
+        return;
+    }
 
-        try {
-            const response = await fetch("/api/generate-excel", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({parts: part, checks: checks})
-            });
-
-            if (!response.ok) {
-                alert("Excel生成に失敗しました");
-                return;
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "inspection.xlsx";
-            a.click();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            alert("通信に失敗しました: " + err);
-        }
-    });
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "inspection.xlsx";
+    a.click();
+    window.URL.revokeObjectURL(url);
 });
+
+window.addEventListener("DOMContentLoaded", init);
