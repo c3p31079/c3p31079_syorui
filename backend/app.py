@@ -1,30 +1,34 @@
+import os
+import io
 from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
-from excel_utils import write_to_excel
-import io
-import os
+from excel_utils import generate_excel
 
 app = Flask(__name__)
 CORS(app)
-
-TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "template.xlsx")
 
 @app.route("/")
 def home():
     return "Backend running"
 
-@app.route("/api/save_sheet", methods=["POST"])
-def save_sheet():
+# ここに入れる: excel_utils.generate_excel をインポート済み
+@app.route("/api/generate", methods=["POST"])
+def generate():
     data = request.json
-    wb = write_to_excel(data, TEMPLATE_PATH)
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    
+    # Excel生成（自由座標対応）
+    excel_bytes = generate_excel(data)
 
-    output = io.BytesIO()
-    wb.save(output)
-    output.seek(0)
-    return send_file(output,
-                     download_name="CheckSheet.xlsx",
-                     as_attachment=True,
-                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    # ダウンロード用レスポンス
+    return send_file(
+        io.BytesIO(excel_bytes),
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name='inspection.xlsx'
+    )
+    
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

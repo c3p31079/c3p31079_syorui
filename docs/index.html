@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>遊具管理システム | 点検チェックシートページ</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css@1.0.15/destyle.css"/>
-    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css') }}">
-    <style>
-        .ai-predicted { background-color: #e3f2fd !important; font-weight: bold; }
-        .grade-A { color: #4caf50; }
-        .grade-B { color: #ff9800; }
-        .grade-C { color: #f44336; }
-        .confidence-info { font-size: 0.8em; color: #666; }
-        .CheckSheet_save_button { margin-top:20px; }
-    </style>
+<meta charset="UTF-8">
+<title>遊具管理システム | 点検チェックシートページ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css@1.0.15/destyle.css"/>
+<link rel="stylesheet" href="static/CSS/style.css">
+<style>
+    .ai-predicted { background-color: #e3f2fd !important; font-weight: bold; }
+    .grade-A { color: #4caf50; }
+    .grade-B { color: #ff9800; }
+    .grade-C { color: #f44336; }
+    .confidence-info { font-size: 0.8em; color: #666; }
+</style>
 </head>
 <body>
 <header class="header">
     <div class="flexbox">
-        <h1><a href="{{ url_for('home') }}">遊具管理システム</a></h1>
+        <h1><a href="/">遊具管理システム</a></h1>
         <div class="account_toggle" id="mobile">
-            <img src="{{ url_for('static', filename='img/Icon.svg') }}" alt="アカウント" id="accountIcon">
+            <img src="static/img/Icon.svg" alt="アカウント" id="accountIcon">
         </div>
-        <button><img src="{{ url_for('static', filename='img/bell.png') }}" alt="通知"></button>
+        <button><img src="static/img/bell.png" alt="通知"></button>
         <div class="nav_wrapper">
             <input type="checkbox" id="nav_toggle" hidden>
             <label class="nav_icon" for="nav_toggle">
@@ -33,13 +32,13 @@
             <div class="overlay"></div>
             <nav class="nav">
                 <ul>
-                    <li><a href="{{ url_for('home') }}">トップページ</a></li>
-                    <li><a href="{{ url_for('daily_report') }}">日報作成</a></li>
-                    <li><a href="{{ url_for('results_report') }}">結果報告書作成</a></li>
-                    <li><a href="{{ url_for('CheckSheet') }}">点検チェックシート</a></li>
-                    <li><a href="{{ url_for('Deterioration') }}">劣化進行・劣化予測</a></li>
-                    <li><a href="{{ url_for('PhotoViewing') }}">写真閲覧</a></li>
-                    <li><a href="{{ url_for('AllDocuments') }}">書類一覧</a></li>         
+                    <li><a href="/">トップページ</a></li>
+                    <li><a href="/daily_report">日報作成</a></li>
+                    <li><a href="/results_report">結果報告書作成</a></li>
+                    <li><a href="/CheckSheet">点検チェックシート</a></li>
+                    <li><a href="/Deterioration">劣化進行・劣化予測</a></li>
+                    <li><a href="/PhotoViewing">写真閲覧</a></li>
+                    <li><a href="/AllDocuments">書類一覧</a></li>         
                 </ul>
             </nav>
         </div>
@@ -47,258 +46,187 @@
 </header>
 
 <div class="wrapper">
-    <p id="page_route"><a href="{{ url_for('home') }}">トップ</a> > <a href="{{ url_for('CheckSheet') }}">点検チェックシート</a></p>
+<p id="page_route"><a href="/">トップ</a> > <a href="/CheckSheet">点検チェックシート</a></p>
 
-    <!-- 検索フォーム -->
-    <div class="section">
-        <div class="CheckSheet_input_area AllDocuments_search_section">
-            <label for="search_park">公園名</label><br>
-            <input type="search" id="search_park" name="search_park" placeholder="キーワードを入力"><br>
-
-            <label for="search_author">作成者名</label><br>
-            <input type="search" id="search_author" name="search_author" placeholder="キーワードを入力"><br>
-
+<!-- 検索フォーム -->
+<div class="section">
+    <div class="CheckSheet_input_area AllDocuments_search_section">
+        <label for="search_park">公園名</label><br>
+        <input type="search" id="search_park" name="search_park" placeholder="キーワードを入力"><br>
+        
+        <label for="search_author">作成者名</label><br>
+        <input type="search" id="search_author" name="search_author" placeholder="キーワードを入力"><br>
+        
+        <div class="CheckSheet_search_year">
+            <label for="inspection_year">点検年度</label><br>
+            <select id="inspection_year" name="inspection_year">
+                <option value="all" selected>すべて</option>
+                <option value="2025">令和７年度</option>
+                <option value="2024">令和６年度</option>
+                <option value="2023">令和５年度</option>
+            </select>
+        </div>
+        <br>
+        
+        <div class="CheckSheet_search_wrapper">
             <div class="CheckSheet_search_year">
-                <label for="inspection_year">点検年度</label><br>
-                <select id="inspection_year" name="inspection_year">
-                    <option value="all" selected>すべて</option>
-                    <option value="2025">令和７年度</option>
-                    <option value="2024">令和６年度</option>
-                    <option value="2023">令和５年度</option>
+                <label for="install_era">設置年度</label><br>
+                <select id="install_era" name="install_era">
+                    <option value="reiwa" selected>令和</option>
+                    <option value="heisei">平成</option>
                 </select>
-            </div><br>
-
-            <div class="CheckSheet_search_wrapper">
-                <div class="CheckSheet_search_year">
-                    <label for="install_era">設置年度</label><br>
-                    <select id="install_era" name="install_era">
-                        <option value="reiwa" selected>令和</option>
-                        <option value="heisei">平成</option>
-                    </select>
-                </div>
-                <div class="CheckSheet_search_year">
-                    <label for="install_year_num">　</label><br>
-                    <select id="install_year_num" name="install_year_num">
-                        <option value="1">１年度</option>
-                        <option value="2">２年度</option>
-                        <option value="3">３年度</option>
-                        <option value="4">４年度</option>
-                        <option value="5">５年度</option>
-                        <option value="6">６年度</option>
-                        <option value="7">７年度</option>
-                        <option value="8">８年度</option>
-                        <option value="9">９年度</option>
-                        <option value="10">１０年度</option>
-                        <option value="11">１１年度</option>
-                        <option value="12">１２年度</option>
-                        <option value="13">１３年度</option>
-                        <option value="14">１４年度</option>
-                        <option value="15">１５年度</option>
-                        <option value="16">１６年度</option>
-                        <option value="17">１７年度</option>
-                        <option value="18">１８年度</option>
-                        <option value="19">１９年度</option>
-                        <option value="20">２０年度</option>
-                        <option value="21">２１年度</option>
-                        <option value="22">２２年度</option>
-                        <option value="23">２３年度</option>
-                        <option value="24">２４年度</option>
-                        <option value="25">２５年度</option>
-                        <option value="26">２６年度</option>
-                        <option value="27">２７年度</option>
-                        <option value="28">２８年度</option>
-                        <option value="29">２９年度</option>
-                        <option value="30">３０年度</option>
-                        <option value="31">３１年度</option>
-                    </select>
-                </div>
             </div>
-
-            <label for="inspection_date">点検日</label><br>
-            <input type="date" id="inspection_date" name="inspection_date">
+            <div class="CheckSheet_search_year">
+                <label for="install_year_num">　</label><br>
+                <select id="install_year_num" name="install_year_num">
+                    <option value="1">１年度</option>
+                    <option value="2">２年度</option>
+                    <option value="3">３年度</option>
+                    <option value="4">４年度</option>
+                    <option value="5">５年度</option>
+                    <option value="6">６年度</option>
+                    <option value="7">７年度</option>
+                    <option value="8">８年度</option>
+                    <option value="9">９年度</option>
+                </select>
+            </div>
         </div>
-    </div>
-
-    <!-- 点検チェックシート -->
-    <div class="section check_area">
-        <h1>点検時の記録</h1>
-        <table class="CheckSheet_list">
-            <thead>
-                <tr>
-                    <th rowspan="2">点検部位</th>
-                    <th rowspan="2">項目</th>
-                    <th colspan="3">結果</th>
-                    <th rowspan="2">写真</th>
-                </tr>
-                <tr>
-                    <th>A<br>異常なし</th>
-                    <th>B<br>経過観察</th>
-                    <th>C<br>要対応</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr id="row-chain" data-part="chain">
-                    <td>鎖</td>
-                    <td>錆・腐食 <span class="confidence-info" id="chain-confidence"></span></td>
-                    <td>
-                        <input type="radio" id="chain_a" name="chain" value="A">
-                        <label class="checkbox_wrapper" for="chain_a"></label>
-                    </td>
-                    <td>
-                        <input type="radio" id="chain_b" name="chain" value="B">
-                        <label class="checkbox_wrapper" for="chain_b"></label>
-                    </td>
-                    <td>
-                        <input type="radio" id="chain_c" name="chain" value="C">
-                        <label class="checkbox_wrapper" for="chain_c"></label>
-                    </td>
-                    <td>
-                        <a href="{{ url_for('TakePhoto') }}?inspection_id=1&row_index=chain">
-                            <button type="button"><img src="{{ url_for('static', filename='img/camera.png') }}" alt="写真"></button>
-                        </a>
-                    </td>
-                </tr>
-                <tr id="row-joint" data-part="joint">
-                    <td>継ぎ手</td>
-                    <td>磨耗・変形</td>
-                    <td><input type="radio" id="joint_a" name="joint" value="A"><label class="checkbox_wrapper" for="joint_a"></label></td>
-                    <td><input type="radio" id="joint_b" name="joint" value="B"><label class="checkbox_wrapper" for="joint_b"></label></td>
-                    <td><input type="radio" id="joint_c" name="joint" value="C"><label class="checkbox_wrapper" for="joint_c"></label></td>
-                    <td><a href="{{ url_for('TakePhoto') }}?inspection_id=1&row_index=joint"><button type="button"><img src="{{ url_for('static', filename='img/camera.png') }}" alt="写真"></button></a></td>
-                </tr>
-                <tr id="row-pole" data-part="pole">
-                    <td>ポール</td>
-                    <td>腐食・傾き</td>
-                    <td><input type="radio" id="pole_a" name="pole" value="A"><label class="checkbox_wrapper" for="pole_a"></label></td>
-                    <td><input type="radio" id="pole_b" name="pole" value="B"><label class="checkbox_wrapper" for="pole_b"></label></td>
-                    <td><input type="radio" id="pole_c" name="pole" value="C"><label class="checkbox_wrapper" for="pole_c"></label></td>
-                    <td><a href="{{ url_for('TakePhoto') }}?inspection_id=1&row_index=pole"><button type="button"><img src="{{ url_for('static', filename='img/camera.png') }}" alt="写真"></button></a></td>
-                </tr>
-                <tr id="row-seat" data-part="seat">
-                    <td>座面</td>
-                    <td>割れ・損傷</td>
-                    <td><input type="radio" id="seat_a" name="seat" value="A"><label class="checkbox_wrapper" for="seat_a"></label></td>
-                    <td><input type="radio" id="seat_b" name="seat" value="B"><label class="checkbox_wrapper" for="seat_b"></label></td>
-                    <td><input type="radio" id="seat_c" name="seat" value="C"><label class="checkbox_wrapper" for="seat_c"></label></td>
-                    <td><a href="{{ url_for('TakePhoto') }}?inspection_id=1&row_index=seat"><button type="button"><img src="{{ url_for('static', filename='img/camera.png') }}" alt="写真"></button></a></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- 措置及び総合結果 -->
-        <h1>措置及び総合結果</h1>
-        <div class="CheckSheet_measure_area">
-            <h2>●点検時に実施した措置</h2>
-            <input type="checkbox" id="action_grease" name="action_grease"><label for="action_grease">グリース・オイル等の注入</label><br>
-            <input type="checkbox" id="action_bolt" name="action_bolt"><label for="action_bolt">ボルト・ナットの増し締め・交換</label><br>
-            <input type="checkbox" id="action_hanger" name="action_hanger"><label for="action_hanger">吊金具の交換</label><input type="number" id="hanger_count" min="0"> 箇所<br>
-            <input type="checkbox" id="action_chain" name="action_chain"><label for="action_chain">チェーンの交換</label><input type="number" id="chain_count" min="0"> 箇所<br>
-            <input type="checkbox" id="action_seat" name="action_seat"><label for="action_seat">座板の交換</label><input type="number" id="seat_count" min="0"> 箇所<br>
-            <input type="checkbox" id="action_removal" name="action_removal"><label for="action_removal">石・異物の除去、枝の剪定</label><br>
-            <input type="checkbox" id="action_other" name="action_other"><label for="action_other">その他</label><input type="text" id="action_other_detail" class="result_short_opinion"><br>
-
-            <label for="observations">●所見</label><br>
-            <textarea id="observations" class="result_long_opinion"></textarea>
-        </div>
-
-        <h2>●総合結果</h2>
-        <input type="radio" id="overall_a" name="overall_result" value="A"><label for="overall_a">Ａ：健全（△・×なし）</label><br>
-        <input type="radio" id="overall_b" name="overall_result" value="B"><label for="overall_b">Ｂ：経過観察（△あり、×なし）</label><br>
-        <input type="radio" id="overall_c" name="overall_result" value="C"><label for="overall_c">Ｃ：要修繕・要対応（×あり）</label><br>
-        <input type="radio" id="overall_d" name="overall_result" value="D"><label for="overall_d">Ｄ：使用禁止措置</label>
-        <input type="text" id="overall_d_detail" class="result_short_opinion"><br>
-
-        <h1>以下は点検後の記録（担当者記入欄）</h1>
-        <h2>●対応方針</h2>
-        <input type="checkbox" id="plan_maintenance"><label for="plan_maintenance">整備班で対応予定</label><br>
-        <input type="checkbox" id="plan_repair"><label for="plan_repair">修繕・修繕工事で対応予定</label><br>
-        <input type="checkbox" id="plan_improvement"><label for="plan_improvement">施設改良工事で対応予定</label><br>
-        <input type="checkbox" id="plan_precision"><label for="plan_precision">精密点検予定</label><br>
-        <input type="checkbox" id="plan_removal"><label for="plan_removal">撤去予定</label><br>
-        <input type="checkbox" id="plan_other"><label for="plan_other">その他</label>
-        <input type="text" id="plan_other_detail" class="result_short_opinion"><br>
-
-        <h2>●対応予定時期</h2>
-        <select id="response_month">
-            <option value="1">１月</option>
-            <option value="2">２月</option>
-            <option value="3">３月</option>
-            <option value="4">４月</option>
-            <option value="5">５月</option>
-            <option value="6">６月</option>
-            <option value="7">７月</option>
-            <option value="8">８月</option>
-            <option value="9">９月</option>
-            <option value="10">１０月</option>
-            <option value="11">１１月</option>
-            <option value="12">１２月</option>
-        </select>
-        <input type="radio" id="period_early" name="period" value="early"><label for="period_early">上旬</label>
-        <input type="radio" id="period_mid" name="period" value="mid"><label for="period_mid">中旬</label>
-        <input type="radio" id="period_late" name="period" value="late"><label for="period_late">下旬頃</label><br>
-
-        <input type="checkbox" id="prohibition_measure"><label for="prohibition_measure">本格的な使用禁止措置</label><br>
-        <label for="prohibition_date">実施日</label>
-        <input type="date" id="prohibition_date"><br>
-        <input type="radio" id="prohibition_done" name="prohibition_status" value="done"><label for="prohibition_done">実施済み</label>
-        <input type="radio" id="prohibition_planned" name="prohibition_status" value="planned"><label for="prohibition_planned">実施予定</label><br><br>
-
-        <label for="remarks">●備考</label><br>
-        <textarea id="remarks" class="result_long_opinion"></textarea><br>
-
-        <div class="CheckSheet_save_button"><button type="button" id="save_btn">保存</button></div>
+        
+        <label for="inspection_date">点検日</label><br>
+        <input type="date" id="inspection_date" name="inspection_date">
     </div>
 </div>
 
-<script>
-document.getElementById("save_btn").addEventListener("click", async function() {
-    const data = {
-        park_name: document.getElementById("search_park").value,
-        inspection_date: document.getElementById("inspection_date").value,
-        install_year: document.getElementById("install_year_num").value,
-        parts: [
-            {part:"chain", grade: document.querySelector('input[name="chain"]:checked')?.value || "A"},
-            {part:"joint", grade: document.querySelector('input[name="joint"]:checked')?.value || "A"},
-            {part:"pole", grade: document.querySelector('input[name="pole"]:checked')?.value || "A"},
-            {part:"seat", grade: document.querySelector('input[name="seat"]:checked')?.value || "A"}
-        ],
-        actions: {
-            grease: document.getElementById("action_grease").checked,
-            bolt: document.getElementById("action_bolt").checked,
-            hanger: parseInt(document.getElementById("hanger_count").value) || 0,
-            chain: parseInt(document.getElementById("chain_count").value) || 0,
-            seat: parseInt(document.getElementById("seat_count").value) || 0,
-            removal: document.getElementById("action_removal").checked,
-            other: document.getElementById("action_other_detail").value
-        },
-        plans: {
-            maintenance: document.getElementById("plan_maintenance").checked,
-            repair: document.getElementById("plan_repair").checked,
-            improvement: document.getElementById("plan_improvement").checked,
-            precision: document.getElementById("plan_precision").checked,
-            removal: document.getElementById("plan_removal").checked,
-            other: document.getElementById("plan_other_detail").value
-        },
-        response_month: document.getElementById("response_month").value,
-        period: document.querySelector('input[name="period"]:checked')?.value,
-        overall: document.querySelector('input[name="overall_result"]:checked')?.value,
-        overall_d_detail: document.getElementById("overall_d_detail").value,
-        remarks: document.getElementById("remarks").value,
-        observations: document.getElementById("observations").value
-    };
+<!-- 点検チェックシート -->
+<div class="section check_area">
+<h1>点検時の記録</h1>
 
-    const response = await fetch("http://127.0.0.1:5000/api/save_sheet", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
+<table class="CheckSheet_list">
+<thead>
+<tr>
+<th rowspan="2">点検部位</th>
+<th rowspan="2">項目</th>
+<th colspan="3">結果</th>
+<th rowspan="2">写真</th>
+</tr>
+<tr>
+<th>A<br>異常なし</th>
+<th>B<br>経過観察</th>
+<th>C<br>要対応</th>
+</tr>
+</thead>
+<tbody>
+
+<!-- ここから点検部位ごとに完全展開 -->
+
+<!-- 柱・梁(本体) -->
+<tr><td>柱・梁(本体)</td><td>ぐらつき</td><td><input type="radio" name="柱・梁_1" value="A"></td><td><input type="radio" name="柱・梁_1" value="B"></td><td><input type="radio" name="柱・梁_1" value="C"></td><td><button type="button" onclick="takePhoto('柱・梁(本体)','ぐらつき')">📷</button></td></tr>
+<tr><td>柱・梁(本体)</td><td>破損</td><td><input type="radio" name="柱・梁_2" value="A"></td><td><input type="radio" name="柱・梁_2" value="B"></td><td><input type="radio" name="柱・梁_2" value="C"></td><td><button type="button" onclick="takePhoto('柱・梁(本体)','破損')">📷</button></td></tr>
+<tr><td>柱・梁(本体)</td><td>変形</td><td><input type="radio" name="柱・梁_3" value="A"></td><td><input type="radio" name="柱・梁_3" value="B"></td><td><input type="radio" name="柱・梁_3" value="C"></td><td><button type="button" onclick="takePhoto('柱・梁(本体)','変形')">📷</button></td></tr>
+<tr><td>柱・梁(本体)</td><td>腐食(腐朽)</td><td><input type="radio" name="柱・梁_4" value="A"></td><td><input type="radio" name="柱・梁_4" value="B"></td><td><input type="radio" name="柱・梁_4" value="C"></td><td><button type="button" onclick="takePhoto('柱・梁(本体)','腐食(腐朽)')">📷</button></td></tr>
+<tr><td>柱・梁(本体)</td><td>接合部の緩み</td><td><input type="radio" name="柱・梁_5" value="A"></td><td><input type="radio" name="柱・梁_5" value="B"></td><td><input type="radio" name="柱・梁_5" value="C"></td><td><button type="button" onclick="takePhoto('柱・梁(本体)','接合部の緩み')">📷</button></td></tr>
+
+<!-- 接合部(継ぎ手) -->
+<tr><td>接合部(継ぎ手)</td><td>破損</td><td><input type="radio" name="接合部_1" value="A"></td><td><input type="radio" name="接合部_1" value="B"></td><td><input type="radio" name="接合部_1" value="C"></td><td><button type="button" onclick="takePhoto('接合部(継ぎ手)','破損')">📷</button></td></tr>
+<tr><td>接合部(継ぎ手)</td><td>変形</td><td><input type="radio" name="接合部_2" value="A"></td><td><input type="radio" name="接合部_2" value="B"></td><td><input type="radio" name="接合部_2" value="C"></td><td><button type="button" onclick="takePhoto('接合部(継ぎ手)','変形')">📷</button></td></tr>
+<tr><td>接合部(継ぎ手)</td><td>腐食</td><td><input type="radio" name="接合部_3" value="A"></td><td><input type="radio" name="接合部_3" value="B"></td><td><input type="radio" name="接合部_3" value="C"></td><td><button type="button" onclick="takePhoto('接合部(継ぎ手)','腐食')">📷</button></td></tr>
+<tr><td>接合部(継ぎ手)</td><td>ボルトの緩み</td><td><input type="radio" name="接合部_4" value="A"></td><td><input type="radio" name="接合部_4" value="B"></td><td><input type="radio" name="接合部_4" value="C"></td><td><button type="button" onclick="takePhoto('接合部(継ぎ手)','ボルトの緩み')">📷</button></td></tr>
+<tr><td>接合部(継ぎ手)</td><td>欠落</td><td><input type="radio" name="接合部_5" value="A"></td><td><input type="radio" name="接合部_5" value="B"></td><td><input type="radio" name="接合部_5" value="C"></td><td><button type="button" onclick="takePhoto('接合部(継ぎ手)','欠落')">📷</button></td></tr>
+
+<!-- 吊金具 -->
+<tr><td>吊金具</td><td>破損</td><td><input type="radio" name="吊金具_1" value="A"></td><td><input type="radio" name="吊金具_1" value="B"></td><td><input type="radio" name="吊金具_1" value="C"></td><td><button type="button" onclick="takePhoto('吊金具','破損')">📷</button></td></tr>
+<tr><td>吊金具</td><td>変形</td><td><input type="radio" name="吊金具_2" value="A"></td><td><input type="radio" name="吊金具_2" value="B"></td><td><input type="radio" name="吊金具_2" value="C"></td><td><button type="button" onclick="takePhoto('吊金具','変形')">📷</button></td></tr>
+<tr><td>吊金具</td><td>腐食</td><td><input type="radio" name="吊金具_3" value="A"></td><td><input type="radio" name="吊金具_3" value="B"></td><td><input type="radio" name="吊金具_3" value="C"></td><td><button type="button" onclick="takePhoto('吊金具','腐食')">📷</button></td></tr>
+<tr><td>吊金具</td><td>異音</td><td><input type="radio" name="吊金具_4" value="A"></td><td><input type="radio" name="吊金具_4" value="B"></td><td><input type="radio" name="吊金具_4" value="C"></td><td><button type="button" onclick="takePhoto('吊金具','異音')">📷</button></td></tr>
+<tr><td>吊金具</td><td>金具本体のずれ</td><td><input type="radio" name="吊金具_5" value="A"></td><td><input type="radio" name="吊金具_5" value="B"></td><td><input type="radio" name="吊金具_5" value="C"></td><td><button type="button" onclick="takePhoto('吊金具','金具本体のずれ')">📷</button></td></tr>
+<tr><td>吊金具</td><td>摩耗</td><td><input type="radio" name="吊金具_6" value="A"></td><td><input type="radio" name="吊金具_6" value="B"></td><td><input type="radio" name="吊金具_6" value="C"></td><td><button type="button" onclick="takePhoto('吊金具','摩耗')">📷</button></td></tr>
+<tr><td>吊金具</td><td>ボルトの緩み</td><td><input type="radio" name="吊金具_7" value="A"></td><td><input type="radio" name="吊金具_7" value="B"></td><td><input type="radio" name="吊金具_7" value="C"></td><td><button type="button" onclick="takePhoto('吊金具','ボルトの緩み')">📷</button></td></tr>
+<tr><td>吊金具</td><td>欠落</td><td><input type="radio" name="吊金具_8" value="A"></td><td><input type="radio" name="吊金具_8" value="B"></td><td><input type="radio" name="吊金具_8" value="C"></td><td><button type="button" onclick="takePhoto('吊金具','欠落')">📷</button></td></tr>
+
+<!-- 揺動部（チェーン・ロープ） -->
+<tr><td>揺動部（チェーン・ロープ）</td><td>ねじれ</td><td><input type="radio" name="チェーン_1" value="A"></td><td><input type="radio" name="チェーン_1" value="B"></td><td><input type="radio" name="チェーン_1" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（チェーン・ロープ）','ねじれ')">📷</button></td></tr>
+<tr><td>揺動部（チェーン・ロープ）</td><td>変形</td><td><input type="radio" name="チェーン_2" value="A"></td><td><input type="radio" name="チェーン_2" value="B"></td><td><input type="radio" name="チェーン_2" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（チェーン・ロープ）','変形')">📷</button></td></tr>
+<tr><td>揺動部（チェーン・ロープ）</td><td>破損</td><td><input type="radio" name="チェーン_3" value="A"></td><td><input type="radio" name="チェーン_3" value="B"></td><td><input type="radio" name="チェーン_3" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（チェーン・ロープ）','破損')">📷</button></td></tr>
+<tr><td>揺動部（チェーン・ロープ）</td><td>ほつれ</td><td><input type="radio" name="チェーン_4" value="A"></td><td><input type="radio" name="チェーン_4" value="B"></td><td><input type="radio" name="チェーン_4" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（チェーン・ロープ）','ほつれ')">📷</button></td></tr>
+<tr><td>揺動部（チェーン・ロープ）</td><td>断線</td><td><input type="radio" name="チェーン_5" value="A"></td><td><input type="radio" name="チェーン_5" value="B"></td><td><input type="radio" name="チェーン_5" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（チェーン・ロープ）','断線')">📷</button></td></tr>
+<tr><td>揺動部（チェーン・ロープ）</td><td>摩耗(× :1/3以上、1/2以上は使用禁止)</td><td><input type="radio" name="チェーン_6" value="A"></td><td><input type="radio" name="チェーン_6" value="B"></td><td><input type="radio" name="チェーン_6" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（チェーン・ロープ）','摩耗')">📷</button></td></tr>
+
+<!-- 揺動部（座板・座面(タイヤ)） -->
+<tr><td>揺動部（座板・座面(タイヤ)）</td><td>ヒビ</td><td><input type="radio" name="座板_1" value="A"></td><td><input type="radio" name="座板_1" value="B"></td><td><input type="radio" name="座板_1" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（座板・座面(タイヤ)）','ヒビ')">📷</button></td></tr>
+<tr><td>揺動部（座板・座面(タイヤ)）</td><td>割れ</td><td><input type="radio" name="座板_2" value="A"></td><td><input type="radio" name="座板_2" value="B"></td><td><input type="radio" name="座板_2" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（座板・座面(タイヤ)）','割れ')">📷</button></td></tr>
+<tr><td>揺動部（座板・座面(タイヤ)）</td><td>湾曲等変形</td><td><input type="radio" name="座板_3" value="A"></td><td><input type="radio" name="座板_3" value="B"></td><td><input type="radio" name="座板_3" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（座板・座面(タイヤ)）','湾曲等変形')">📷</button></td></tr>
+<tr><td>揺動部（座板・座面(タイヤ)）</td><td>破損</td><td><input type="radio" name="座板_4" value="A"></td><td><input type="radio" name="座板_4" value="B"></td><td><input type="radio" name="座板_4" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（座板・座面(タイヤ)）','破損')">📷</button></td></tr>
+<tr><td>揺動部（座板・座面(タイヤ)）</td><td>腐朽</td><td><input type="radio" name="座板_5" value="A"></td><td><input type="radio" name="座板_5" value="B"></td><td><input type="radio" name="座板_5" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（座板・座面(タイヤ)）','腐朽')">📷</button></td></tr>
+<tr><td>揺動部（座板・座面(タイヤ)）</td><td>金具の摩耗(× ：1/3以上、1/2以上は使用禁止)</td><td><input type="radio" name="座板_6" value="A"></td><td><input type="radio" name="座板_6" value="B"></td><td><input type="radio" name="座板_6" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（座板・座面(タイヤ)）','金具の摩耗')">📷</button></td></tr>
+<tr><td>揺動部（座板・座面(タイヤ)）</td><td>ボルト、袋ナットの緩み</td><td><input type="radio" name="座板_7" value="A"></td><td><input type="radio" name="座板_7" value="B"></td><td><input type="radio" name="座板_7" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（座板・座面(タイヤ)）','ボルト、袋ナットの緩み')">📷</button></td></tr>
+<tr><td>揺動部（座板・座面(タイヤ)）</td><td>破損、腐食、欠落</td><td><input type="radio" name="座板_8" value="A"></td><td><input type="radio" name="座板_8" value="B"></td><td><input type="radio" name="座板_8" value="C"></td><td><button type="button" onclick="takePhoto('揺動部（座板・座面(タイヤ)）','破損、腐食、欠落')">📷</button></td></tr>
+
+<!-- 安全柵 -->
+<tr><td>安全柵</td><td>ぐらつき</td><td><input type="radio" name="安全柵_1" value="A"></td><td><input type="radio" name="安全柵_1" value="B"></td><td><input type="radio" name="安全柵_1" value="C"></td><td><button type="button" onclick="takePhoto('安全柵','ぐらつき')">📷</button></td></tr>
+<tr><td>安全柵</td><td>破損</td><td><input type="radio" name="安全柵_2" value="A"></td><td><input type="radio" name="安全柵_2" value="B"></td><td><input type="radio" name="安全柵_2" value="C"></td><td><button type="button" onclick="takePhoto('安全柵','破損')">📷</button></td></tr>
+<tr><td>安全柵</td><td>変形</td><td><input type="radio" name="安全柵_3" value="A"></td><td><input type="radio" name="安全柵_3" value="B"></td><td><input type="radio" name="安全柵_3" value="C"></td><td><button type="button" onclick="takePhoto('安全柵','変形')">📷</button></td></tr>
+<tr><td>安全柵</td><td>腐食</td><td><input type="radio" name="安全柵_4" value="A"></td><td><input type="radio" name="安全柵_4" value="B"></td><td><input type="radio" name="安全柵_4" value="C"></td><td><button type="button" onclick="takePhoto('安全柵','腐食')">📷</button></td></tr>
+<tr><td>安全柵</td><td>〔接合部・ボルト〕緩み</td><td><input type="radio" name="安全柵_5" value="A"></td><td><input type="radio" name="安全柵_5" value="B"></td><td><input type="radio" name="安全柵_5" value="C"></td><td><button type="button" onclick="takePhoto('安全柵','〔接合部・ボルト〕緩み')">📷</button></td></tr>
+<tr><td>安全柵</td><td>欠落</td><td><input type="radio" name="安全柵_6" value="A"></td><td><input type="radio" name="安全柵_6" value="B"></td><td><input type="radio" name="安全柵_6" value="C"></td><td><button type="button" onclick="takePhoto('安全柵','欠落')">📷</button></td></tr>
+
+<!-- その他 -->
+<tr><td>その他</td><td>異物</td><td><input type="radio" name="その他_1" value="A"></td><td><input type="radio" name="その他_1" value="B"></td><td><input type="radio" name="その他_1" value="C"></td><td><button type="button" onclick="takePhoto('その他','異物')">📷</button></td></tr>
+<tr><td>その他</td><td>落書き</td><td><input type="radio" name="その他_2" value="A"></td><td><input type="radio" name="その他_2" value="B"></td><td><input type="radio" name="その他_2" value="C"></td><td><button type="button" onclick="takePhoto('その他','落書き')">📷</button></td></tr>
+
+<!-- 基礎 -->
+<tr><td>基礎</td><td>基礎が露出</td><td><input type="radio" name="基礎_1" value="A"></td><td><input type="radio" name="基礎_1" value="B"></td><td><input type="radio" name="基礎_1" value="C"></td><td><button type="button" onclick="takePhoto('基礎','基礎が露出')">📷</button></td></tr>
+<tr><td>基礎</td><td>亀裂</td><td><input type="radio" name="基礎_2" value="A"></td><td><input type="radio" name="基礎_2" value="B"></td><td><input type="radio" name="基礎_2" value="C"></td><td><button type="button" onclick="takePhoto('基礎','亀裂')">📷</button></td></tr>
+<tr><td>基礎</td><td>破損</td><td><input type="radio" name="基礎_3" value="A"></td><td><input type="radio" name="基礎_3" value="B"></td><td><input type="radio" name="基礎_3" value="C"></td><td><button type="button" onclick="takePhoto('基礎','破損')">📷</button></td></tr>
+
+<!-- 地表部・安全柵内 -->
+<tr><td>地表部・安全柵内</td><td>大きな凹凸</td><td><input type="radio" name="地表_1" value="A"></td><td><input type="radio" name="地表_1" value="B"></td><td><input type="radio" name="地表_1" value="C"></td><td><button type="button" onclick="takePhoto('地表部・安全柵内','大きな凹凸')">📷</button></td></tr>
+<tr><td>地表部・安全柵内</td><td>石や根の露出</td><td><input type="radio" name="地表_2" value="A"></td><td><input type="radio" name="地表_2" value="B"></td><td><input type="radio" name="地表_2" value="C"></td><td><button type="button" onclick="takePhoto('地表部・安全柵内','石や根の露出')">📷</button></td></tr>
+<tr><td>地表部・安全柵内</td><td>異物</td><td><input type="radio" name="地表_3" value="A"></td><td><input type="radio" name="地表_3" value="B"></td><td><input type="radio" name="地表_3" value="C"></td><td><button type="button" onclick="takePhoto('地表部・安全柵内','異物')">📷</button></td></tr>
+<tr><td>地表部・安全柵内</td><td>マットのめくれ</td><td><input type="radio" name="地表_4" value="A"></td><td><input type="radio" name="地表_4" value="B"></td><td><input type="radio" name="地表_4" value="C"></td><td><button type="button" onclick="takePhoto('地表部・安全柵内','マットのめくれ')">📷</button></td></tr>
+<tr><td>地表部・安全柵内</td><td>破損</td><td><input type="radio" name="地表_5" value="A"></td><td><input type="radio" name="地表_5" value="B"></td><td><input type="radio" name="地表_5" value="C"></td><td><button type="button" onclick="takePhoto('地表部・安全柵内','破損')">📷</button></td></tr>
+<tr><td>地表部・安全柵内</td><td>樹木の枝</td><td><input type="radio" name="地表_6" value="A"></td><td><input type="radio" name="地表_6" value="B"></td><td><input type="radio" name="地表_6" value="C"></td><td><button type="button" onclick="takePhoto('地表部・安全柵内','樹木の枝')">📷</button></td></tr>
+>
+
+</tbody>
+</table>
+
+<h2>措置及び総合結果</h2>
+<div class="CheckSheet_save_button">
+<button type="button" onclick="saveSheet()">保存</button>
+</div>
+
+</div>
+
+<script>
+function takePhoto(part, item){
+    alert(`写真撮影: ${part} - ${item}`);
+}
+
+async function saveSheet(){
+    const formData = new FormData(document.querySelector('.wrapper'));
+    const data = {};
+    formData.forEach((value,key) => {
+        data[key] = value;
+    });
+
+    const response = await fetch('/api/save_sheet', {
+        method:'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     });
 
-    const blob = await response.blob();
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = "CheckSheet.xlsx";
-    link.click();
-});
+    if(response.ok){
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'inspection_result.xlsx';
+        a.click();
+        URL.revokeObjectURL(url);
+    } else {
+        alert('保存に失敗しました');
+    }
+}
 </script>
 </body>
 </html>

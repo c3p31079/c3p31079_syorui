@@ -1,124 +1,85 @@
-import openpyxl
+import io
+from openpyxl import Workbook
 from openpyxl.drawing.image import Image
-import os
+from openpyxl.utils import get_column_letter
+from PIL import Image as PILImage
 
-ICON_DIR = os.path.join(os.path.dirname(__file__), 'icons')
+# 画像アイコンのディレクトリ
+ICON_DIR = "backend/icons"
 
-# 部位ごとの自由座標（Excel上のセル名または座標）
-PART_POSITIONS = {
-    "chain": {"B":"F5","C":"G5"},
-    "joint": {"B":"F6","C":"G6"},
-    "pole": {"B":"F7","C":"G7"},
-    "seat": {"B":"F8","C":"G8"},
+# アイコンマッピング（選択値 → アイコンファイル）
+ICON_MAP = {
+    "B": "triangle.png",
+    "C": "none.png",
+    "check": "check.png",
+    "circle": "circle.png"
 }
 
-# 措置の座標
-ACTION_POSITIONS = {
-    "grease":"B10",
-    "bolt":"B11",
-    "hanger":"B12",
-    "chain":"B13",
-    "seat":"B14",
-    "removal":"B15",
-    "other":"B16"
+# 点検項目ごとの座標マップ（自由に調整可能）
+COORD_MAP = {
+    "揺動部（チェーン・ロープ）_ねじれ": (2, 3),
+    "揺動部（チェーン・ロープ）_変形": (4, 3),
+    "揺動部（チェーン・ロープ）_破損": (6, 3),
+    "揺動部（チェーン・ロープ）_ほつれ": (8, 3),
+    "揺動部（チェーン・ロープ）_断線": (10, 3),
+    "揺動部（チェーン・ロープ）_摩耗": (12, 3),
+    # 座板・座面（タイヤ）
+    "揺動部（座板・座面(タイヤ)）_ヒビ": (2, 5),
+    "揺動部（座板・座面(タイヤ)）_割れ": (4, 5),
+    "揺動部（座板・座面(タイヤ)）_湾曲等変形": (6, 5),
+    "揺動部（座板・座面(タイヤ)）_破損": (8, 5),
+    "揺動部（座板・座面(タイヤ)）_腐朽": (10, 5),
+    "揺動部（座板・座面(タイヤ)）_金具の摩耗": (12, 5),
+    "揺動部（座板・座面(タイヤ)）_ボルト、袋ナットの緩み": (14, 5),
+    "揺動部（座板・座面(タイヤ)）_破損、腐食、欠落": (16, 5),
+    # 安全柵
+    "安全柵_ぐらつき": (2, 7),
+    "安全柵_破損": (4, 7),
+    "安全柵_変形": (6, 7),
+    "安全柵_腐食": (8, 7),
+    "安全柵_〔接合部・ボルト〕緩み": (10, 7),
+    "安全柵_欠落": (12, 7),
+    # その他
+    "その他_異物": (2, 9),
+    "その他_落書き": (4, 9),
+    # 基礎
+    "基礎_基礎が露出": (2, 11),
+    "基礎_亀裂": (4, 11),
+    "基礎_破損": (6, 11),
+    # 地表部・安全柵内
+    "地表部・安全柵内_大きな凹凸": (2, 13),
+    "地表部・安全柵内_石や根の露出": (4, 13),
+    "地表部・安全柵内_異物": (6, 13),
+    "地表部・安全柵内_マットのめくれ": (8, 13),
+    "地表部・安全柵内_破損": (10, 13),
+    "地表部・安全柵内_樹木の枝": (12, 13),
+    # チェック系（例：対応方針、実施済/予定など）は座標別に追加可能（今は試しなので後でやるよ）
 }
 
-# 対応方針の座標
-PLAN_POSITIONS = {
-    "maintenance":"C20",
-    "repair":"C21",
-    "improvement":"C22",
-    "precision":"C23",
-    "removal":"C24",
-    "other":"C25"
-}
-
-# 上旬・中旬・下旬座標
-PERIOD_POSITIONS = {
-    "early":"D30",
-    "mid":"E30",
-    "late":"F30"
-}
-
-# 総合結果座標
-OVERALL_POSITIONS = {
-    "A":"G5",
-    "B":"G6",
-    "C":"G7",
-    "D":"G8"
-}
-
-def add_image(ws, img_name, cell):
-    img_path = os.path.join(ICON_DIR, img_name)
-    if os.path.exists(img_path):
-        img = Image(img_path)
-        ws.add_image(img, cell)
-
-def write_to_excel(data, template_path):
-    wb = openpyxl.load_workbook(template_path)
+# Excel生成関数
+def generate_excel(data: dict) -> bytes:
+    wb = Workbook()
     ws = wb.active
+    ws.title = "点検結果"
 
-    # 公園名、点検日、設置年度
-    ws["B1"] = data.get("park_name", "")
-    ws["C1"] = data.get("inspection_date", "")
-    ws["D1"] = data.get("install_year", "")
+    # ヘッダ行
+    ws.append(["点検部位", "項目", "選択"])
 
-    # 点検部位
-    for part in data.get("parts", []):
-        name = part["part"]
-        grade = part["grade"]
-        if grade in ["B","C"]:
-            icon = "triangle.png" if grade=="B" else "none.png"
-            pos = PART_POSITIONS.get(name, {}).get(grade)
-            if pos:
-                add_image(ws, icon, pos)
+    # データ書き込み＋アイコン配置
+    for key, value in data.items():
+        ws.append([key.split("_")[0], key.split("_")[1], value])
 
-    # 措置
-    actions = data.get("actions", {})
-    for action, value in actions.items():
-        if isinstance(value, bool) and value:
-            pos = ACTION_POSITIONS.get(action)
-            if pos:
-                add_image(ws, "check.png", pos)
-        elif isinstance(value, int):
-            pos = ACTION_POSITIONS.get(action)
-            if pos:
-                ws[pos] = value
+        if value in ICON_MAP:
+            icon_file = os.path.join(ICON_DIR, ICON_MAP[value])
+            if os.path.exists(icon_file):
+                img = Image(icon_file)
+                coord = COORD_MAP.get(key)
+                if coord:
+                    col_letter = get_column_letter(coord[0])
+                    ws.add_image(img, f"{col_letter}{coord[1]}")
 
-    # 対応方針
-    plans = data.get("plans", {})
-    for plan, value in plans.items():
-        if isinstance(value, bool) and value:
-            pos = PLAN_POSITIONS.get(plan)
-            if pos:
-                add_image(ws, "check.png", pos)
-        elif isinstance(value, str):
-            pos = PLAN_POSITIONS.get(plan)
-            if pos:
-                ws[pos] = value
-
-    # 対応予定時期
-    month = data.get("response_month")
-    period = data.get("period")
-    if month:
-        ws["E40"] = f"{month}月"
-    if period:
-        pos = PERIOD_POSITIONS.get(period)
-        if pos:
-            add_image(ws, "circle.png", pos)
-
-    # 総合結果
-    overall = data.get("overall")
-    if overall:
-        pos = OVERALL_POSITIONS.get(overall)
-        if pos:
-            add_image(ws, "check.png", pos)
-        # D の詳細欄
-        if overall == "D":
-            ws["H8"] = data.get("overall_d_detail","")
-
-    # 備考・所見
-    ws["B50"] = data.get("remarks","")
-    ws["B51"] = data.get("observations","")
-
-    return wb
+    # バイト配列に書き出し
+    bio = io.BytesIO()
+    wb.save(bio)
+    bio.seek(0)
+    return bio.getvalue()
