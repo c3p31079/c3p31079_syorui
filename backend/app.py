@@ -1,36 +1,30 @@
-import os
-import io
-import json
-from flask import Flask, request, send_file, jsonify
+from flask import Flask, request, send_file
 from flask_cors import CORS
-from excel_utils import generate_inspection_excel  # 自作モジュール
+from io import BytesIO
+from excel_utils import create_excel_template, apply_items
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/")
-def home():
-    return "Backend running"
-
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
-    """
-    フロントから送信されたJSONデータを受け取り、Excelを生成して返す
-    """
     data = request.get_json()
-    if not data:
-        return jsonify({"error": "No data received"}), 400
+    wb, ws = create_excel_template()
 
-    # Excel生成
-    excel_bytes = generate_inspection_excel(data)
-    
-    return send_file(
-        io.BytesIO(excel_bytes),
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        as_attachment=True,
-        download_name="点検チェックシート.xlsx"
-    )
+    # 公園名・点検年度・設置年度
+    ws["C2"] = data.get("search_park", "")
+    ws["H2"] = data.get("inspection_year", "")
+    ws["H3"] = data.get("install_year_num", "")
+
+    # JSONで受け取った座標・文字・アイコンを一括反映
+    items = data.get("items", [])
+    apply_items(ws, items)
+
+    # Excelをバイナリで返す
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return send_file(output, download_name="点検チェックシート.xlsx", as_attachment=True)
 
 if __name__ == "__main__":
-    # 開発環境用デバッグモード
     app.run(debug=True)

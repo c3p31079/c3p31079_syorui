@@ -328,45 +328,174 @@
         </div>
 
         <script>
-            // 保存ボタン：フォームの値をJSONでapp.pyに送信してExcel生成
-            document.getElementById('save_excel').addEventListener('click', async function() {
-                const formData = new FormData(document.querySelector('form, .wrapper'));
-                const jsonData = {};
+        document.addEventListener("DOMContentLoaded", function() {
+            const saveBtn = document.querySelector(".CheckSheet_save_button button");
 
-                formData.forEach((value, key) => {
-                    if(jsonData[key]) {
-                        if(Array.isArray(jsonData[key])) {
-                            jsonData[key].push(value);
-                        } else {
-                            jsonData[key] = [jsonData[key], value];
+            saveBtn.addEventListener("click", async () => {
+                console.log("💾 Excelダウンロード処理開始");
+
+                // 公園名・点検年度・設置年度
+                const parkName = document.getElementById("search_park").value;
+                const inspectionYear = document.getElementById("inspection_year").value;
+                const installYearNum = document.getElementById("install_year_num").value;
+
+                // 各点検部位・項目
+                const parts = [
+                    {part:"柱・梁（本体）", cell:"D6"},
+                    {part:"接合部（継ぎ手）", cell:"D7"},
+                    {part:"吊金具", cell:"D8"},
+                    {part:"揺動部（チェーン・ロープ）", cell:"D9"},
+                    {part:"揺動部（座板・座面）", cell:"D11"},
+                    {part:"安全柵", cell:"D12"},
+                    {part:"その他", cell:"D13"},
+                    {part:"基礎", cell:"D14"},
+                    {part:"地表部・安全柵内", cell:"D15"}
+                ];
+
+                let items = [];
+
+                // 点検部位のチェック（仮にラジオ・チェック・テキストをここでまとめる）
+                parts.forEach(p => {
+                    // ラジオの例
+                    ["A","B","C"].forEach(grade=>{
+                        const radio = document.getElementById(`${p.part}_${grade}`);
+                        if(radio && radio.checked){
+                            items.push({type:"check", cell:p.cell, x_offset:0, y_offset:0});
                         }
-                    } else {
-                        jsonData[key] = value;
+                    });
+                });
+
+                // 措置
+                const actionCheckboxes = [
+                    {id:"action_grease", cell:"F6", type:"check"},
+                    {id:"action_bolt", cell:"F7", type:"check"},
+                    {id:"action_hanger", cell:"F8", type:"check", num_id:"hanger_count"},
+                    {id:"action_chain", cell:"F9", type:"check", num_id:"chain_count"},
+                    {id:"action_seat", cell:"F10", type:"check", num_id:"seat_count"},
+                    {id:"action_removal", cell:"F11", type:"check"},
+                    {id:"action_other", cell:"F12", type:"check", text_id:"action_other_detail"}
+                ];
+
+                actionCheckboxes.forEach(a=>{
+                    const cb = document.getElementById(a.id);
+                    if(cb && cb.checked){
+                        items.push({type:"check", cell:a.cell, x_offset:0, y_offset:0});
+                        // 数値・テキスト挿入
+                        if(a.num_id){
+                            const val = document.getElementById(a.num_id).value;
+                            if(val) items.push({type:"text", cell:a.cell, text:`(${val}箇所)`, x_offset:1, y_offset:0});
+                        }
+                        if(a.text_id){
+                            const val = document.getElementById(a.text_id).value;
+                            if(val) items.push({type:"text", cell:a.cell, text:`(${val})`, x_offset:1, y_offset:0});
+                        }
                     }
                 });
 
-                try {
-                    const response = await fetch('/api/generate_excel', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(jsonData)
+                // 総合結果
+                const overallRadios = ["overall_a","overall_b","overall_c","overall_d"];
+                overallRadios.forEach(id=>{
+                    const radio = document.getElementById(id);
+                    if(radio && radio.checked){
+                        const cell = "F13"; // 仮座標
+                        items.push({type:"check", cell:cell});
+                        if(id==="overall_d"){
+                            const val = document.getElementById("overall_d_detail").value;
+                            if(val) items.push({type:"text", cell:cell, text:`(${val})`, x_offset:1, y_offset:0});
+                        }
+                    }
+                });
+
+                // 対応方針
+                const planCheckboxes = [
+                    {id:"plan_maintenance", cell:"H6"},
+                    {id:"plan_repair", cell:"H7"},
+                    {id:"plan_improvement", cell:"H8"},
+                    {id:"plan_precision", cell:"H9"},
+                    {id:"plan_removal", cell:"H10"},
+                    {id:"plan_other", cell:"H11", text_id:"plan_other_detail"}
+                ];
+
+                planCheckboxes.forEach(p=>{
+                    const cb = document.getElementById(p.id);
+                    if(cb && cb.checked){
+                        items.push({type:"check", cell:p.cell, x_offset:0, y_offset:0});
+                        if(p.text_id){
+                            const val = document.getElementById(p.text_id).value;
+                            if(val) items.push({type:"text", cell:p.cell, text:`(${val})`, x_offset:1, y_offset:0});
+                        }
+                    }
+                });
+
+                // 対応予定時期（月・上中下）
+                const month = document.getElementById("response_month").value;
+                const periodRadios = ["period_early","period_mid","period_late"];
+                const periodMap = {period_early:"上旬", period_mid:"中旬", period_late:"下旬"};
+                const cell = "H12"; // 仮座標
+                items.push({type:"text", cell:cell, text:`${month}月`, x_offset:0, y_offset:0});
+                periodRadios.forEach(id=>{
+                    const radio = document.getElementById(id);
+                    if(radio && radio.checked){
+                        items.push({type:"circle", cell:cell, x_offset:1, y_offset:0});
+                    }
+                });
+
+                // 本格的使用禁止
+                const prohibition_cb = document.getElementById("prohibition_measure");
+                const prohibition_cell = "H13";
+                if(prohibition_cb && prohibition_cb.checked){
+                    items.push({type:"check", cell:prohibition_cell});
+                }
+                const prohibition_date = document.getElementById("prohibition_date").value;
+                if(prohibition_date){
+                    items.push({type:"text", cell:prohibition_cell, text:prohibition_date, x_offset:1, y_offset:0});
+                }
+                const prohibition_status = ["prohibition_done","prohibition_planned"];
+                prohibition_status.forEach(id=>{
+                    const radio = document.getElementById(id);
+                    if(radio && radio.checked){
+                        items.push({type:"circle", cell:prohibition_cell, x_offset:2, y_offset:0});
+                    }
+                });
+
+                // 備考
+                const remarks = document.getElementById("remarks").value;
+                if(remarks) items.push({type:"text", cell:"H14", text:remarks, x_offset:0, y_offset:0});
+
+                // JSONで送信
+                const payload = {
+                    search_park: parkName,
+                    inspection_year: inspectionYear,
+                    install_year_num: installYearNum,
+                    items: items
+                };
+
+                console.log("📤 送信データ:", payload);
+
+                try{
+                    const res = await fetch("/api/generate_excel", {
+                        method:"POST",
+                        headers:{"Content-Type":"application/json"},
+                        body: JSON.stringify(payload)
                     });
-
-                    if(!response.ok) throw new Error('Excel生成失敗');
-
-                    const blob = await response.blob();
+                    if(!res.ok) throw new Error("Excel生成失敗");
+                    const blob = await res.blob();
                     const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
+                    const a = document.createElement("a");
                     a.href = url;
-                    a.download = '点検チェックシート.xlsx';
+                    a.download = "点検チェックシート.xlsx";
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
                     window.URL.revokeObjectURL(url);
-                } catch(err) {
-                    alert(err);
+                    console.log("✅ Excelダウンロード完了");
+                }catch(err){
+                    console.error(err);
+                    alert("Excel生成に失敗しました");
                 }
             });
+        });
         </script>
+
     </body>
 </html>
