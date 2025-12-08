@@ -1515,3 +1515,43 @@ header h1{
     border-radius: 8px;
     margin: 20px; 
 }
+
+/* ===== 点検表 ラジオ風UI ===== */
+
+.radio-cell {
+  padding: 0;
+}
+
+.radio-cell label {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  position: relative;
+}
+
+/* 本物のラジオボタンは非表示 */
+.radio-cell input[type="radio"] {
+  display: none;
+}
+
+/* A / B / C 表示 */
+.radio-mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+  line-height: 36px;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* 選択されたら「○」を表示 */
+.radio-cell input[type="radio"]:checked + .radio-mark::after {
+  content: "○";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  color: #333;
+}

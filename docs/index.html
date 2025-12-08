@@ -133,102 +133,340 @@
                 </thead>
                 <tbody>
                     <!-- 点検部位ごとに最初の行だけ部位表示 -->
-                    <tr id="row-柱・梁（本体）">
-                        <td rowspan="5">柱・梁（本体）</td>
-                        <td>ぐらつき</td>
-                        <td><input type="radio" name="pillar_grade_ぐらつき" value="A"></td>
-                        <td><input type="radio" name="pillar_grade_ぐらつき" value="B"></td>
-                        <td><input type="radio" name="pillar_grade_ぐらつき" value="C"></td>
-                        <td></td>
-                    </tr>
-                    <tr><td>破損</td><td><input type="radio" name="pillar_grade_破損" value="A"></td><td><input type="radio" name="pillar_grade_破損" value="B"></td><td><input type="radio" name="pillar_grade_破損" value="C"></td><td></td></tr>
-                    <tr><td>変形</td><td><input type="radio" name="pillar_grade_変形" value="A"></td><td><input type="radio" name="pillar_grade_変形" value="B"></td><td><input type="radio" name="pillar_grade_変形" value="C"></td><td></td></tr>
-                    <tr><td>腐食 (腐朽)</td><td><input type="radio" name="pillar_grade_腐食" value="A"></td><td><input type="radio" name="pillar_grade_腐食" value="B"></td><td><input type="radio" name="pillar_grade_腐食" value="C"></td><td></td></tr>
-                    <tr><td>接合部の緩み</td><td><input type="radio" name="pillar_grade_接合部の緩み" value="A"></td><td><input type="radio" name="pillar_grade_接合部の緩み" value="B"></td><td><input type="radio" name="pillar_grade_接合部の緩み" value="C"></td><td></td></tr>
+                    <tbody>
 
-                    <!-- 接合部(継ぎ手) -->
-                    <tr id="row-接合部(継ぎ手)">
-                        <td rowspan="5">接合部(継ぎ手)</td>
-                        <td>破損</td><td><input type="radio" name="joint_grade_破損" value="A"></td><td><input type="radio" name="joint_grade_破損" value="B"></td><td><input type="radio" name="joint_grade_破損" value="C"></td><td></td>
-                    </tr>
-                    <tr><td>変形</td><td><input type="radio" name="joint_grade_変形" value="A"></td><td><input type="radio" name="joint_grade_変形" value="B"></td><td><input type="radio" name="joint_grade_変形" value="C"></td><td></td></tr>
-                    <tr><td>腐食</td><td><input type="radio" name="joint_grade_腐食" value="A"></td><td><input type="radio" name="joint_grade_腐食" value="B"></td><td><input type="radio" name="joint_grade_腐食" value="C"></td><td></td></tr>
-                    <!-- 吊金具 -->
-                    <tr id="row-吊金具">
-                        <td rowspan="8">吊金具</td>
-                        <td>破損</td><td><input type="radio" name="hanger_grade_破損" value="A"></td><td><input type="radio" name="hanger_grade_破損" value="B"></td><td><input type="radio" name="hanger_grade_破損" value="C"></td><td></td>
-                    </tr>
-                    <tr><td>変形</td><td><input type="radio" name="hanger_grade_変形" value="A"></td><td><input type="radio" name="hanger_grade_変形" value="B"></td><td><input type="radio" name="hanger_grade_変形" value="C"></td><td></td></tr>
-                    <tr><td>腐食</td><td><input type="radio" name="hanger_grade_腐食" value="A"></td><td><input type="radio" name="hanger_grade_腐食" value="B"></td><td><input type="radio" name="hanger_grade_腐食" value="C"></td><td></td></tr>
-                    <tr><td>異音</td><td><input type="radio" name="hanger_grade_異音" value="A"></td><td><input type="radio" name="hanger_grade_異音" value="B"></td><td><input type="radio" name="hanger_grade_異音" value="C"></td><td></td></tr>
-                    <tr><td>金具本体のずれ</td><td><input type="radio" name="hanger_grade_ずれ" value="A"></td><td><input type="radio" name="hanger_grade_ずれ" value="B"></td><td><input type="radio" name="hanger_grade_ずれ" value="C"></td><td></td></tr>
-                    <tr><td>摩耗(×:1/3以上、1/2以上は使用禁止)</td><td><input type="radio" name="hanger_grade_摩耗" value="A"></td><td><input type="radio" name="hanger_grade_摩耗" value="B"></td><td><input type="radio" name="hanger_grade_摩耗" value="C"></td><td></td></tr>
-                    <tr><td>ボルトの緩み</td><td><input type="radio" name="hanger_grade_ボルト" value="A"></td><td><input type="radio" name="hanger_grade_ボルト" value="B"></td><td><input type="radio" name="hanger_grade_ボルト" value="C"></td><td></td></tr>
-                    <tr><td>欠落</td><td><input type="radio" name="hanger_grade_欠落" value="A"></td><td><input type="radio" name="hanger_grade_欠落" value="B"></td><td><input type="radio" name="hanger_grade_欠落" value="C"></td><td></td></tr>
+                    <tbody>
 
-                    <!-- 揺動部（チェーン・ロープ） -->
-                    <tr id="row-揺動部チェーン">
-                        <td rowspan="6">揺動部（チェーン・ロープ）</td>
-                        <td>ねじれ</td><td><input type="radio" name="swing_chain_grade_ねじれ" value="A"></td><td><input type="radio" name="swing_chain_grade_ねじれ" value="B"></td><td><input type="radio" name="swing_chain_grade_ねじれ" value="C"></td><td></td>
-                    </tr>
-                    <tr><td>変形</td><td><input type="radio" name="swing_chain_grade_変形" value="A"></td><td><input type="radio" name="swing_chain_grade_変形" value="B"></td><td><input type="radio" name="swing_chain_grade_変形" value="C"></td><td></td></tr>
-                    <tr><td>破損</td><td><input type="radio" name="swing_chain_grade_破損" value="A"></td><td><input type="radio" name="swing_chain_grade_破損" value="B"></td><td><input type="radio" name="swing_chain_grade_破損" value="C"></td><td></td></tr>
-                    <tr><td>ほつれ</td><td><input type="radio" name="swing_chain_grade_ほつれ" value="A"></td><td><input type="radio" name="swing_chain_grade_ほつれ" value="B"></td><td><input type="radio" name="swing_chain_grade_ほつれ" value="C"></td><td></td></tr>
-                    <tr><td>断線</td><td><input type="radio" name="swing_chain_grade_断線" value="A"></td><td><input type="radio" name="swing_chain_grade_断線" value="B"></td><td><input type="radio" name="swing_chain_grade_断線" value="C"></td><td></td></tr>
-                    <tr><td>摩耗(×:1/3以上、1/2以上は使用禁止)</td><td><input type="radio" name="swing_chain_grade_摩耗" value="A"></td><td><input type="radio" name="swing_chain_grade_摩耗" value="B"></td><td><input type="radio" name="swing_chain_grade_摩耗" value="C"></td><td></td></tr>
+                <!-- ================= 柱・梁（本体） ================= -->
+                <tr>
+                <td rowspan="5">柱・梁（本体）</td>
+                <td>ぐらつき</td>
+                <td><input type="radio" name="pillar_wobble" value="A"></td>
+                <td><input type="radio" name="pillar_wobble" value="B"></td>
+                <td><input type="radio" name="pillar_wobble" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>破損</td>
+                <td><input type="radio" name="pillar_damage" value="A"></td>
+                <td><input type="radio" name="pillar_damage" value="B"></td>
+                <td><input type="radio" name="pillar_damage" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>変形</td>
+                <td><input type="radio" name="pillar_deform" value="A"></td>
+                <td><input type="radio" name="pillar_deform" value="B"></td>
+                <td><input type="radio" name="pillar_deform" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>腐食（腐朽）</td>
+                <td><input type="radio" name="pillar_corrosion" value="A"></td>
+                <td><input type="radio" name="pillar_corrosion" value="B"></td>
+                <td><input type="radio" name="pillar_corrosion" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>〔接合部・ボルト〕緩み</td>
+                <td><input type="radio" name="pillar_joint_loose" value="A"></td>
+                <td><input type="radio" name="pillar_joint_loose" value="B"></td>
+                <td><input type="radio" name="pillar_joint_loose" value="C"></td>
+                <td></td>
+                </tr>
 
-                    <!-- 揺動部（座板・座面(タイヤ)） -->
-                    <tr id="row-揺動部座板">
-                        <td rowspan="8">揺動部（座板・座面(タイヤ)）</td>
-                        <td>ヒビ</td><td><input type="radio" name="seat_grade_ヒビ" value="A"></td><td><input type="radio" name="seat_grade_ヒビ" value="B"></td><td><input type="radio" name="seat_grade_ヒビ" value="C"></td><td></td>
-                    </tr>
-                    <tr><td>割れ</td><td><input type="radio" name="seat_grade_割れ" value="A"></td><td><input type="radio" name="seat_grade_割れ" value="B"></td><td><input type="radio" name="seat_grade_割れ" value="C"></td><td></td></tr>
-                    <tr><td>湾曲等変形</td><td><input type="radio" name="seat_grade_湾曲" value="A"></td><td><input type="radio" name="seat_grade_湾曲" value="B"></td><td><input type="radio" name="seat_grade_湾曲" value="C"></td><td></td></tr>
-                    <tr><td>破損</td><td><input type="radio" name="seat_grade_破損" value="A"></td><td><input type="radio" name="seat_grade_破損" value="B"></td><td><input type="radio" name="seat_grade_破損" value="C"></td><td></td></tr>
-                    <tr><td>腐朽</td><td><input type="radio" name="seat_grade_腐朽" value="A"></td><td><input type="radio" name="seat_grade_腐朽" value="B"></td><td><input type="radio" name="seat_grade_腐朽" value="C"></td><td></td></tr>
-                    <tr><td>金具の摩耗(× :1/3以上、1/2以上は使用禁止)</td><td><input type="radio" name="seat_grade_金具摩耗" value="A"></td><td><input type="radio" name="seat_grade_金具摩耗" value="B"></td><td><input type="radio" name="seat_grade_金具摩耗" value="C"></td><td></td></tr>
-                    <tr><td>ボルト、袋ナットの緩み</td><td><input type="radio" name="seat_grade_ボルト緩み" value="A"></td><td><input type="radio" name="seat_grade_ボルト緩み" value="B"></td><td><input type="radio" name="seat_grade_ボルト緩み" value="C"></td><td></td></tr>
-                    <tr><td>欠落</td><td><input type="radio" name="seat_grade_欠落" value="A"></td><td><input type="radio" name="seat_grade_欠落" value="B"></td><td><input type="radio" name="seat_grade_欠落" value="C"></td><td></td></tr>
+                <!-- ================= 接合部（継ぎ手） ================= -->
+                <tr>
+                <td rowspan="4">接合部（継ぎ手）</td>
+                <td>破損</td>
+                <td><input type="radio" name="joint_damage" value="A"></td>
+                <td><input type="radio" name="joint_damage" value="B"></td>
+                <td><input type="radio" name="joint_damage" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>変形</td>
+                <td><input type="radio" name="joint_deform" value="A"></td>
+                <td><input type="radio" name="joint_deform" value="B"></td>
+                <td><input type="radio" name="joint_deform" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>腐食</td>
+                <td><input type="radio" name="joint_corrosion" value="A"></td>
+                <td><input type="radio" name="joint_corrosion" value="B"></td>
+                <td><input type="radio" name="joint_corrosion" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>ボルトの緩み・欠落</td>
+                <td><input type="radio" name="joint_bolt" value="A"></td>
+                <td><input type="radio" name="joint_bolt" value="B"></td>
+                <td><input type="radio" name="joint_bolt" value="C"></td>
+                <td></td>
+                </tr>
 
-                    <!-- 安全柵 -->
-                    <tr id="row-安全柵">
-                        <td rowspan="8">安全柵</td>
-                        <td>ぐらつき</td><td><input type="radio" name="safety_grade_ぐらつき" value="A"></td><td><input type="radio" name="safety_grade_ぐらつき" value="B"></td><td><input type="radio" name="safety_grade_ぐらつき" value="C"></td><td></td>
-                    </tr>
-                    <tr><td>破損</td><td><input type="radio" name="safety_grade_破損" value="A"></td><td><input type="radio" name="safety_grade_破損" value="B"></td><td><input type="radio" name="safety_grade_破損" value="C"></td><td></td></tr>
-                    <tr><td>変形</td><td><input type="radio" name="safety_grade_変形" value="A"></td><td><input type="radio" name="safety_grade_変形" value="B"></td><td><input type="radio" name="safety_grade_変形" value="C"></td><td></td></tr>
-                    <tr><td>腐食</td><td><input type="radio" name="safety_grade_腐食" value="A"></td><td><input type="radio" name="safety_grade_腐食" value="B"></td><td><input type="radio" name="safety_grade_腐食" value="C"></td><td></td></tr>
-                    <tr><td>〔接合部・ボルト〕緩み</td><td><input type="radio" name="safety_grade_接合緩み" value="A"></td><td><input type="radio" name="safety_grade_接合緩み" value="B"></td><td><input type="radio" name="safety_grade_接合緩み" value="C"></td><td></td></tr>
-                    <tr><td>欠落</td><td><input type="radio" name="safety_grade_欠落" value="A"></td><td><input type="radio" name="safety_grade_欠落" value="B"></td><td><input type="radio" name="safety_grade_欠落" value="C"></td><td></td></tr>
-                    <!-- その他 -->
-                    <tr id="row-その他">
-                        <td>その他</td>
-                        <td>異物、落書き</td>
-                        <td><input type="radio" name="other_grade" value="A"></td>
-                        <td><input type="radio" name="other_grade" value="B"></td>
-                        <td><input type="radio" name="other_grade" value="C"></td>
-                        <td></td>
-                    </tr>
+                <!-- ================= 吊金具 ================= -->
+                <tr>
+                <td rowspan="6">吊金具</td>
+                <td>破損</td>
+                <td><input type="radio" name="hanger_damage" value="A"></td>
+                <td><input type="radio" name="hanger_damage" value="B"></td>
+                <td><input type="radio" name="hanger_damage" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>変形</td>
+                <td><input type="radio" name="hanger_deform" value="A"></td>
+                <td><input type="radio" name="hanger_deform" value="B"></td>
+                <td><input type="radio" name="hanger_deform" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>腐食</td>
+                <td><input type="radio" name="hanger_corrosion" value="A"></td>
+                <td><input type="radio" name="hanger_corrosion" value="B"></td>
+                <td><input type="radio" name="hanger_corrosion" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>異音</td>
+                <td><input type="radio" name="hanger_noise" value="A"></td>
+                <td><input type="radio" name="hanger_noise" value="B"></td>
+                <td><input type="radio" name="hanger_noise" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>摩耗（×：1/3以上）</td>
+                <td><input type="radio" name="hanger_wear_1_3" value="A"></td>
+                <td><input type="radio" name="hanger_wear_1_3" value="B"></td>
+                <td><input type="radio" name="hanger_wear_1_3" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>摩耗（×：1/2以上 ※使用禁止）</td>
+                <td><input type="radio" name="hanger_wear_1_2" value="A"></td>
+                <td><input type="radio" name="hanger_wear_1_2" value="B"></td>
+                <td><input type="radio" name="hanger_wear_1_2" value="C"></td>
+                <td></td>
+                </tr>
 
-                    <!-- 基礎 -->
-                    <tr id="row-基礎">
-                        <td>基礎</td>
-                        <td>基礎が露出、亀裂、破損</td>
-                        <td><input type="radio" name="foundation_grade" value="A"></td>
-                        <td><input type="radio" name="foundation_grade" value="B"></td>
-                        <td><input type="radio" name="foundation_grade" value="C"></td>
-                        <td></td>
-                    </tr>
+                <!-- ================= 揺動部（チェーン・ロープ） ================= -->
+                <tr>
+                <td rowspan="6">揺動部（チェーン・ロープ）</td>
+                <td>ねじれ</td>
+                <td><input type="radio" name="swing_twist" value="A"></td>
+                <td><input type="radio" name="swing_twist" value="B"></td>
+                <td><input type="radio" name="swing_twist" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>破損・断線</td>
+                <td><input type="radio" name="swing_damage" value="A"></td>
+                <td><input type="radio" name="swing_damage" value="B"></td>
+                <td><input type="radio" name="swing_damage" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>摩耗（×：1/3以上）</td>
+                <td><input type="radio" name="swing_wear_1_3" value="A"></td>
+                <td><input type="radio" name="swing_wear_1_3" value="B"></td>
+                <td><input type="radio" name="swing_wear_1_3" value="C"></td>
+                <td></td>
+                </tr>
+                <tr>
+                <td>摩耗（×：1/2以上 ※使用禁止）</td>
+                <td><input type="radio" name="swing_wear_1_2" value="A"></td>
+                <td><input type="radio" name="swing_wear_1_2" value="B"></td>
+                <td><input type="radio" name="swing_wear_1_2" value="C"></td>
+                <td></td>
+                </tr>
 
-                    <!-- 地表部・安全柵内 -->
-                    <tr id="row-地表部">
-                        <td>地表部・安全柵内</td>
-                        <td>大きな凹凸、石や根の露出、異物、マットのめくれ、破損、樹木の枝</td>
-                        <td><input type="radio" name="ground_grade" value="A"></td>
-                        <td><input type="radio" name="ground_grade" value="B"></td>
-                        <td><input type="radio" name="ground_grade" value="C"></td>
-                        <td></td>
-                    </tr>
+                </tbody>
+
+
+                                    <!-- 安全柵 -->
+                                    <tr class="section">
+                <th colspan="5">安全柵</th>
+                </tr>
+                <tr>
+                <td>支柱</td>
+                <td>
+                    □ 破損
+                    □ 変形
+                    □ 腐食
+                </td>
+                <td>
+                    <select name="fence_post_grade">
+                    <option value="">―</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+                </tr>
+
+                <tr>
+                <td>横桟・パネル</td>
+                <td>
+                    □ 破損
+                    □ 欠損
+                    □ 腐食
+                </td>
+                <td>
+                    <select name="fence_panel_grade">
+                    <option value="">―</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+                </tr>
+
+                <tr>
+                <td>〔接合部・ボルト〕</td>
+                <td>
+                    □ 緩み
+                    □ 脱落
+                </td>
+                <td>
+                    <select name="fence_joint_grade">
+                    <option value="">―</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+                </tr>
+
+                                    
+                                    <!-- その他 -->
+                                    <tr class="section">
+                <th colspan="5">基礎</th>
+                </tr>
+                <tr>
+                <td>コンクリート基礎</td>
+                <td>
+                    □ ひび割れ
+                    □ 欠損
+                </td>
+                <td>
+                    <select name="foundation_concrete_grade">
+                    <option value="">―</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+                </tr>
+
+                <tr>
+                <td>露出状況</td>
+                <td>
+                    □ 浮き出し
+                    □ 埋設不足
+                </td>
+                <td>
+                    <select name="foundation_exposure_grade">
+                    <option value="">―</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+                </tr>
+
+
+                                    <!-- 基礎 -->
+                                <tr class="section">
+                <th colspan="5">基礎</th>
+                </tr>
+                <tr>
+                <td>コンクリート基礎</td>
+                <td>
+                    □ ひび割れ
+                    □ 欠損
+                </td>
+                <td>
+                    <select name="foundation_concrete_grade">
+                    <option value="">―</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+                </tr>
+
+                <tr>
+                <td>露出状況</td>
+                <td>
+                    □ 浮き出し
+                    □ 埋設不足
+                </td>
+                <td>
+                    <select name="foundation_exposure_grade">
+                    <option value="">―</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+                </tr>
+
+
+                                    <!-- 地表部・安全柵内 -->
+                                    <tr class="section">
+                <th colspan="5">地表部・安全柵内</th>
+                </tr>
+                <tr>
+                <td>舗装・地面</td>
+                <td>
+                    □ 陥没
+                    □ 凹凸
+                    □ ひび割れ
+                </td>
+                <td>
+                    <select name="ground_surface_grade">
+                    <option value="">―</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+                </tr>
+
+                <tr>
+                <td>石・異物</td>
+                <td>
+                    □ 有
+                    □ 無
+                </td>
+                <td>
+                    <select name="ground_object_grade">
+                    <option value="">―</option>
+                    <option value="A">A（なし）</option>
+                    <option value="C">C（あり）</option>
+                    </select>
+                </td>
+                <td colspan="2"></td>
+                </tr>
+
                 </tbody>
             </table>
 
