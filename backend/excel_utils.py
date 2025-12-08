@@ -1,85 +1,174 @@
-import io
-from openpyxl import Workbook
+import openpyxl
 from openpyxl.drawing.image import Image
-from openpyxl.utils import get_column_letter
-from PIL import Image as PILImage
+from openpyxl.styles import Alignment, Font
+import os
+import io
 
-# 画像アイコンのディレクトリ
-ICON_DIR = "backend/icons"
+# =============================================
+# 画像ファイルパス
+# =============================================
+CHECK_IMG = "static/img/check.png"
+CIRCLE_IMG = "static/img/circle.png"
 
-# アイコンマッピング（選択値 → アイコンファイル）
-ICON_MAP = {
-    "B": "triangle.png",
-    "C": "none.png",
-    "check": "check.png",
-    "circle": "circle.png"
+# =============================================
+# xy座標調整用（セル基準の微調整）
+# =============================================
+xy_coords = {
+    "柱・梁（本体）": {
+        "ぐらつき": (0, 0),
+        "破損": (0, 0),
+        "変形": (0, 0),
+        "腐食 (腐朽)": (0, 0),
+        "接合部の緩み": (0, 0)
+    },
+    "接合部(継ぎ手)": {
+        "破損": (0,0),
+        "変形": (0,0),
+        "腐食": (0,0),
+        "ボルトの緩み": (0,0),
+        "欠落": (0,0)
+    },
+    # 他の点検部位も同様に追加可能
 }
 
-# 点検項目ごとの座標マップ（自由に調整可能）
-COORD_MAP = {
-    "揺動部（チェーン・ロープ）_ねじれ": (2, 3),
-    "揺動部（チェーン・ロープ）_変形": (4, 3),
-    "揺動部（チェーン・ロープ）_破損": (6, 3),
-    "揺動部（チェーン・ロープ）_ほつれ": (8, 3),
-    "揺動部（チェーン・ロープ）_断線": (10, 3),
-    "揺動部（チェーン・ロープ）_摩耗": (12, 3),
-    # 座板・座面（タイヤ）
-    "揺動部（座板・座面(タイヤ)）_ヒビ": (2, 5),
-    "揺動部（座板・座面(タイヤ)）_割れ": (4, 5),
-    "揺動部（座板・座面(タイヤ)）_湾曲等変形": (6, 5),
-    "揺動部（座板・座面(タイヤ)）_破損": (8, 5),
-    "揺動部（座板・座面(タイヤ)）_腐朽": (10, 5),
-    "揺動部（座板・座面(タイヤ)）_金具の摩耗": (12, 5),
-    "揺動部（座板・座面(タイヤ)）_ボルト、袋ナットの緩み": (14, 5),
-    "揺動部（座板・座面(タイヤ)）_破損、腐食、欠落": (16, 5),
-    # 安全柵
-    "安全柵_ぐらつき": (2, 7),
-    "安全柵_破損": (4, 7),
-    "安全柵_変形": (6, 7),
-    "安全柵_腐食": (8, 7),
-    "安全柵_〔接合部・ボルト〕緩み": (10, 7),
-    "安全柵_欠落": (12, 7),
-    # その他
-    "その他_異物": (2, 9),
-    "その他_落書き": (4, 9),
-    # 基礎
-    "基礎_基礎が露出": (2, 11),
-    "基礎_亀裂": (4, 11),
-    "基礎_破損": (6, 11),
-    # 地表部・安全柵内
-    "地表部・安全柵内_大きな凹凸": (2, 13),
-    "地表部・安全柵内_石や根の露出": (4, 13),
-    "地表部・安全柵内_異物": (6, 13),
-    "地表部・安全柵内_マットのめくれ": (8, 13),
-    "地表部・安全柵内_破損": (10, 13),
-    "地表部・安全柵内_樹木の枝": (12, 13),
-    # チェック系（例：対応方針、実施済/予定など）は座標別に追加可能（今は試しなので後でやるよ）
-}
+# =============================================
+# チェックマーク画像をセルに追加
+# =============================================
+def add_checkmark(ws, cell, x_offset=0, y_offset=0):
+    """
+    チェックボックスのチェックをExcelに反映
+    画像が存在すればcheck.png、なければセルに●
+    """
+    if os.path.exists(CHECK_IMG):
+        img = Image(CHECK_IMG)
+        # ここに追加で座標補正可能
+        img.anchor = cell.coordinate
+        ws.add_image(img)
+    else:
+        ws[cell.coordinate] = "●"
 
-# Excel生成関数
-def generate_excel(data: dict) -> bytes:
-    wb = Workbook()
+# =============================================
+# circle画像をセルに追加（対応予定時期など）
+# =============================================
+def add_circle(ws, cell, x_offset=0, y_offset=0):
+    if os.path.exists(CIRCLE_IMG):
+        img = Image(CIRCLE_IMG)
+        img.anchor = cell.coordinate
+        ws.add_image(img)
+    else:
+        ws[cell.coordinate] = "〇"
+
+# =============================================
+# Excel生成メイン関数
+# =============================================
+def generate_inspection_excel(form_data):
+    """
+    form_data: HTMLから送信されたJSON
+    {
+        "search_park": "...",
+        "inspection_year": "...",
+        "install_year_num": "...",
+        "点検部位・項目": {...},
+        "action_grease": true,
+        "overall_result": "A",
+        ...
+    }
+    """
+    # -----------------------------------------
+    # ワークブック作成
+    # -----------------------------------------
+    wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "点検結果"
+    ws.title = "点検チェックシート"
 
-    # ヘッダ行
-    ws.append(["点検部位", "項目", "選択"])
+    # -----------------------------------------
+    # セル幅・フォント調整（必要に応じ追加可能）
+    # -----------------------------------------
+    ws.column_dimensions['A'].width = 20
+    ws.column_dimensions['B'].width = 20
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 30
+    ws.column_dimensions['E'].width = 30
+    ws.column_dimensions['F'].width = 15
+    ws.column_dimensions['G'].width = 15
+    ws.column_dimensions['H'].width = 20
 
-    # データ書き込み＋アイコン配置
-    for key, value in data.items():
-        ws.append([key.split("_")[0], key.split("_")[1], value])
+    # -----------------------------------------
+    # 公園名・作成者・点検年度・設置年度
+    # -----------------------------------------
+    ws["C2"] = form_data.get("search_park", "")
+    ws["F2"] = form_data.get("search_author", "")
+    ws["H2"] = form_data.get("inspection_year", "")
+    ws["H3"] = form_data.get("install_year_num", "")
 
-        if value in ICON_MAP:
-            icon_file = os.path.join(ICON_DIR, ICON_MAP[value])
-            if os.path.exists(icon_file):
-                img = Image(icon_file)
-                coord = COORD_MAP.get(key)
-                if coord:
-                    col_letter = get_column_letter(coord[0])
-                    ws.add_image(img, f"{col_letter}{coord[1]}")
+    # -----------------------------------------
+    # 点検部位と項目の反映
+    # -----------------------------------------
+    inspection_parts = {
+        "柱・梁（本体）": ["ぐらつき","破損","変形","腐食 (腐朽)","接合部の緩み"],
+        "接合部(継ぎ手)": ["破損","変形","腐食","ボルトの緩み","欠落"],
+        "吊金具": ["破損","変形","腐食","異音","金具本体のずれ","摩耗","ボルトの緩み","欠落"],
+        "揺動部（チェーン・ロープ）": ["ねじれ","変形","破損","ほつれ","断線","摩耗"],
+        "揺動部（座板・座面(タイヤ)）": ["ヒビ","割れ","湾曲等変形","破損","腐朽","金具の摩耗","ボルト、袋ナットの緩み","欠落"],
+        "安全柵": ["ぐらつき","破損","変形","腐食","〔接合部・ボルト〕緩み","欠落"],
+        "その他": ["異物","落書き"],
+        "基礎": ["基礎が露出","亀裂","破損"],
+        "地表部・安全柵内": ["大きな凹凸","石や根の露出","異物","マットのめくれ","破損","樹木の枝"]
+    }
 
-    # バイト配列に書き出し
-    bio = io.BytesIO()
-    wb.save(bio)
-    bio.seek(0)
-    return bio.getvalue()
+    start_row = 6
+    for part_name, items in inspection_parts.items():
+        for idx, item in enumerate(items):
+            row = start_row
+            ws[f"B{row}"] = part_name if idx==0 else ""  # 点検部位は最初だけ
+            ws[f"C{row}"] = ""  # 必要に応じ編集可
+            ws[f"D{row}"] = item
+            ws[f"E{row}"] = ""  # 項目詳細
+            start_row += 1
+
+    # -----------------------------------------
+    # チェックボックス反映（例）
+    # -----------------------------------------
+    for key, val in form_data.items():
+        if key.startswith("action_") and val:
+            # TODO: 実際のセル位置に対応させる
+            row = 6  # 仮: F列にマーク
+            add_checkmark(ws, ws.cell(row=row, column=6))
+
+    # -----------------------------------------
+    # 総合結果
+    # -----------------------------------------
+    overall = form_data.get("overall_result")
+    if overall:
+        # TODO: 実際セル位置にマーク
+        add_checkmark(ws, ws["F13"])
+
+    # -----------------------------------------
+    # 対応予定時期（circle.png）
+    # -----------------------------------------
+    month = form_data.get("response_month")
+    period = form_data.get("period")
+    if month:
+        ws["H6"] = f"{month}月"
+        if period:
+            add_circle(ws, ws["H6"])
+
+    # -----------------------------------------
+    # 備考・所見
+    # -----------------------------------------
+    ws["F10"] = form_data.get("observations","")
+    ws["H12"] = form_data.get("remarks","")
+
+    # -----------------------------------------
+    # ここに追加可能: 他のセルに文字列・画像を追加
+    # ws["D6"] = "例: 自由入力"
+    # add_checkmark(ws, ws["F7"])
+    # -----------------------------------------
+
+    # -----------------------------------------
+    # Excelをバイトに変換して返す
+    # -----------------------------------------
+    stream = io.BytesIO()
+    wb.save(stream)
+    stream.seek(0)
+    return stream.getvalue()
