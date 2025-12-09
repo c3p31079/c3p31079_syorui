@@ -18,37 +18,39 @@ def create_excel_template():
 
 def apply_items(ws, items):
     for item in items:
-        if not item or "type" not in item:
+
+        # --- 安全チェック ---
+        if "cell" not in item:
             continue
 
         cell = item["cell"]
+        dx = item.get("dx", 0)
+        dy = item.get("dy", 0)
 
+        # ======================
+        # テキスト
+        # ======================
         if item["type"] == "text":
-            _insert_text(
-                ws,
-                cell,
-                item.get("text", ""),
-                item.get("dx", 0),
-                item.get("dy", 0)
-            )
+            ws[cell].value = str(item.get("text", ""))
+            continue
 
-        elif item["type"] in ("circle", "check", "triangle", "cross"):
-            icon_file = {
-                "circle": "circle.png",
-                "check": "check.png",
-                "triangle": "triangle.png",
-                "cross": "cross.png"
-            }[item["type"]]
+        # ======================
+        # PNGアイコン（完全にフロント主導）
+        # ======================
+        if item["type"] == "icon":
+            icon_file = item.get("icon")
+            if not icon_file:
+                continue
 
             icon_path = os.path.join(ICON_DIR, icon_file)
-            if os.path.exists(icon_path):
-                _insert_image(
-                    ws,
-                    cell,
-                    icon_path,
-                    item.get("dx", 0),
-                    item.get("dy", 0)
-                )
+            if not os.path.exists(icon_path):
+                print(f"[WARN] icon not found: {icon_path}")
+                continue
+
+            img = Image(icon_path)
+            img.anchor = cell
+            ws.add_image(img)
+
 
 
 def _insert_image(ws, cell, icon_path, dx, dy):
