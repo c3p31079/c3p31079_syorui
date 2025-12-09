@@ -1529,14 +1529,45 @@
                 let items = [];
 
                 // 点検部位のチェック（仮にラジオ・チェック・テキストをここでまとめる）
-                parts.forEach(p => {
-                    // ラジオの例
-                    ["A","B","C"].forEach(grade=>{
-                        const radio = document.getElementById(`${p.part}_${grade}`);
-                        if(radio && radio.checked){
-                            items.push({type:"check", cell:p.cell, x_offset:0, y_offset:0});
-                        }
-                    });
+                // ✅ 点検結果（A・B・C）を正しく取得
+                const inspectionMap = {
+                    pillar_wobble: { cell: "D6" }
+                };
+
+                Object.keys(inspectionMap).forEach(name => {
+                    const checked = document.querySelector(`input[name="${name}"]:checked`);
+                    if (!checked) return;
+
+                    const grade = checked.value; // A / B / C
+                    const cell = inspectionMap[name].cell;
+
+                    // ✅ backend が理解できる type に変更
+                    if (grade === "A") {
+                        items.push({
+                            type: "circle",
+                            cell: cell,
+                            x_offset: 0,
+                            y_offset: 0
+                        });
+                    }
+
+                    if (grade === "B") {
+                        items.push({
+                            type: "triangle",
+                            cell: cell,
+                            x_offset: 0,
+                            y_offset: 0
+                        });
+                    }
+
+                    if (grade === "C") {
+                        items.push({
+                            type: "cross",
+                            cell: cell,
+                            x_offset: 0,
+                            y_offset: 0
+                        });
+                    }
                 });
 
                 // 措置
