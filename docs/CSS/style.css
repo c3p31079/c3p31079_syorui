@@ -1516,6 +1516,9 @@ header h1{
     margin: 20px; 
 }
 
+
+
+
 /* ===== 点検表 ラジオ風UI ===== */
 
 .radio-cell {
@@ -1554,4 +1557,18 @@ header h1{
   transform: translate(-50%, -50%);
   font-size: 20px;
   color: #333;
+}
+
+.judge-td {
+    text-align: center;
+}
+
+.mark {
+    font-size: 1.2em;
+    visibility: hidden;
+    margin-left: 4px;
+}
+
+label {
+    cursor: pointer;
 }
