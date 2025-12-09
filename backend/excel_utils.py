@@ -51,35 +51,6 @@ def apply_items(ws, items):
                 )
 
 
-        # 文字入れ
-        if not item or "type" not in item:
-            continue
-
-        if item["type"] == "text":
-            ws[cell].value = item["text"]
-
-        # PNGアイコン（○△×✓）
-        if item["type"] in ("circle", "check", "triangle", "cross"):
-            icon_file = {
-                "circle": "circle.png",
-                "triangle": "triangle.png",
-                "cross": "cross.png",
-                "check": "check.png"
-            }.get(item["type"])
-
-            if not icon_file:
-                continue
-
-            icon_path = os.path.join(ICON_DIR, icon_file)
-            if not os.path.exists(icon_path):
-                continue
-
-            img = Image(icon_path)
-            img.anchor = cell  # ★ まずはセル左上に固定
-            ws.add_image(img)
-
-
-
 def _insert_image(ws, cell, icon_path, dx, dy):
     img = Image(icon_path)
 
