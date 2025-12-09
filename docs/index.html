@@ -1493,7 +1493,7 @@
                 <textarea id="remarks" name="remarks" class="result_long_opinion"></textarea><br>
 
                 <div class="CheckSheet_save_button">
-                    <button type="submit" id="save_excel">Excelでダウンロード</button>
+                    <button type="button" id="save_excel">Excelでダウンロード</button>
                 </div>
             </div>
         </div>
@@ -1502,8 +1502,10 @@
         document.addEventListener("DOMContentLoaded", function() {
             const saveBtn = document.querySelector(".CheckSheet_save_button button");
 
-            saveBtn.addEventListener("click", async () => {
+            saveBtn.addEventListener("click", async (e) => {
                 e.preventDefault(); // ← これを追加したよ。
+                e.stopPropagation();// ← これを追加したよ。
+
                 console.log("💾 Excelダウンロード処理開始");
 
                 // 公園名・点検年度・設置年度
