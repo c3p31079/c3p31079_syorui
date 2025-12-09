@@ -2,6 +2,14 @@
 // Excel ダウンロード処理
 // ============================
 
+const downloadBtn = document.getElementById("downloadExcelBtn");
+if (downloadBtn) {
+    downloadBtn.type = "button"; // ★これが最重要っぽい
+}
+
+// 二重クリック防止
+this.disabled = true;
+
 document.getElementById("downloadExcelBtn").addEventListener("click", async function () {
 
     // ============================
@@ -388,7 +396,8 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     };
 
         // Excel に反映する項目（仮：既存ロジック維持）
-    data.items = [
+    data.items = data.items || [];
+    data.items.push(
             // ==============================
             // 実施措置（F6:G9）
             // ==============================
@@ -493,37 +502,31 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
                 "dy": 18,
                 "text": "次回点検時に重点確認"
             }
-    ];
+    );
     
     
     // ==============================
-    // B / C → Excel Items 変換【★必須★】
+    // B / C → Excel Items 変換（強制反映版）
     // ==============================
 
     data.inspection_sections.forEach(section => {
         section.items.forEach(item => {
             const result = inspectionResults[item.name];
-            if (!result) return;
-            if (!item.excel?.[result]) return;
+            if (result !== "B" && result !== "C") return;
 
-            console.log(
-            "[CHECK]",
-            item.name,
-            "result =", result,
-            "excel =", item.excel[result]
-            );
-
-            const excelDef = item.excel[result];
+            const excelDef = item.excel?.[result];
+            if (!excelDef) return;
 
             data.items.push({
             type: "icon",
             cell: excelDef.cell,
-            dx: excelDef.dx || 0,
-            dy: excelDef.dy || 0,
+            dx: excelDef.dx ?? 0,
+            dy: excelDef.dy ?? 0,
             icon: excelDef.icon
             });
         });
     });
+
 
 
     console.log("=== Excelに送信される items ===", data.items);
@@ -564,7 +567,10 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
         a.href = url;
         a.download = "点検チェックシート.xlsx";
         document.body.appendChild(a);
+        // 二重クリック防止
+        this.disabled = true;
         a.click();
+        this.disabled = false;
 
         a.remove();
         window.URL.revokeObjectURL(url);
@@ -572,5 +578,6 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     } catch (error) {
         alert(error.message);
         console.error(error);
+        this.disabled = false;
     }
 });
