@@ -382,10 +382,11 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
 
 
 
-],
+        ]
+    };
 
         // Excel に反映する項目（仮：既存ロジック維持）
-        items: [
+    data.items = [
             // ==============================
             // 実施措置（F6:G9）
             // ==============================
@@ -490,27 +491,27 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
                 "dy": 18,
                 "text": "次回点検時に重点確認"
             }
-        ]
-    };
+    ];
+    
     
     // ==============================
     // B / C → Excel Items 変換【★必須★】
     // ==============================
 
-    data.items = [];
-
     data.inspection_sections.forEach(section => {
         section.items.forEach(item => {
-
             const result = inspectionResults[item.name];
             if (!result) return;
-            if (!item.excel) return;
-            if (!item.excel[result]) return;
+            if (!item.excel?.[result]) return;
+
+            console.log(
+            "[CHECK]",
+            item.name,
+            "result =", result,
+            "excel =", item.excel[result]
+            );
 
             const excelDef = item.excel[result];
-
-            // ✅ ここが修正点
-            if (!excelDef.icon) return;
 
             data.items.push({
             type: "icon",
@@ -522,13 +523,13 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
         });
     });
 
+
     console.log("=== Excelに送信される items ===", data.items);
-    console.log(
-        "[CHECK]",
-        item.name,
-        "result =", inspectionResults[item.name],
-        "excel =", item.excel?.[inspectionResults[item.name]]
-        );
+    console.log("inspectionResults keys", Object.keys(inspectionResults));
+    console.log("section item name", item.name);
+
+
+    
 
 
     // ============================
