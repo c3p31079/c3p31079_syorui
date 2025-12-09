@@ -528,7 +528,7 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
 
     console.log("=== Excelに送信される items ===", data.items);
     console.log("inspectionResults keys", Object.keys(inspectionResults));
-    console.log("section item name", item.name);
+    //console.log("section item name", item.name);
 
 
     

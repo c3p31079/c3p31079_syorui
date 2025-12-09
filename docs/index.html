@@ -1493,20 +1493,21 @@
                 <textarea id="remarks" name="remarks" class="result_long_opinion"></textarea><br>
 
                 <div class="CheckSheet_save_button">
-                    <button type="button" id="save_excel">Excelでダウンロード</button>
+                    <button id="downloadExcelBtn" type="button">
+                         Excelダウンロード</button>
                 </div>
             </div>
         </div>
 
         <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const saveBtn = document.querySelector(".CheckSheet_save_button button");
 
-            saveBtn.addEventListener("click", async (e) => {
-                e.preventDefault(); // ← これを追加したよ。
-                e.stopPropagation();// ← これを追加したよ。
+            saveBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
 
-                console.log("💾 Excelダウンロード処理開始");
+                console.log("💾 保存ボタン：Excel送信は行いません（正常）");
 
                 // 公園名・点検年度・設置年度
                 const parkName = document.getElementById("search_park").value;
@@ -1712,27 +1713,30 @@
                 console.log("📤 送信データ:", payload);
                 
 
-                try{
-                    const res = await fetch("http://127.0.0.1:5000/api/generate_excel", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-                    if(!res.ok) throw new Error("Excel生成失敗");
-                    const blob = await res.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "点検チェックシート.xlsx";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                    console.log("✅ Excelダウンロード完了");
-                }catch(err){
-                    console.error(err);
-                    alert("Excel生成に失敗しました");
-                }
+                // try{
+                //     const res = await fetch("http://127.0.0.1:5000/api/generate_excel", {
+                //         method: "POST",
+                //         headers: { "Content-Type": "application/json" },
+                //         body: JSON.stringify(payload)
+                //     });
+                //     if(!res.ok) throw new Error("Excel生成失敗");
+                //     const blob = await res.blob();
+                //     const url = window.URL.createObjectURL(blob);
+                //     const a = document.createElement("a");
+                //     a.href = url;
+                //     a.download = "点検チェックシート.xlsx";
+                //     document.body.appendChild(a);
+                //     a.click();
+                //     a.remove();
+                //     window.URL.revokeObjectURL(url);
+                //     console.log("✅ Excelダウンロード完了");
+                // }catch(err){
+                //     console.error(err);
+                //     alert("Excel生成に失敗しました");
+                // }
+
+                
+                return;
             });
         });
 
