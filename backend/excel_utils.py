@@ -4,7 +4,8 @@ from openpyxl.utils import coordinate_to_tuple
 import os
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
 from openpyxl.utils import column_index_from_string
-from openpyxl.drawing.xdr import XDRPoint2D, XDRPositiveSize2D
+from openpyxl.drawing.xdr import XDRPositiveSize2D
+
 
 
 BASE_DIR = os.path.dirname(__file__)
@@ -53,14 +54,22 @@ def apply_items(ws, items):
             _insert_image(ws, cell, icon_path, dx, dy)
 
 
+
 def _insert_image(ws, cell, icon_path, dx, dy):
     img = Image(icon_path)
 
-    row, col = coordinate_to_tuple(cell)
-    anchor = ws.cell(row=row, column=col).coordinate
+    col_letter = ''.join(filter(str.isalpha, cell))
+    row = int(''.join(filter(str.isdigit, cell)))
+    col = column_index_from_string(col_letter) - 1
 
-    img.anchor = anchor
-    img.left = dx
-    img.top = dy
+    marker = AnchorMarker(
+        col=col,
+        colOff=dx * 9525,  # px → EMU
+        row=row - 1,
+        rowOff=dy * 9525
+    )
+
+    size = XDRPositiveSize2D(img.width * 9525, img.height * 9525)
+    img.anchor = OneCellAnchor(_from=marker, ext=size)
 
     ws.add_image(img)

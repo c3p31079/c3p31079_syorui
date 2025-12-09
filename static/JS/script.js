@@ -513,20 +513,17 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
 
         const excelDef = item.excel[result];
 
-        const icon =
-        result === "B" ? "circle.png" :
-        result === "C" ? "none.png" :
-        null;
-
-        if (!icon) return;
+        if (!excelDef.icon) return;
 
         data.items.push({
         type: "icon",
         cell: excelDef.cell,
         dx: excelDef.dx,
         dy: excelDef.dy,
-        icon: icon
+        icon: excelDef.icon
         });
+    console.log("送信 items:",data.items);
+    
     });
     });
 
