@@ -1679,13 +1679,7 @@
                 };
 
                 console.log("📤 送信データ:", payload);
-                console.log(
-                "[CHECK]",
-                item.name,
-                "result =", inspectionResults[item.name],
-                "excel =", item.excel?.[inspectionResults[item.name]]
-                );
-
+                
 
                 try{
                     const res = await fetch("http://127.0.0.1:5000/api/generate_excel", {

@@ -518,9 +518,12 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     });
 
     console.log("=== Excelに送信される items ===", data.items);
-
-
-
+    console.log(
+        "[CHECK]",
+        item.name,
+        "result =", inspectionResults[item.name],
+        "excel =", item.excel?.[inspectionResults[item.name]]
+        );
 
 
     // ============================
