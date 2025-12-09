@@ -5,6 +5,7 @@ import os
 
 BASE_DIR = os.path.dirname(__file__)
 TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
+ICON_DIR = os.path.join(BASE_DIR, "icons")
 
 
 def create_excel_template():
@@ -29,13 +30,29 @@ def apply_items(ws, items):
 
         target_cell = ws[cell]
 
+        # 文字入れ
         if item["type"] == "text":
-            target_cell.value = item["text"]
+            ws[cell].value = item["text"]
 
-        elif item["type"] in ("check", "circle"):
-            # 図形の代わりに記号で表現（今はこれでOK）
-            mark = "✓" if item["type"] == "check" else "○"
-            target_cell.value = mark
+        # PNGアイコン（○△×✓）
+        if item["type"] in ("circle", "check", "triangle", "cross"):
+            icon_file = {
+                "circle": "circle.png",
+                "triangle": "triangle.png",
+                "cross": "cross.png",
+                "check": "check.png"
+            }.get(item["type"])
+
+            if not icon_file:
+                continue
+
+            icon_path = os.path.join(ICON_DIR, icon_file)
+            if not os.path.exists(icon_path):
+                continue
+
+            img = Image(icon_path)
+            img.anchor = cell  # ★ まずはセル左上に固定
+            ws.add_image(img)
 
 
 

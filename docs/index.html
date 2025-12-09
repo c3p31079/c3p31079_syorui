@@ -1677,6 +1677,8 @@
                 radio.addEventListener("change", () => {
                     const row = radio.closest("tr");
 
+                    if(!row) return;
+
                     // 行内のすべてのマークをリセット
                     row.querySelectorAll(".mark").forEach(m => {
                         m.style.visibility = "hidden";
@@ -1694,10 +1696,10 @@
             // 初期表示（A）
             document.querySelectorAll("tr").forEach(row => {
                 const checked = row.querySelector("input[type='radio']:checked");
-                if (checked) {
-                    const mark = checked.closest("label").querySelector(".mark");
-                    if (mark) mark.style.visibility = "visible";
-                }
+                if(!checked) return;
+                
+                const mark = checked.closest("label")?.querySelector(".mark");
+                if (mark) mark.style.visibility = "visible";
             });
 
         });
