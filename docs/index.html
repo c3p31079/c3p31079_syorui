@@ -1644,9 +1644,9 @@
                 console.log("📤 送信データ:", payload);
 
                 try{
-                    const res = await fetch("/api/generate_excel", {
-                        method:"POST",
-                        headers:{"Content-Type":"application/json"},
+                    const res = await fetch("http://127.0.0.1:5000/api/generate_excel", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(payload)
                     });
                     if(!res.ok) throw new Error("Excel生成失敗");
@@ -1666,7 +1666,7 @@
                 }
             });
         });
-        
+
         document.addEventListener("DOMContentLoaded", () => {
 
             document.querySelectorAll("input[type='radio']").forEach(radio => {
