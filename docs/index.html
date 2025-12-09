@@ -1711,28 +1711,7 @@
 
                 console.log("📤 送信データ:", payload);
                 
-
-                try{
-                    const res = await fetch("http://127.0.0.1:5000/api/generate_excel", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-                    if(!res.ok) throw new Error("Excel生成失敗");
-                    const blob = await res.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "点検チェックシート.xlsx";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                    console.log("✅ Excelダウンロード完了");
-                }catch(err){
-                    console.error(err);
-                    alert("Excel生成に失敗しました");
-                }
+                
             });
         });
 

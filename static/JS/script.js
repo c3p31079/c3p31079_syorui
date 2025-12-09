@@ -12,7 +12,8 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     // 判定結果をHTMLから収集（★必須）
     // ============================
     const inspectionResults = {};
-    document.querySelectorAll("input[name], select[name]").forEach(el => {
+
+    document.querySelectorAll("input[type='radio']:checked").forEach(el => {
         if (["A", "B", "C"].includes(el.value)) {
             inspectionResults[el.name] = el.value;
         }
@@ -21,6 +22,7 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     console.log("=== inspectionResults ===", inspectionResults);
 
 
+    
     const data = {
         search_park: document.getElementById("search_park")?.value || "",
         inspection_year: document.getElementById("inspection_year")?.value || "",
