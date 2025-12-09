@@ -1541,30 +1541,56 @@
 
                 // 措置
                 const actionCheckboxes = [
-                    {id:"action_grease", cell:"F6", type:"check"},
-                    {id:"action_bolt", cell:"F7", type:"check"},
-                    {id:"action_hanger", cell:"F8", type:"check", num_id:"hanger_count"},
-                    {id:"action_chain", cell:"F9", type:"check", num_id:"chain_count"},
-                    {id:"action_seat", cell:"F10", type:"check", num_id:"seat_count"},
-                    {id:"action_removal", cell:"F11", type:"check"},
-                    {id:"action_other", cell:"F12", type:"check", text_id:"action_other_detail"}
+                    {id:"action_grease", cell:"F6"},
+                    {id:"action_bolt", cell:"F7"},
+                    {id:"action_hanger", cell:"F8", num_id:"hanger_count"},
+                    {id:"action_chain", cell:"F9", num_id:"chain_count"},
+                    {id:"action_seat", cell:"F10", num_id:"seat_count"},
+                    {id:"action_removal", cell:"F11"},
+                    {id:"action_other", cell:"F12", text_id:"action_other_detail"}
                 ];
 
-                actionCheckboxes.forEach(a=>{
+                actionCheckboxes.forEach(a => {
                     const cb = document.getElementById(a.id);
-                    if(cb && cb.checked){
-                        items.push({type:"check", cell:a.cell, x_offset:0, y_offset:0});
-                        // 数値・テキスト挿入
-                        if(a.num_id){
-                            const val = document.getElementById(a.num_id).value;
-                            if(val) items.push({type:"text", cell:a.cell, text:`(${val}箇所)`, x_offset:1, y_offset:0});
+                    if (!cb || !cb.checked) return;
+
+                    // チェックマーク
+                    items.push({
+                        type: "check",
+                        cell: a.cell,
+                        x_offset: 0,
+                        y_offset: 0
+                    });
+
+                    // 数値（◯箇所）
+                    if (a.num_id) {
+                        const numEl = document.getElementById(a.num_id);
+                        if (numEl && numEl.value) {
+                            items.push({
+                                type: "text",
+                                cell: a.cell,
+                                text: `(${numEl.value}箇所)`,
+                                x_offset: 1,
+                                y_offset: 0
+                            });
                         }
-                        if(a.text_id){
-                            const val = document.getElementById(a.text_id).value;
-                            if(val) items.push({type:"text", cell:a.cell, text:`(${val})`, x_offset:1, y_offset:0});
+                    }
+
+                    // その他テキスト
+                    if (a.text_id) {
+                        const txtEl = document.getElementById(a.text_id);
+                        if (txtEl && txtEl.value) {
+                            items.push({
+                                type: "text",
+                                cell: a.cell,
+                                text: `(${txtEl.value})`,
+                                x_offset: 1,
+                                y_offset: 0
+                            });
                         }
                     }
                 });
+
 
                 // 総合結果
                 const overallRadios = ["overall_a","overall_b","overall_c","overall_d"];
@@ -1634,7 +1660,15 @@
 
                 // 備考
                 const remarks = document.getElementById("remarks").value;
-                if(remarks) items.push({type:"text", cell:"H14", text:remarks, x_offset:0, y_offset:0});
+                if(remarksEl && remarksEl.value){ 
+                    items.push({
+                        type:"text",
+                        cell:"H14", 
+                        text:remarks, 
+                        x_offset:0, 
+                        y_offset:0
+                    });
+                }
 
                 // JSONで送信
                 const payload = {

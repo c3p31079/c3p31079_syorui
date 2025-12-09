@@ -31,6 +31,9 @@ def apply_items(ws, items):
         target_cell = ws[cell]
 
         # 文字入れ
+        if not item or "type" not in item:
+            continue
+
         if item["type"] == "text":
             ws[cell].value = item["text"]
 
