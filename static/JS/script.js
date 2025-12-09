@@ -486,22 +486,12 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
 
     const inspectionResults = {};
 
-    data.inspection_sections.forEach(section => {
-    section.items.forEach(item => {
-        const checked = document.querySelector(
-        `input[name="${item.name}"]:checked`
-        );
-        if (checked) {
-        inspectionResults[item.name] = checked.value; // B or C
-        }
-    });
-    });
-
     // ==============================
-    // B / C → Excel Items 変換
+    // B / C → Excel Items 変換（完成版）
     // ==============================
 
-    data.items = [];
+    // 既存 items を保持
+    const excelItems = [...data.items];
 
     data.inspection_sections.forEach(section => {
     section.items.forEach(item => {
@@ -512,20 +502,24 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
         if (!item.excel[result]) return;
 
         const excelDef = item.excel[result];
-
         if (!excelDef.icon) return;
 
-        data.items.push({
+        excelItems.push({
         type: "icon",
         cell: excelDef.cell,
-        dx: excelDef.dx,
-        dy: excelDef.dy,
+        dx: excelDef.dx ?? 0,
+        dy: excelDef.dy ?? 0,
         icon: excelDef.icon
         });
-    console.log("送信 items:",data.items);
-    
     });
     });
+
+    // 最後にまとめて代入
+    data.items = excelItems;
+
+    // ✅ デバッグ用（1回だけ）
+    console.log("=== Excel に送信される items ===", data.items);
+
 
 
 
