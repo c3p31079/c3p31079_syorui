@@ -7,14 +7,14 @@ if (downloadBtn) {
     downloadBtn.type = "button"; // ★これが最重要っぽい
 }
 
-// 二重クリック防止
-this.disabled = true;
 
-document.getElementById("downloadExcelBtn").addEventListener("click", async function () {
 
-    // ============================
-    // HTML から値を取得
-    // ============================
+document.getElementById("downloadExcelBtn").addEventListener("click", async function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.disabled = true;
+    console.log("💾 Excelダウンロード処理開始");
 
     // ============================
     // 判定結果をHTMLから収集（★必須）
@@ -392,11 +392,11 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
 
 
 
-        ]
+        ],
+        items:[]
     };
 
         // Excel に反映する項目（仮：既存ロジック維持）
-    data.items = data.items || [];
     data.items.push(
             // ==============================
             // 実施措置（F6:G9）
@@ -567,17 +567,18 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
         a.href = url;
         a.download = "点検チェックシート.xlsx";
         document.body.appendChild(a);
-        // 二重クリック防止
-        this.disabled = true;
-        a.click();
-        this.disabled = false;
+
+        a.click();   // ← ここでは disabled を触らない
 
         a.remove();
         window.URL.revokeObjectURL(url);
 
+
     } catch (error) {
         alert(error.message);
         console.error(error);
-        this.disabled = false;
+    } finally {
+        this.disabled = false;   // ✅ 必ず戻す
     }
+
 });
