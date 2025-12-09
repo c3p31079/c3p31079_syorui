@@ -1,14 +1,14 @@
-from openpyxl import Workbook
+from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.utils import coordinate_to_tuple
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ICON_DIR = os.path.join(BASE_DIR, "static", "icons")
+BASE_DIR = os.path.dirname(__file__)
+TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
 
 
 def create_excel_template():
-    wb = Workbook()
+    wb = load_workbook(TEMPLATE_PATH)
     ws = wb.active
     ws.title = "点検チェックシート"
 
@@ -21,43 +21,22 @@ def create_excel_template():
 
 
 def apply_items(ws, items):
-    """
-    items = [
-      {
-        type: "check" | "circle" | "text",
-        cell: "F6",
-        dx: 2,
-        dy: 4,
-        icon: "check.png",
-        text: "任意"
-      }
-    ]
-    """
-
     for item in items:
-        item_type = item.get("type")
-        cell = item.get("cell")
-        dx = item.get("dx", 0)
-        dy = item.get("dy", 0)
 
-        if not cell:
-            continue
+        cell = item["cell"]
+        x = item.get("x_offset", 0)
+        y = item.get("y_offset", 0)
 
-        if item_type in ["check", "circle"]:
-            icon_name = item.get("icon")
-            if not icon_name:
-                continue
+        target_cell = ws[cell]
 
-            icon_path = os.path.join(ICON_DIR, icon_name)
-            if not os.path.exists(icon_path):
-                print(f"⚠ アイコン未存在: {icon_path}")
-                continue
+        if item["type"] == "text":
+            target_cell.value = item["text"]
 
-            _insert_image(ws, cell, icon_path, dx, dy)
+        elif item["type"] in ("check", "circle"):
+            # 図形の代わりに記号で表現（今はこれでOK）
+            mark = "✓" if item["type"] == "check" else "○"
+            target_cell.value = mark
 
-        elif item_type == "text":
-            text = item.get("text", "")
-            _insert_text(ws, cell, text, dx, dy)
 
 
 def _insert_image(ws, cell, icon_path, dx, dy):
