@@ -521,9 +521,9 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
         if (!icon) return;
 
         data.items.push({
-        type: icon,
+        type: "icon",
         cell: excelDef.cell,
-        dx: excelDef.dx,
+       dx: excelDef.dx,
         dy: excelDef.dy,
         icon: icon
         });
