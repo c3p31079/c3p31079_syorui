@@ -2,6 +2,10 @@ from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.utils import coordinate_to_tuple
 import os
+from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
+from openpyxl.utils import column_index_from_string
+from openpyxl.drawing.xdr import XDRPoint2D, XDRPositiveSize2D
+
 
 BASE_DIR = os.path.dirname(__file__)
 TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
