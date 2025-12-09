@@ -1659,14 +1659,14 @@
                 });
 
                 // 備考
-                const remarks = document.getElementById("remarks").value;
-                if(remarksEl && remarksEl.value){ 
+                const remarksEl = document.getElementById("remarks");
+                if (remarksEl && remarksEl.value) {
                     items.push({
-                        type:"text",
-                        cell:"H14", 
-                        text:remarks, 
-                        x_offset:0, 
-                        y_offset:0
+                        type: "text",
+                        cell: "H14",
+                        text: remarksEl.value,
+                        x_offset: 0,
+                        y_offset: 0
                     });
                 }
 
