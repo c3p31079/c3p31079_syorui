@@ -1500,281 +1500,99 @@
         </div>
 
         <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const saveBtn = document.querySelector(".CheckSheet_save_button button");
+document.addEventListener("DOMContentLoaded", function () {
 
-            saveBtn.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+    /* ===============================
+       保存ボタン（Excel送信しない）
+       =============================== */
+    const saveBtn = document.querySelector(".CheckSheet_save_button button");
+    if (saveBtn) {
+        saveBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("💾 保存のみ（Excel生成なし）");
+        });
+    }
 
-                console.log("💾 保存ボタン：Excel送信は行いません（正常）");
+    /* ===============================
+       Excelダウンロードボタン
+       =============================== */
+    const downloadBtn = document.getElementById("downloadExcelBtn");
+    if (!downloadBtn) return;
 
-                // 公園名・点検年度・設置年度
-                const parkName = document.getElementById("search_park").value;
-                const inspectionYear = document.getElementById("inspection_year").value;
-                const installYearNum = document.getElementById("install_year_num").value;
+    downloadBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-                // 各点検部位・項目
-                const parts = [
-                    {part:"柱・梁（本体）", cell:"D6"},
-                    {part:"接合部（継ぎ手）", cell:"D7"},
-                    {part:"吊金具", cell:"D8"},
-                    {part:"揺動部（チェーン・ロープ）", cell:"D9"},
-                    {part:"揺動部（座板・座面）", cell:"D11"},
-                    {part:"安全柵", cell:"D12"},
-                    {part:"その他", cell:"D13"},
-                    {part:"基礎", cell:"D14"},
-                    {part:"地表部・安全柵内", cell:"D15"}
-                ];
+        console.log("📘 Excel生成開始");
 
-                let items = [];
+        // -------- 基本情報 --------
+        const payload = {
+            search_park: document.getElementById("search_park")?.value || "",
+            inspection_year: document.getElementById("inspection_year")?.value || "",
+            install_year_num: document.getElementById("install_year_num")?.value || "",
+            items: []
+        };
 
-                // 点検部位のチェック（仮にラジオ・チェック・テキストをここでまとめる）
-                // ✅ 点検結果（A・B・C）を正しく取得
-                const inspectionMap = {
-                    pillar_wobble: { cell: "D6" }
-                };
+        /* ===============================
+           点検結果（A / B / C → PNG）
+           =============================== */
+        const inspectionMap = {
+            pillar_wobble: { cell: "D6" }
+        };
 
-                Object.keys(inspectionMap).forEach(name => {
-                    const checked = document.querySelector(`input[name="${name}"]:checked`);
-                    if (!checked) return;
+        Object.keys(inspectionMap).forEach(name => {
+            const checked = document.querySelector(`input[name="${name}"]:checked`);
+            if (!checked) return;
 
-                    const grade = checked.value; // A / B / C
-                    const cell = inspectionMap[name].cell;
-
-                    // ✅ backend が理解できる type に変更
-                    if (grade === "A") {
-                        items.push({
-                            type: "circle",
-                            cell: cell,
-                            x_offset: 0,
-                            y_offset: 0
-                        });
-                    }
-
-                    if (grade === "B") {
-                        items.push({
-                            type: "triangle",
-                            cell: cell,
-                            x_offset: 0,
-                            y_offset: 0
-                        });
-                    }
-
-                    if (grade === "C") {
-                        items.push({
-                            type: "cross",
-                            cell: cell,
-                            x_offset: 0,
-                            y_offset: 0
-                        });
-                    }
-                });
-
-                // 措置
-                const actionCheckboxes = [
-                    {id:"action_grease", cell:"F6"},
-                    {id:"action_bolt", cell:"F7"},
-                    {id:"action_hanger", cell:"F8", num_id:"hanger_count"},
-                    {id:"action_chain", cell:"F9", num_id:"chain_count"},
-                    {id:"action_seat", cell:"F10", num_id:"seat_count"},
-                    {id:"action_removal", cell:"F11"},
-                    {id:"action_other", cell:"F12", text_id:"action_other_detail"}
-                ];
-
-                actionCheckboxes.forEach(a => {
-                    const cb = document.getElementById(a.id);
-                    if (!cb || !cb.checked) return;
-
-                    // チェックマーク
-                    items.push({
-                        type: "check",
-                        cell: a.cell,
-                        x_offset: 0,
-                        y_offset: 0
-                    });
-
-                    // 数値（◯箇所）
-                    if (a.num_id) {
-                        const numEl = document.getElementById(a.num_id);
-                        if (numEl && numEl.value) {
-                            items.push({
-                                type: "text",
-                                cell: a.cell,
-                                text: `(${numEl.value}箇所)`,
-                                x_offset: 1,
-                                y_offset: 0
-                            });
-                        }
-                    }
-
-                    // その他テキスト
-                    if (a.text_id) {
-                        const txtEl = document.getElementById(a.text_id);
-                        if (txtEl && txtEl.value) {
-                            items.push({
-                                type: "text",
-                                cell: a.cell,
-                                text: `(${txtEl.value})`,
-                                x_offset: 1,
-                                y_offset: 0
-                            });
-                        }
-                    }
-                });
-
-
-                // 総合結果
-                const overallRadios = ["overall_a","overall_b","overall_c","overall_d"];
-                overallRadios.forEach(id=>{
-                    const radio = document.getElementById(id);
-                    if(radio && radio.checked){
-                        const cell = "F13"; // 仮座標
-                        items.push({type:"check", cell:cell});
-                        if(id==="overall_d"){
-                            const val = document.getElementById("overall_d_detail").value;
-                            if(val) items.push({type:"text", cell:cell, text:`(${val})`, x_offset:1, y_offset:0});
-                        }
-                    }
-                });
-
-                // 対応方針
-                const planCheckboxes = [
-                    {id:"plan_maintenance", cell:"H6"},
-                    {id:"plan_repair", cell:"H7"},
-                    {id:"plan_improvement", cell:"H8"},
-                    {id:"plan_precision", cell:"H9"},
-                    {id:"plan_removal", cell:"H10"},
-                    {id:"plan_other", cell:"H11", text_id:"plan_other_detail"}
-                ];
-
-                planCheckboxes.forEach(p=>{
-                    const cb = document.getElementById(p.id);
-                    if(cb && cb.checked){
-                        items.push({type:"check", cell:p.cell, x_offset:0, y_offset:0});
-                        if(p.text_id){
-                            const val = document.getElementById(p.text_id).value;
-                            if(val) items.push({type:"text", cell:p.cell, text:`(${val})`, x_offset:1, y_offset:0});
-                        }
-                    }
-                });
-
-                // 対応予定時期（月・上中下）
-                const month = document.getElementById("response_month").value;
-                const periodRadios = ["period_early","period_mid","period_late"];
-                const periodMap = {period_early:"上旬", period_mid:"中旬", period_late:"下旬"};
-                const cell = "H12"; // 仮座標
-                items.push({type:"text", cell:cell, text:`${month}月`, x_offset:0, y_offset:0});
-                periodRadios.forEach(id=>{
-                    const radio = document.getElementById(id);
-                    if(radio && radio.checked){
-                        items.push({type:"circle", cell:cell, x_offset:1, y_offset:0});
-                    }
-                });
-
-                // 本格的使用禁止
-                const prohibition_cb = document.getElementById("prohibition_measure");
-                const prohibition_cell = "H13";
-                if(prohibition_cb && prohibition_cb.checked){
-                    items.push({type:"check", cell:prohibition_cell});
-                }
-                const prohibition_date = document.getElementById("prohibition_date").value;
-                if(prohibition_date){
-                    items.push({type:"text", cell:prohibition_cell, text:prohibition_date, x_offset:1, y_offset:0});
-                }
-                const prohibition_status = ["prohibition_done","prohibition_planned"];
-                prohibition_status.forEach(id=>{
-                    const radio = document.getElementById(id);
-                    if(radio && radio.checked){
-                        items.push({type:"circle", cell:prohibition_cell, x_offset:2, y_offset:0});
-                    }
-                });
-
-                // 備考
-                const remarksEl = document.getElementById("remarks");
-                if (remarksEl && remarksEl.value) {
-                    items.push({
-                        type: "text",
-                        cell: "H14",
-                        text: remarksEl.value,
-                        x_offset: 0,
-                        y_offset: 0
-                    });
-                }
-
-                // JSONで送信
-                const payload = {
-                    search_park: parkName,
-                    inspection_year: inspectionYear,
-                    install_year_num: installYearNum,
-                    items: items
-                };
-
-                console.log("📤 送信データ:", payload);
-                
-
-                // try{
-                //     const res = await fetch("http://127.0.0.1:5000/api/generate_excel", {
-                //         method: "POST",
-                //         headers: { "Content-Type": "application/json" },
-                //         body: JSON.stringify(payload)
-                //     });
-                //     if(!res.ok) throw new Error("Excel生成失敗");
-                //     const blob = await res.blob();
-                //     const url = window.URL.createObjectURL(blob);
-                //     const a = document.createElement("a");
-                //     a.href = url;
-                //     a.download = "点検チェックシート.xlsx";
-                //     document.body.appendChild(a);
-                //     a.click();
-                //     a.remove();
-                //     window.URL.revokeObjectURL(url);
-                //     console.log("✅ Excelダウンロード完了");
-                // }catch(err){
-                //     console.error(err);
-                //     alert("Excel生成に失敗しました");
-                // }
-
-                
-                return;
+            const grade = checked.value;
+            payload.items.push({
+                type: "icon",
+                cell: inspectionMap[name].cell,
+                icon:
+                    grade === "A" ? "circle.png" :
+                    grade === "B" ? "triangle.png" :
+                                    "cross.png",
+                dx: 0,
+                dy: 0
             });
         });
 
-        document.addEventListener("DOMContentLoaded", () => {
+        console.log("📤 送信payload", payload);
 
-            document.querySelectorAll("input[type='radio']").forEach(radio => {
-
-                radio.addEventListener("change", () => {
-                    const row = radio.closest("tr");
-
-                    if(!row) return;
-
-                    // 行内のすべてのマークをリセット
-                    row.querySelectorAll(".mark").forEach(m => {
-                        m.style.visibility = "hidden";
-                    });
-
-                    // 選択された列だけ表示
-                    const mark = radio.closest("label").querySelector(".mark");
-                    if (mark) {
-                        mark.style.visibility = "visible";
-                    }
-                });
-
+        /* ===============================
+           Excel生成 & ダウンロード
+           =============================== */
+        try {
+            const res = await fetch("http://127.0.0.1:5000/api/generate_excel", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
             });
 
-            // 初期表示（A）
-            document.querySelectorAll("tr").forEach(row => {
-                const checked = row.querySelector("input[type='radio']:checked");
-                if(!checked) return;
-                
-                const mark = checked.closest("label")?.querySelector(".mark");
-                if (mark) mark.style.visibility = "visible";
-            });
+            if (!res.ok) throw new Error("Excel生成失敗");
 
-        });
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
 
-        </script>
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "点検チェックシート.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+
+            console.log("✅ Excelダウンロード完了");
+
+        } catch (err) {
+            console.error(err);
+            alert("Excel生成に失敗しました");
+        }
+    });
+
+});
+</script>
 
     </body>
 </html>
