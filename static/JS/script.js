@@ -480,20 +480,33 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
         ]
     };
     
-    const inspectionResults = {};
+    // ==============================
+    // B / C → Excel Items 変換【★必須★】
+    // ==============================
+
+    data.items = data.items ?? [];
 
     data.inspection_sections.forEach(section => {
-    section.items.forEach(item => {
-        const checked = document.querySelector(
-            `input[name="${item.name}"]:checked`
-        );
-        if (checked) {
-            inspectionResults[item.name] = checked.value;
-            }
+        section.items.forEach(item => {
+            const result = inspectionResults[item.name];
+            if (!result) return;
+            if (!item.excel || !item.excel[result]) return;
+
+            const excelDef = item.excel[result];
+            if (!excelDef.icon) return;
+
+            data.items.push({
+            type: "icon",
+            cell: excelDef.cell,
+            dx: excelDef.dx ?? 0,
+            dy: excelDef.dy ?? 0,
+            icon: excelDef.icon
+            });
         });
     });
 
-    console.log("=== inspectionResults ===", inspectionResults);
+    console.log("=== Excelに送信される items ===", data.items);
+
 
 
 
