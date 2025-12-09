@@ -1,6 +1,6 @@
 from flask import Flask, request, send_file
 from flask_cors import CORS
-from io import BytesIO
+import io
 from excel_utils import create_excel_template, apply_items
 
 app = Flask(__name__)
