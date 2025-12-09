@@ -497,23 +497,28 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     // B / C → Excel Items 変換【★必須★】
     // ==============================
 
-    data.items = data.items ?? [];
+    data.items = [];
 
     data.inspection_sections.forEach(section => {
         section.items.forEach(item => {
+
             const result = inspectionResults[item.name];
             if (!result) return;
-            if (!item.excel || !item.excel[result]) return;
+            if (!item.excel) return;
+            if (!item.excel[result]) return;
 
             const excelDef = item.excel[result];
-            data.items.push({
-                type: "icon",
-                cell: excelDef.cell,
-                dx: excelDef.dx ?? 0,
-                dy: excelDef.dy ?? 0,
-                icon: excelDef.icon
-            });
 
+            // ✅ ここが修正点
+            if (!excelDef.icon) return;
+
+            data.items.push({
+            type: "icon",
+            cell: excelDef.cell,
+            dx: excelDef.dx || 0,
+            dy: excelDef.dy || 0,
+            icon: excelDef.icon
+            });
         });
     });
 
