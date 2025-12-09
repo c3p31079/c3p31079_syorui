@@ -19,28 +19,28 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     "items": [
       { "name": "pillar_wobble", "label": "ぐらつき",
         "excel": {
-            "B": { "type": "circle", "cell": "D6", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D6", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 } } },
 
       { "name": "pillar_damage", "label": "破損",
         "excel": {
-            "B": { "type": "circle", "cell": "D6", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D6", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 } } },
 
       { "name": "pillar_deform", "label": "変形",
         "excel": {
-            "B": { "type": "circle", "cell": "D6", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D6", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 } } },
 
       { "name": "pillar_corrosion", "label": "腐食（腐朽）",
         "excel": {
-            "B": { "type": "circle", "cell": "D6", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D6", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 } } },
 
       { "name": "pillar_joint_loose", "label": "〔接合部・ボルト〕緩み",
         "excel": {
-            "B": { "type": "circle", "cell": "D6", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D6", "dx": 2, "dy": 2 } } }
+            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 } } }
     ]
   },
 
@@ -49,28 +49,28 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     "items": [
       { "name": "joint_damage", "label": "破損",
         "excel": {
-            "B": { "type": "circle", "cell": "D7", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D7", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 } } },
 
       { "name": "joint_deform", "label": "変形",
         "excel": {
-            "B": { "type": "circle", "cell": "D7", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D7", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 } } },
 
       { "name": "joint_corrosion", "label": "腐食",
         "excel": {
-            "B": { "type": "circle", "cell": "D7", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D7", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 } } },
 
       { "name": "joint_bolt_loose", "label": "ボルトの緩み",
         "excel": {
-            "B": { "type": "circle", "cell": "D7", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D7", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 } } },
 
       { "name": "joint_missing", "label": "欠落",
         "excel": {
-            "B": { "type": "circle", "cell": "D7", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D7", "dx": 2, "dy": 2 } } }
+            "B": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D7", "dx": 2, "dy": 2 } } }
     ]
   },
 
@@ -79,43 +79,43 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     "items": [
       { "name": "hanger_damage", "label": "破損",
         "excel": {
-            "B": { "type": "circle", "cell": "D8", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D8", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 } } },
 
       { "name": "hanger_deform", "label": "変形",
         "excel": {
-            "B": { "type": "circle", "cell": "D8", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D8", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 } } },
 
       { "name": "hanger_corrosion", "label": "腐食",
         "excel": {
-            "B": { "type": "circle", "cell": "D8", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D8", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 } } },
 
       { "name": "hanger_noise", "label": "異音",
         "excel": {
-            "B": { "type": "circle", "cell": "D8", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D8", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 } } },
 
       { "name": "hanger_shift", "label": "金具本体のずれ",
         "excel": {
-            "B": { "type": "circle", "cell": "D8", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D8", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 } } },
 
       { "name": "hanger_wear_13", "label": "摩耗（×：1/3以上）",
         "excel": {
-            "B": { "type": "circle", "cell": "D8", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D8", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 } } },
 
       { "name": "hanger_wear_12", "label": "摩耗（×：1/2以上 使用禁止）",
         "excel": {
-            "B": { "type": "circle", "cell": "D8", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D8", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 } } },
 
       { "name": "hanger_bolt", "label": "ボルトの緩み／欠落",
         "excel": {
-            "B": { "type": "circle", "cell": "D8", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D8", "dx": 2, "dy": 2 } } }
+            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 } } }
     ]
   },
 
@@ -124,38 +124,38 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     "items": [
       { "name": "chain_twist", "label": "ねじれ",
         "excel": {
-            "B": { "type": "circle", "cell": "D9", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D9", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 } } },
 
       { "name": "chain_deform", "label": "変形",
         "excel": {
-            "B": { "type": "circle", "cell": "D9", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D9", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 } } },
 
       { "name": "chain_damage", "label": "破損",
         "excel": {
-            "B": { "type": "circle", "cell": "D9", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D9", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 } } },
 
       { "name": "chain_fray", "label": "ほつれ",
         "excel": {
-            "B": { "type": "circle", "cell": "D9", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D9", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 } } },
 
       { "name": "chain_break", "label": "断線",
         "excel": {
-            "B": { "type": "circle", "cell": "D9", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D9", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 } } },
 
       { "name": "chain_wear_13", "label": "摩耗（×：1/3以上）",
         "excel": {
-            "B": { "type": "circle", "cell": "D9", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D9", "dx": 2, "dy": 2 } } },
+            "B": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 } } },
 
       { "name": "chain_wear_12", "label": "摩耗（×：1/2以上 使用禁止）",
         "excel": {
-            "B": { "type": "circle", "cell": "D9", "dx": 2, "dy": 2 },
-            "C": { "type": "none", "cell": "D9", "dx": 2, "dy": 2 } } }
+            "B": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 },
+            "C": { "type": "icon", "cell": "D9", "dx": 2, "dy": 2 } } }
     ]
   },
   {
@@ -164,65 +164,65 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     {
       "name": "seat_crack","label": "ヒビ",
       "excel": {
-        "B": { "type": "circle", "cell": "D10", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D10", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "seat_break","label": "割れ",
       "excel": {
-        "B": { "type": "circle", "cell": "D10", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D10", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "seat_deform","label": "湾曲等変形",
       "excel": {
-        "B": { "type": "circle", "cell": "D10", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D10", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "seat_damage","label": "破損",
       "excel": {
-        "B": { "type": "circle", "cell": "D10", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D10", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "seat_rot","label": "腐朽",
       "excel": {
-        "B": { "type": "circle", "cell": "D10", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D10", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "seat_metal_wear_13","label": "金具の摩耗（×：1/3以上）",
       "excel": {
-        "B": { "type": "circle", "cell": "D10", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D10", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "seat_metal_wear_12","label": "金属の摩耗（×：1/2以上 使用禁止）",
       "excel": {
-        "B": { "type": "circle", "cell": "D10", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D10", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "seat_bolt_loose",
       "label": "ボルト・袋ナットの緩み",
       "excel": {
-        "B": { "type": "circle", "cell": "D10", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D10", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "seat_bolt_missing","label": "欠落",
       "excel": {
-        "B": { "type": "circle", "cell": "D10", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D10", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D10", "dx": 2, "dy": 2 }
       }
     }
   ]
@@ -233,43 +233,43 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     {
       "name": "fence_wobble","label": "ぐらつき",
       "excel": {
-        "B": { "type": "circle", "cell": "D11", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D11", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "fence_damage","label": "破損",
       "excel": {
-        "B": { "type": "circle", "cell": "D11", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D11", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "fence_deform","label": "変形",
       "excel": {
-        "B": { "type": "circle", "cell": "D11", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D11", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "fence_corrosion","label": "腐食",
       "excel": {
-        "B": { "type": "circle", "cell": "D11", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D11", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "fence_joint_loose","label": "〔接合部・ボルト〕緩み",
       "excel": {
-        "B": { "type": "circle", "cell": "D11", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D11", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "fence_missing","label": "欠落",
       "excel": {
-        "B": { "type": "circle", "cell": "D11", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D11", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D11", "dx": 2, "dy": 2 }
       }
     }
   ]
@@ -280,15 +280,15 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     {
       "name": "other_sharp","label": "異物",
       "excel": {
-        "B": { "type": "circle", "cell": "D12", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D12", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D12", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D12", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "other_sign","label": "落書き",
       "excel": {
-        "B": { "type": "circle", "cell": "D12", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D12", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D12", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D12", "dx": 2, "dy": 2 }
       }
     }
   ]
@@ -299,22 +299,22 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     {
       "name": "base_sink","label": "基礎の露出",
       "excel": {
-        "B": { "type": "circle", "cell": "D13", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D13", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D13", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D13", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "base_crack","label": "亀裂",
       "excel": {
-        "B": { "type": "circle", "cell": "D13", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D13", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D13", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D13", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "base_expose","label": "破損",
       "excel": {
-        "B": { "type": "circle", "cell": "D13", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D13", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D13", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D13", "dx": 2, "dy": 2 }
       }
     }
   ]
@@ -325,43 +325,43 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     {
       "name": "ground_uneven","label": "大きな凹凸",
       "excel": {
-        "B": { "type": "circle", "cell": "D14", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D14", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "ground_exposed_stone_root","label": "石や根の露出",
       "excel": {
-        "B": { "type": "circle", "cell": "D14", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D14", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "ground_foreign_object","label": "異物",
       "excel": {
-        "B": { "type": "circle", "cell": "D14", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D14", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "ground_mat_flip","label": "マットのめくれ",
       "excel": {
-        "B": { "type": "circle", "cell": "D14", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D14", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "ground_mat_damage","label": "マットの破損",
       "excel": {
-        "B": { "type": "circle", "cell": "D14", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D14", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 }
       }
     },
     {
       "name": "ground_tree_branch","label": "樹木の枝",
       "excel": {
-        "B": { "type": "circle", "cell": "D14", "dx": 2, "dy": 2 },
-        "C": { "type": "none", "cell": "D14", "dx": 2, "dy": 2 }
+        "B": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 },
+        "C": { "type": "icon", "cell": "D14", "dx": 2, "dy": 2 }
       }
     }
   ]
@@ -377,7 +377,7 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
             // 実施措置（F6:G9）
             // ==============================
             {
-                "type": "check",
+                "type": "icon",
                 "cell": "F6",
                 "dx": 2,
                 "dy": 4,
@@ -406,7 +406,7 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
             // 総合結果（F13:G15）
             // ==============================
             {
-                "type": "check",
+                "type": "icon",
                 "cell": "F14",
                 "dx": 2,
                 "dy": 3,
@@ -424,7 +424,7 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
             // 対応方針（H6:H10）
             // ==============================
             {
-                "type": "check",
+                "type": "icon",
                 "cell": "H7",
                 "dx": 1,
                 "dy": 3,
@@ -449,7 +449,7 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
                 "text": "6"
             },
             {
-                "type": "circle",
+                "type": "icon",
                 "cell": "H11",
                 "dx": 30,
                 "dy": 3,
@@ -460,7 +460,7 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
             // 本格的使用禁止（H11）
             // ==============================
             {
-                "type": "check",
+                "type": "icon",
                 "cell": "H11",
                 "dx": 55,
                 "dy": 3,

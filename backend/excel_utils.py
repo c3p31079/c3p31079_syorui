@@ -12,15 +12,14 @@ def create_excel_template():
     wb = load_workbook(TEMPLATE_PATH)
     ws = wb.active
     ws.title = "点検チェックシート"
-
     return wb, ws
 
 
 def apply_items(ws, items):
     for item in items:
+        print("IMAGE ITEM", item)
 
-        # --- 安全チェック ---
-        if "cell" not in item:
+        if "cell" not in item or "type" not in item:
             continue
 
         cell = item["cell"]
@@ -35,7 +34,7 @@ def apply_items(ws, items):
             continue
 
         # ======================
-        # PNGアイコン（完全にフロント主導）
+        # PNGアイコン
         # ======================
         if item["type"] == "icon":
             icon_file = item.get("icon")
@@ -47,10 +46,7 @@ def apply_items(ws, items):
                 print(f"[WARN] icon not found: {icon_path}")
                 continue
 
-            img = Image(icon_path)
-            img.anchor = cell
-            ws.add_image(img)
-
+            _insert_image(ws, cell, icon_path, dx, dy)
 
 
 def _insert_image(ws, cell, icon_path, dx, dy):
@@ -64,14 +60,3 @@ def _insert_image(ws, cell, icon_path, dx, dy):
     img.top = dy
 
     ws.add_image(img)
-
-
-def _insert_text(ws, cell, text, dx, dy):
-    base_cell = ws[cell]
-
-    safe = str(text).replace("\r", "").replace("\n", " ")
-
-    if base_cell.value:
-        base_cell.value = f"{base_cell.value} {safe}"
-    else:
-        base_cell.value = safe
