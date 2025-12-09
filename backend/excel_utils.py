@@ -13,22 +13,43 @@ def create_excel_template():
     ws = wb.active
     ws.title = "点検チェックシート"
 
-    # テンプレ最小構成（実際は既存を想定）
-    ws["C2"] = ""
-    ws["H2"] = ""
-    ws["H3"] = ""
-
     return wb, ws
 
 
 def apply_items(ws, items):
     for item in items:
+        if not item or "type" not in item:
+            continue
 
         cell = item["cell"]
-        x = item.get("x_offset", 0)
-        y = item.get("y_offset", 0)
 
-        target_cell = ws[cell]
+        if item["type"] == "text":
+            _insert_text(
+                ws,
+                cell,
+                item.get("text", ""),
+                item.get("dx", 0),
+                item.get("dy", 0)
+            )
+
+        elif item["type"] in ("circle", "check", "triangle", "cross"):
+            icon_file = {
+                "circle": "circle.png",
+                "check": "check.png",
+                "triangle": "triangle.png",
+                "cross": "cross.png"
+            }[item["type"]]
+
+            icon_path = os.path.join(ICON_DIR, icon_file)
+            if os.path.exists(icon_path):
+                _insert_image(
+                    ws,
+                    cell,
+                    icon_path,
+                    item.get("dx", 0),
+                    item.get("dy", 0)
+                )
+
 
         # 文字入れ
         if not item or "type" not in item:
@@ -73,11 +94,11 @@ def _insert_image(ws, cell, icon_path, dx, dy):
 
 
 def _insert_text(ws, cell, text, dx, dy):
-    """
-    セルを基準に文字を描画的に微調整
-    """
     base_cell = ws[cell]
+
+    safe = str(text).replace("\r", "").replace("\n", " ")
+
     if base_cell.value:
-        base_cell.value = str(base_cell.value) + " " + text
+        base_cell.value = f"{base_cell.value} {safe}"
     else:
-        base_cell.value = text
+        base_cell.value = safe
