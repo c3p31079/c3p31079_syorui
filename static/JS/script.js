@@ -8,6 +8,19 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     // HTML から値を取得
     // ============================
 
+    // ============================
+    // 判定結果をHTMLから収集（★必須）
+    // ============================
+    const inspectionResults = {};
+    document.querySelectorAll("[name]").forEach(el => {
+        if (el.value === "A" || el.value === "B" || el.value === "C") {
+            inspectionResults[el.name] = el.value;
+        }
+    });
+
+    console.log("=== inspectionResults ===", inspectionResults);
+
+
     const data = {
         search_park: document.getElementById("search_park")?.value || "",
         inspection_year: document.getElementById("inspection_year")?.value || "",
@@ -493,7 +506,13 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
             if (!item.excel || !item.excel[result]) return;
 
             const excelDef = item.excel[result];
-            if (!excelDef.icon) return;
+            data.items.push({
+                type: "icon",
+                cell: excelDef.cell,
+                dx: excelDef.dx ?? 0,
+                dy: excelDef.dy ?? 0,
+                icon: excelDef.icon
+            });
 
             data.items.push({
             type: "icon",
