@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         console.log("=== inspectionResults ===", inspectionResults);
 
+        
         // ============================
         // 2. データ構造作成
         // ============================

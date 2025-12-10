@@ -87,3 +87,4 @@ def generate_excel():
 if __name__ == "__main__":
     # 外部アクセスしたい場合は host='0.0.0.0' に変更
     app.run(debug=True)
+
