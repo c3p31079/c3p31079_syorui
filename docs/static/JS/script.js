@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
             search_park: document.getElementById("search_park")?.value || "",
             inspection_year: document.getElementById("inspection_year")?.value || "",
             install_year_num: document.getElementById("install_year_num")?.value || "",
-            inspection_sections: window.inspection_sections ?? [
+            inspection_sections: window.inspection_sections ??[
   {
     "section": "柱・梁（本体）",
     "items": [
@@ -373,7 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
             items: []
         };
 
-        // === 点検結果取得 ===
+// === 点検結果取得 ===
         const inspectionResults = {};
         document.querySelectorAll("tbody tr").forEach(tr => {
             const radioChecked = tr.querySelector("input[type='radio']:checked");
