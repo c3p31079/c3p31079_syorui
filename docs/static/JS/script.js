@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("tbody tr").forEach(tr => {
             const radioChecked = tr.querySelector("input[type='radio']:checked");
             if (radioChecked && radioChecked.name) {
-                inspectionResults[radioChecked.name] = radioChecked.value; // "A" / "B" / "C"
+                inspectionResults[radioChecked.name] = radioChecked.value;
             }
         });
         console.log("=== inspectionResults ===", inspectionResults);
@@ -390,27 +390,77 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         // ============================
-        // 4. ラジオボタン結果を反映
+        // 3. tbody ラジオ結果を Excel 用に変換
         // ============================
         baseSections.forEach(section => {
-          section.items.forEach(item => {
-            const result = inspectionResults[item.name] || "A"; // 未選択は A
-            if (result === "A") return; // 無視
+            section.items.forEach(item => {
+                const result = inspectionResults[item.name] || "A"; // 未選択は A
+                if (result === "A") return;
 
-            const excelDef = item.excel?.[result];
-            if (!excelDef) return;
+                const excelDef = item.excel?.[result];
+                if (!excelDef) return;
 
-            data.items.push({
-                type: excelDef.type,
-                cell: excelDef.cell,
-                dx: excelDef.dx ?? 0,
-                dy: excelDef.dy ?? 0,
-                icon: excelDef.icon,
-                text: excelDef.text ?? ""
+                data.items.push({
+                    type: excelDef.type,
+                    cell: excelDef.cell,
+                    dx: excelDef.dx ?? 0,
+                    dy: excelDef.dy ?? 0,
+                    icon: excelDef.icon,
+                    text: excelDef.text ?? ""
+                });
             });
-          });
         });
 
+        // ============================
+        // 4. CheckSheet_measure_area 内の情報を取得
+        // ============================
+        const measureArea = document.querySelector(".CheckSheet_measure_area");
+        if (measureArea) {
+
+            // チェックボックス
+            measureArea.querySelectorAll("input[type='checkbox']").forEach(cb => {
+                if (cb.checked) {
+                    data.items.push({
+                        type: "checkbox",
+                        name: cb.name,
+                        value: cb.value
+                    });
+                }
+            });
+
+            // 数値入力（number）
+            measureArea.querySelectorAll("input[type='number']").forEach(numInput => {
+                if (numInput.value) {
+                    data.items.push({
+                        type: "number",
+                        name: numInput.name,
+                        value: numInput.value
+                    });
+                }
+            });
+
+            // テキスト入力
+            measureArea.querySelectorAll("input[type='text'], textarea").forEach(txtInput => {
+                if (txtInput.value.trim()) {
+                    data.items.push({
+                        type: "text",
+                        name: txtInput.name,
+                        value: txtInput.value.trim()
+                    });
+                }
+            });
+
+            // ラジオボタン
+            measureArea.querySelectorAll("input[type='radio']").forEach(rb => {
+                if (rb.checked) {
+                    data.items.push({
+                        type: "radio",
+                        name: rb.name,
+                        value: rb.value
+                    });
+                }
+            });
+        }
 
         console.log("=== Excelに送信される items ===", data.items);
 
