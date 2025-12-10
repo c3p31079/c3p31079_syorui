@@ -881,30 +881,33 @@
     </form>
 
 <script>
-/* ① DOMContentLoaded 開始 */
 document.addEventListener("DOMContentLoaded", function () {
 
-    const saveBtn = document.getElementById("downloadExcelBtn");
+    const downloadBtn = document.getElementById("downloadExcelBtn");
+    if (!downloadBtn) return;
 
-    /* ② click イベント開始 */
-    saveBtn.addEventListener("click", async (e) => {
+    downloadBtn.addEventListener("click", async function (e) {
         e.preventDefault();
         e.stopPropagation();
 
-        console.log("Excelダウンロード処理開始");
+        console.log("Excel生成処理 開始");
 
-        // -----------------------------
+        // =============================
         // 基本情報
-        // -----------------------------
+        // =============================
         const parkName = document.getElementById("search_park")?.value || "";
         const inspectionYear = document.getElementById("inspection_year")?.value || "";
         const installYearNum = document.getElementById("install_year_num")?.value || "";
 
+        // ★ 毎回必ず初期化（重要）
         let items = [];
 
-        // -----------------------------
-        // 点検結果
-        // -----------------------------
+        // =============================
+        // 点検結果（ラジオボタン）
+        // A：無視
+        // B：triangle.png
+        // C：none.png
+        // =============================
         const inspectionMap = {
             pillar_wobble: { cell: "D6" }
         };
@@ -915,8 +918,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const grade = checked.value;
             const cell = inspectionMap[name].cell;
-
-            if (grade === "A") return;
 
             if (grade === "B") {
                 items.push({
@@ -933,28 +934,34 @@ document.addEventListener("DOMContentLoaded", function () {
                     icon: "none.png"
                 });
             }
-
+            // A は何もしない
         });
 
-        // -----------------------------
-        // 措置
-        // -----------------------------
+        // =============================
+        // 措置（チェックボックス）
+        // =============================
         const actionCheckboxes = [
-            {id:"action_grease", cell:"F6"},
-            {id:"action_bolt", cell:"F7"},
-            {id:"action_hanger", cell:"F8", num_id:"hanger_count"},
-            {id:"action_chain", cell:"F9", num_id:"chain_count"},
-            {id:"action_seat", cell:"F10", num_id:"seat_count"},
-            {id:"action_removal", cell:"F11"},
-            {id:"action_other", cell:"F12", text_id:"action_other_detail"}
+            { id: "action_grease",  cell: "F6" },
+            { id: "action_bolt",    cell: "F7" },
+            { id: "action_hanger",  cell: "F8",  num_id: "hanger_count" },
+            { id: "action_chain",   cell: "F9",  num_id: "chain_count" },
+            { id: "action_seat",    cell: "F10", num_id: "seat_count" },
+            { id: "action_removal", cell: "F11" },
+            { id: "action_other",   cell: "F12", text_id: "action_other_detail" }
         ];
 
         actionCheckboxes.forEach(a => {
             const cb = document.getElementById(a.id);
             if (!cb || !cb.checked) return;
 
-            items.push({ type: "icon", cell: a.cell, icon: "check.png" });
+            // チェックアイコン
+            items.push({
+                type: "icon",
+                cell: a.cell,
+                icon: "check.png"
+            });
 
+            // 数値（○箇所）
             if (a.num_id) {
                 const numEl = document.getElementById(a.num_id);
                 if (numEl && numEl.value) {
@@ -966,45 +973,43 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
+            // 自由記述
             if (a.text_id) {
                 const textEl = document.getElementById(a.text_id);
-                if (textEl && textEl.value) {
+                if (textEl && textEl.value.trim() !== "") {
                     items.push({
                         type: "text",
                         cell: a.cell,
-                        text: textEl.value
+                        text: textEl.value.trim()
                     });
                 }
             }
-
         });
-        console.log("Excel出力用データ", items);
 
-        // -----------------------------
-        // Backend送信
-        // -----------------------------
-        const payload = {
-            park_name: parkName,
-            inspection_year: inspectionYear,
-            install_year: installYearNum,
-            items: items
-        };
+        console.log("送信 items", items);
 
+        // =============================
+        // Backend に送信 → Excel生成 → DL
+        // =============================
         try {
-            await fetch("/api/export-excel", {
+            const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({
-                    parkName,
-                    inspectionYear,
-                    installYearNum,
-                    items
+                    park_name: parkName,
+                    inspection_year: inspectionYear,
+                    install_year: installYearNum,
+                    items: items
                 })
             });
 
-            if (!res.ok) throw new Error("Excel生成失敗");
+            if (!response.ok) {
+                throw new Error("Excel生成に失敗しました");
+            }
 
-            const blob = await res.blob();
+            const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
 
             const a = document.createElement("a");
@@ -1013,17 +1018,19 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.appendChild(a);
             a.click();
             a.remove();
+
             window.URL.revokeObjectURL(url);
+
+            console.log("Excelダウンロード完了");
 
         } catch (err) {
             console.error(err);
             alert("Excelのダウンロードに失敗しました");
         }
-
-    }); // ←② click の終わり
-
-}); // ←① DOMContentLoaded の終わり
+    });
+});
 </script>
+
 
 
 
