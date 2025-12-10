@@ -38,21 +38,21 @@
 #     # 他端末からアクセス可能にする場合 host=0.0.0.0 に変更
 #     app.run(host="127.0.0.1", port=5000, debug=True)
 
-
 from flask import Flask, request, send_file
 from flask_cors import CORS
 import io
 from excel_utils import create_excel_template, apply_items
 
 app = Flask(__name__)
-CORS(app)  # 全オリジンからのアクセスを許可
+# GitHub Pages など任意のオリジンを許可
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
     data = request.json
     print("=== items received ===")
     print(data.get("items"))
-    
+
     items = data.get("items", [])
 
     wb, ws = create_excel_template()
@@ -74,4 +74,4 @@ def home():
     return "Backend running"
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
