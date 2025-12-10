@@ -1,40 +1,34 @@
-// ============================
-// Excel ダウンロード処理
-// ============================
-
 const downloadBtn = document.getElementById("downloadExcelBtn");
+
 if (downloadBtn) {
-    downloadBtn.type = "button"; // ★これが最重要っぽい
-}
+    downloadBtn.type = "button"; // ★重要
+    downloadBtn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-downloadBtn.addEventListener("click", async function (e) {
-    e.preventDefault();
-    e.stopPropagation();
+        const btn = this;
+        btn.disabled = true;
+        console.log("💾 Excelダウンロード処理開始");
 
-    const btn = this;   // ★thisを固定
-    btn.disabled = true;
-    console.log("💾 Excelダウンロード処理開始");
+        // ============================
+        // 判定結果をHTMLから収集
+        // ============================
+        const inspectionResults = {};
+        document.querySelectorAll("input[type='radio']:checked").forEach(el => {
+            if (["B","C"].includes(el.value)) {
+                inspectionResults[el.name] = el.value;
+            }
+        });
+        console.log("=== inspectionResults ===", inspectionResults);
 
-    // ============================
-    // 判定結果をHTMLから収集
-    // ============================
-    const inspectionResults = {};
-    document.querySelectorAll("input[type='radio']:checked").forEach(el => {
-        if (["B","C"].includes(el.value)) {
-            inspectionResults[el.name] = el.value;
-        }
-    });
-
-    console.log("=== inspectionResults ===", inspectionResults);
-
-    // ============================
-    // データ構造作成
-    // ============================
-    const data = {
-        search_park: document.getElementById("search_park")?.value || "",
-        inspection_year: document.getElementById("inspection_year")?.value || "",
-        install_year_num: document.getElementById("install_year_num")?.value || "",
-        inspection_sections: [
+        // ============================
+        // データ構造作成
+        // ============================
+        const data = {
+            search_park: document.getElementById("search_park")?.value || "",
+            inspection_year: document.getElementById("inspection_year")?.value || "",
+            install_year_num: document.getElementById("install_year_num")?.value || "",
+            inspection_sections: window.inspection_sections || [
   {
     "section": "柱・梁（本体）",
     "items": [
@@ -507,22 +501,22 @@ downloadBtn.addEventListener("click", async function (e) {
     // B / C → Excel Items 変換
     // ============================
     data.inspection_sections.forEach(section => {
-        section.items.forEach(item => {
-            const result = inspectionResults[item.name];
-            if (!["B","C"].includes(result)) return;
+            section.items.forEach(item => {
+                const result = inspectionResults[item.name];
+                if (!["B","C"].includes(result)) return;
 
-            const excelDef = item.excel?.[result];
-            if (!excelDef) return;
+                const excelDef = item.excel?.[result];
+                if (!excelDef) return;
 
-            data.items.push({
-                type: "icon",
-                cell: excelDef.cell,
-                dx: excelDef.dx ?? 0,
-                dy: excelDef.dy ?? 0,
-                icon: excelDef.icon
+                data.items.push({
+                    type: "icon",
+                    cell: excelDef.cell,
+                    dx: excelDef.dx ?? 0,
+                    dy: excelDef.dy ?? 0,
+                    icon: excelDef.icon
+                });
             });
         });
-    });
 
     console.log("=== Excelに送信される items ===", data.items);
 
@@ -532,29 +526,30 @@ downloadBtn.addEventListener("click", async function (e) {
     // ============================
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
+            const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
 
-        if (!response.ok) throw new Error("Excel生成に失敗しました");
+            if (!response.ok) throw new Error("Excel生成に失敗しました");
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
 
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "点検チェックシート.xlsx";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "点検チェックシート.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
 
-    } catch (error) {
-        alert(error.message);
-        console.error(error);
-    } finally {
-        btn.disabled = false;   // ✅ 必ず元に戻す
-    }
-});
+        } catch (error) {
+            alert(error.message);
+            console.error(error);
+        } finally {
+            btn.disabled = false;
+        }
+    });
+}

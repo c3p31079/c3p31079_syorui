@@ -59,17 +59,14 @@ def _insert_image(ws, cell, icon_path, dx, dy):
     img = Image(icon_path)
 
     col_letter = ''.join(filter(str.isalpha, cell))
-    row = int(''.join(filter(str.isdigit, cell)))
-    col = column_index_from_string(col_letter) - 1
+    row_number = int(''.join(filter(str.isdigit, cell)))
+    col_index = column_index_from_string(col_letter) - 1
 
-    marker = AnchorMarker(
-        col=col,
-        colOff=dx * 9525,  # px → EMU
-        row=row - 1,
-        rowOff=dy * 9525
-    )
+    # px → EMU (Excel単位)
+    col_off = dx * 9525
+    row_off = dy * 9525
 
+    marker = AnchorMarker(col=col_index, colOff=col_off, row=row_number-1, rowOff=row_off)
     size = XDRPositiveSize2D(img.width * 9525, img.height * 9525)
     img.anchor = OneCellAnchor(_from=marker, ext=size)
-
     ws.add_image(img)
