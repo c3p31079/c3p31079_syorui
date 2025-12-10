@@ -498,9 +498,9 @@ if (downloadBtn) {
     
     
     // ============================
-    // B / C → Excel Items 変換
-    // ============================
-    data.inspection_sections.forEach(section => {
+        // B / C → Excel アイテム変換
+        // ============================
+        data.inspection_sections.forEach(section => {
             section.items.forEach(item => {
                 const result = inspectionResults[item.name];
                 if (!["B","C"].includes(result)) return;
@@ -518,14 +518,12 @@ if (downloadBtn) {
             });
         });
 
-    console.log("=== Excelに送信される items ===", data.items);
+        console.log("=== Excelに送信される items ===", data.items);
 
-
-    // ============================
-    // Flask API に POST
-    // ============================
-
-    try {
+        // ============================
+        // Flask API に POST
+        // ============================
+        try {
             const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
