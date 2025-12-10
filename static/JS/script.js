@@ -486,20 +486,27 @@ downloadBtn.addEventListener("click", async function (e) {
     );
     
     
+        // ============================
         // 3. B/C/A → Excel items 変換
+        // ============================
         data.inspection_sections.forEach(section => {
             section.items.forEach(item => {
                 const result = inspectionResults[item.name] || "A";
+
+                // Aは無視
+                if (result === "A") return;
+
                 const excelDef = item.excel?.[result];
                 if (!excelDef) return;
 
+                // Excel用itemsに追加
                 data.items.push({
                     type: excelDef.type,
                     cell: excelDef.cell,
                     dx: excelDef.dx ?? 0,
                     dy: excelDef.dy ?? 0,
                     icon: excelDef.icon,
-                    text: excelDef.text
+                    text: excelDef.text ?? ""
                 });
             });
         });

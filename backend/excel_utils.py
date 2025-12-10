@@ -39,8 +39,6 @@ def apply_items(ws, items):
         # アイコン挿入
         if item["type"] == "icon":
             icon_file = item.get("icon")
-            if not icon_file:
-                continue
 
             icon_path = os.path.join(ICON_DIR, icon_file)
             if not os.path.exists(icon_path):
