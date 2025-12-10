@@ -4,27 +4,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     downloadBtn.addEventListener("click", async function (e) {
         e.preventDefault();
-        e.stopPropagation();
-        const btn = this;
-        btn.disabled = true;
+        this.disabled = true;
+
         console.log("💾 Excelダウンロード処理開始");
-        document.getElementById("downloadBtn")
 
         // ============================
-        // 1. tbody 全行から inspectionResults 作成
+        // 1. tbody 全行からラジオボタン結果取得
         // ============================
         const inspectionResults = {};
         document.querySelectorAll("tbody tr").forEach(tr => {
             const radioChecked = tr.querySelector("input[type='radio']:checked");
             if (radioChecked && radioChecked.name) {
-                inspectionResults[radioChecked.name] = radioChecked.value;
+                inspectionResults[radioChecked.name] = radioChecked.value; // "A" / "B" / "C"
             }
         });
         console.log("=== inspectionResults ===", inspectionResults);
 
-        
         // ============================
-        // 2. データ構造作成
+        // 2. baseSections と items の準備
         // ============================
         const baseSections = window.inspection_sections ?? [
   {
@@ -393,26 +390,29 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         // ============================
-        // 3. ハードコードの Excel 固定項目
+        // 3. 固定 Excel 項目
         // ============================
         data.items.push(
-        { type: "icon", cell: "F6", dx: 2, dy: 4, icon: "check.png" },
-        { type: "text", cell: "F8", dx: 35, dy: 0, text: "2" },
-        { type: "text", cell: "F10", dx: 4, dy: 18, text: "吊金具に摩耗が見られる" },
-        { type: "icon", cell: "F14", dx: 2, dy: 3, icon: "check.png" },
-        { type: "text", cell: "F15", dx: 22, dy: 0, text: "落下防止のため使用注意" },
-        { type: "icon", cell: "H7", dx: 1, dy: 3, icon: "check.png" },
-        { type: "text", cell: "H10", dx: 14, dy: 0, text: "部品調達後対応" },
-        { type: "text", cell: "H11", dx: 8, dy: 0, text: "6" },
-        { type: "icon", cell: "H11", dx: 30, dy: 3, icon: "circle.png" },
-        { type: "icon", cell: "H11", dx: 55, dy: 3, icon: "check.png" },
-        { type: "text", cell: "H12", dx: 2, dy: 18, text: "次回点検時に重点確認" }
-    );
+            { type: "icon", cell: "F6", dx: 2, dy: 4, icon: "check.png" },
+            { type: "text", cell: "F8", dx: 35, dy: 0, text: "2" },
+            { type: "text", cell: "F10", dx: 4, dy: 18, text: "吊金具に摩耗が見られる" },
+            { type: "icon", cell: "F14", dx: 2, dy: 3, icon: "check.png" },
+            { type: "text", cell: "F15", dx: 22, dy: 0, text: "落下防止のため使用注意" },
+            { type: "icon", cell: "H7", dx: 1, dy: 3, icon: "check.png" },
+            { type: "text", cell: "H10", dx: 14, dy: 0, text: "部品調達後対応" },
+            { type: "text", cell: "H11", dx: 8, dy: 0, text: "6" },
+            { type: "icon", cell: "H11", dx: 30, dy: 3, icon: "circle.png" },
+            { type: "icon", cell: "H11", dx: 55, dy: 3, icon: "check.png" },
+            { type: "text", cell: "H12", dx: 2, dy: 18, text: "次回点検時に重点確認" }
+        );
 
-    data.inspection_sections.forEach(section => {
+        // ============================
+        // 4. ラジオボタン結果を反映
+        // ============================
+        baseSections.forEach(section => {
             section.items.forEach(item => {
                 const result = inspectionResults[item.name] || "A"; // 未選択は A
-                if (result === "A") return;
+                if (result === "A") return; // 無視
 
                 const excelDef = item.excel?.[result];
                 if (!excelDef) return;
@@ -451,11 +451,12 @@ document.addEventListener("DOMContentLoaded", () => {
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
+
         } catch (error) {
             alert(error.message);
             console.error(error);
         } finally {
-            btn.disabled = false;
+            this.disabled = false;
         }
     });
 });
