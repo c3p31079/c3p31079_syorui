@@ -876,7 +876,13 @@
             </div>
         </div>
 
- <script src="static/script.js?v=20251210">
+<script>
+  const script = document.createElement("script");
+  script.src = `script.js?v=${Date.now()}`;
+  document.head.appendChild(script);
+</script>
+
+ <script>
 document.addEventListener("DOMContentLoaded", function () {
     const saveBtn = document.getElementById("downloadExcelBtn");
 
