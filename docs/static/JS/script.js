@@ -372,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
             items: []
         };
 
-        // === 1. tbody 点検結果 ===
+        // === 点検結果取得 ===
         const inspectionResults = {};
         document.querySelectorAll("tbody tr").forEach(tr => {
             const radioChecked = tr.querySelector("input[type='radio']:checked");
@@ -381,6 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // inspection_sectionsに基づいてExcel用items作成
         data.inspection_sections.forEach(section => {
             section.items.forEach(item => {
                 const result = inspectionResults[item.name] || "A";
@@ -400,7 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // === 2. CheckSheet_measure_area 入力 ===
+        // === CheckSheet_measure_area 入力 ===
         const measureArea = document.querySelector(".CheckSheet_measure_area");
         if (measureArea) {
             measureArea.querySelectorAll("input,textarea").forEach(input => {
@@ -412,7 +413,30 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // === 3. 点検時に実施した措置 ===
+        // === 措置・所見・総合結果・対応方針・対応予定時期・禁止措置・備考 ===
+        const appendItems = (map, type="checkbox") => {
+            Object.keys(map).forEach(name => {
+                const el = document.getElementById(name);
+                if (el && (el.checked || el.type === "radio")) {
+                    const cfg = map[name];
+                    const item = {
+                        type: el.type,
+                        name: el.type === "radio" ? "overall_result" : name,
+                        value: el.value,
+                        cell: cfg.cell,
+                        dx: cfg.dx,
+                        dy: cfg.dy,
+                        icon: "icons/check.png"
+                    };
+                    if (cfg.inputId) {
+                        const input = document.getElementById(cfg.inputId);
+                        if (input && input.value) item.text = input.value;
+                    }
+                    data.items.push(item);
+                }
+            });
+        };
+
         const actionMap = {
             "action_grease": { cell: "F6", dx: 0, dy: 0 },
             "action_bolt": { cell: "F6", dx: 20, dy: 0 },
@@ -422,29 +446,8 @@ document.addEventListener("DOMContentLoaded", () => {
             "action_removal": { cell: "F6", dx: 20, dy: 20 },
             "action_other": { cell: "F6", dx: 20, dy: 40, inputId: "action_other_detail" }
         };
+        appendItems(actionMap);
 
-        Object.keys(actionMap).forEach(name => {
-            const cb = document.getElementById(name);
-            if (cb && cb.checked) {
-                const cfg = actionMap[name];
-                const item = {
-                    type: "checkbox",
-                    name: name,
-                    value: cb.value,
-                    cell: cfg.cell,
-                    dx: cfg.dx,
-                    dy: cfg.dy,
-                    icon: "icons/check.png"
-                };
-                if (cfg.inputId) {
-                    const input = document.getElementById(cfg.inputId);
-                    if (input && input.value) item.text = input.value;
-                }
-                data.items.push(item);
-            }
-        });
-
-        // === 4. 所見 ===
         const observations = document.getElementById("observations");
         if (observations && observations.value.trim()) {
             data.items.push({
@@ -456,36 +459,14 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // === 5. 総合結果 ===
         const overallMap = {
             "overall_a": { cell: "F13", dx: 0, dy: 0 },
             "overall_b": { cell: "F13", dx: 0, dy: 20 },
             "overall_c": { cell: "F13", dx: 0, dy: 40 },
             "overall_d": { cell: "F13", dx: 0, dy: 60, inputId: "overall_d_detail" }
         };
+        appendItems(overallMap, "radio");
 
-        Object.keys(overallMap).forEach(id => {
-            const radio = document.getElementById(id);
-            if (radio && radio.checked) {
-                const cfg = overallMap[id];
-                const item = {
-                    type: "radio",
-                    name: "overall_result",
-                    value: radio.value,
-                    cell: cfg.cell,
-                    dx: cfg.dx,
-                    dy: cfg.dy,
-                    icon: "icons/check.png"
-                };
-                if (cfg.inputId) {
-                    const input = document.getElementById(cfg.inputId);
-                    if (input && input.value) item.text = input.value;
-                }
-                data.items.push(item);
-            }
-        });
-
-        // === 6. 対応方針 ===
         const planMap = {
             "plan_maintenance": { cell: "H6", dx: 0, dy: 0 },
             "plan_repair": { cell: "H6", dx: 20, dy: 0 },
@@ -494,29 +475,8 @@ document.addEventListener("DOMContentLoaded", () => {
             "plan_removal": { cell: "H6", dx: 0, dy: 40 },
             "plan_other": { cell: "H6", dx: 20, dy: 40, inputId: "plan_other_detail" }
         };
+        appendItems(planMap);
 
-        Object.keys(planMap).forEach(name => {
-            const cb = document.getElementById(name);
-            if (cb && cb.checked) {
-                const cfg = planMap[name];
-                const item = {
-                    type: "checkbox",
-                    name: name,
-                    value: cb.value,
-                    cell: cfg.cell,
-                    dx: cfg.dx,
-                    dy: cfg.dy,
-                    icon: "icons/check.png"
-                };
-                if (cfg.inputId) {
-                    const input = document.getElementById(cfg.inputId);
-                    if (input && input.value) item.text = input.value;
-                }
-                data.items.push(item);
-            }
-        });
-
-        // === 7. 対応予定時期 ===
         const month = document.getElementById("response_month")?.value;
         ["period_early","period_mid","period_late"].forEach(id => {
             const radio = document.getElementById(id);
@@ -534,7 +494,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // === 8. 本格的使用禁止措置 ===
         const prohibition_cb = document.getElementById("prohibition_measure");
         if (prohibition_cb && prohibition_cb.checked) {
             data.items.push({
@@ -558,7 +517,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // === 9. 備考 ===
         const remarks = document.getElementById("remarks");
         if (remarks && remarks.value.trim()) {
             data.items.push({
@@ -572,7 +530,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         console.log("=== Excelに送信される items ===", data.items);
 
-        // === 10. Flask API へ POST ===
+        // === Flask API へ POST ===
         try {
             const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
                 method: "POST",
