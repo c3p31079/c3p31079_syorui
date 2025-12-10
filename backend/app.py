@@ -2,6 +2,7 @@ from flask import Flask, request, send_file
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
+from flask_cors import CORS
 from openpyxl.utils import column_index_from_string
 import io
 import os
@@ -14,6 +15,7 @@ TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
 ICON_DIR = os.path.join(BASE_DIR, "icons")
 
 app = Flask(__name__)
+CORS(app)
 
 def insert_icon(ws, cell, icon_file, dx=0, dy=0):
     icon_path = os.path.join(ICON_DIR, icon_file)
