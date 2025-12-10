@@ -433,23 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         };
 
-        // ==========================
-        // ●点検時に実施した措置 (F6:G9)
-        // ==========================
-        
-        
-        const greaseCount = document.getElementById("grease_count")?.value || 0;
-        const boltCount = document.getElementById("bolt_count")?.value || 0;
-        
-        let actionText = "●点検時に実施した措置\n";
-        actionText += `□グリース・オイル等の注入※1 (${greaseCount}箇所)\n`;
-        actionText += `□ボルト・ナットの増し締め・交換 (${boltCount}箇所)\n`;
-        actionText += `□吊金具の交換 (${document.getElementById("hanger_count")?.value || 0}箇所)\n`;
-        actionText += `□チェーンの交換 (${document.getElementById("chain_count")?.value || 0}箇所)\n`;
-        actionText += `□座板の交換 (${document.getElementById("seat_count")?.value || 0}箇所)\n`;
-        actionText += `□石・異物の除去、枝の剪定\n`;
-        actionText += `□その他 (${document.getElementById("action_other_count")?.value || 0})\n`;
-
+      
         data.items.push({
             type: "text",
             name: "action_text",
