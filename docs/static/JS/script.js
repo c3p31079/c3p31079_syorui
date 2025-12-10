@@ -8,9 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         console.log("💾 Excelダウンロード処理開始");
 
-        // ============================
+         
         // 1. tbody 全行からラジオボタン結果取得
-        // ============================
+         
         const inspectionResults = {};
         document.querySelectorAll("tbody tr").forEach(tr => {
             const radioChecked = tr.querySelector("input[type='radio']:checked");
@@ -20,9 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         console.log("=== inspectionResults ===", inspectionResults);
 
-        // ============================
+         
         // 2. baseSections と items の準備
-        // ============================
+         
         const baseSections = window.inspection_sections ?? [
   {
     "section": "柱・梁（本体）",
@@ -389,9 +389,9 @@ document.addEventListener("DOMContentLoaded", () => {
             items: []
         };
 
-        // ============================
+         
         // 3. tbody ラジオ結果を Excel 用に変換
-        // ============================
+         
         baseSections.forEach(section => {
             section.items.forEach(item => {
                 const result = inspectionResults[item.name] || "A"; // 未選択は A
@@ -411,9 +411,9 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // ============================
+         
         // 4. CheckSheet_measure_area 内の情報を取得
-        // ============================
+         
         const measureArea = document.querySelector(".CheckSheet_measure_area");
         if (measureArea) {
 
@@ -464,9 +464,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         console.log("=== Excelに送信される items ===", data.items);
 
-        // ============================
+         
         // 5. Flask API に POST
-        // ============================
         try {
             const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
                 method: "POST",
@@ -493,4 +492,171 @@ document.addEventListener("DOMContentLoaded", () => {
             this.disabled = false;
         }
     });
+
+    document.getElementById("downloadBtn").addEventListener("click", function () {
+    const data = { items: [] };
+
+    //  点検時に実施した措置（チェックボックス＋入力） 
+    const actionMap = {
+        "action_grease": { cell: "F6", dx: 0, dy: 0 },
+        "action_bolt": { cell: "F6", dx: 20, dy: 0 },
+        "action_hanger": { cell: "F6", dx: 0, dy: 20, inputId: "hanger_count" },
+        "action_chain": { cell: "F6", dx: 0, dy: 40, inputId: "chain_count" },
+        "action_seat": { cell: "F6", dx: 0, dy: 60, inputId: "seat_count" },
+        "action_removal": { cell: "F6", dx: 20, dy: 20 },
+        "action_other": { cell: "F6", dx: 20, dy: 40, inputId: "action_other_detail" }
+    };
+
+    Object.keys(actionMap).forEach(name => {
+        const cb = document.getElementById(name);
+        if (cb && cb.checked) {
+            const cfg = actionMap[name];
+            const item = {
+                type: "checkbox",
+                name: name,
+                value: cb.value,
+                cell: cfg.cell,
+                dx: cfg.dx,
+                dy: cfg.dy,
+                icon: "icons/check.png"
+            };
+            if (cfg.inputId) {
+                const input = document.getElementById(cfg.inputId);
+                if (input && input.value) {
+                    item.text = input.value;
+                }
+            }
+            data.items.push(item);
+        }
+    });
+
+    //  所見（テキスト） 
+    const observations = document.getElementById("observations");
+    if (observations && observations.value.trim()) {
+        data.items.push({
+            type: "text",
+            name: "observations",
+            value: observations.value.trim(),
+            cell: "F10",
+            text: observations.value.trim()
+        });
+    }
+
+    //  総合結果（ラジオ＋入力） 
+    const overallMap = {
+        "overall_a": { cell: "F13", dx: 0, dy: 0 },
+        "overall_b": { cell: "F13", dx: 0, dy: 20 },
+        "overall_c": { cell: "F13", dx: 0, dy: 40 },
+        "overall_d": { cell: "F13", dx: 0, dy: 60, inputId: "overall_d_detail" }
+    };
+
+    Object.keys(overallMap).forEach(id => {
+        const radio = document.getElementById(id);
+        if (radio && radio.checked) {
+            const cfg = overallMap[id];
+            const item = {
+                type: "radio",
+                name: "overall_result",
+                value: radio.value,
+                cell: cfg.cell,
+                dx: cfg.dx,
+                dy: cfg.dy,
+                icon: "icons/check.png"
+            };
+            if (cfg.inputId) {
+                const input = document.getElementById(cfg.inputId);
+                if (input && input.value) item.text = input.value;
+            }
+            data.items.push(item);
+        }
+    });
+
+    //  対応方針（チェックボックス＋入力） 
+    const planMap = {
+        "plan_maintenance": { cell: "H6", dx: 0, dy: 0 },
+        "plan_repair": { cell: "H6", dx: 20, dy: 0 },
+        "plan_improvement": { cell: "H6", dx: 0, dy: 20 },
+        "plan_precision": { cell: "H6", dx: 20, dy: 20 },
+        "plan_removal": { cell: "H6", dx: 0, dy: 40 },
+        "plan_other": { cell: "H6", dx: 20, dy: 40, inputId: "plan_other_detail" }
+    };
+
+    Object.keys(planMap).forEach(name => {
+        const cb = document.getElementById(name);
+        if (cb && cb.checked) {
+            const cfg = planMap[name];
+            const item = {
+                type: "checkbox",
+                name: name,
+                value: cb.value,
+                cell: cfg.cell,
+                dx: cfg.dx,
+                dy: cfg.dy,
+                icon: "icons/check.png"
+            };
+            if (cfg.inputId) {
+                const input = document.getElementById(cfg.inputId);
+                if (input && input.value) item.text = input.value;
+            }
+            data.items.push(item);
+        }
+    });
+
+    //  対応予定時期（ラジオ＋セレクト） 
+    const month = document.getElementById("response_month")?.value;
+    ["period_early","period_mid","period_late"].forEach(id => {
+        const radio = document.getElementById(id);
+        if (radio && radio.checked) {
+            data.items.push({
+                type: "radio",
+                name: "period",
+                value: radio.value,
+                cell: "H10",
+                dx: 0,
+                dy: 0,
+                icon: "icons/check.png",
+                text: month ? `${month}月 ${radio.nextElementSibling.textContent}` : radio.nextElementSibling.textContent
+            });
+        }
+    });
+
+    //  本格的な使用禁止措置（チェック＋日付＋ラジオ） 
+    const prohibition_cb = document.getElementById("prohibition_measure");
+    if (prohibition_cb && prohibition_cb.checked) {
+        data.items.push({
+            type: "checkbox",
+            name: "prohibition_measure",
+            value: prohibition_cb.value,
+            cell: "H11",
+            dx: 0,
+            dy: 0,
+            icon: "icons/check.png"
+        });
+    }
+    const prohibition_date = document.getElementById("prohibition_date")?.value;
+    const prohibition_status = ["prohibition_done","prohibition_planned"].find(id => document.getElementById(id)?.checked);
+    if (prohibition_date || prohibition_status) {
+        data.items.push({
+            type: "text",
+            name: "prohibition_detail",
+            cell: "H11",
+            text: `${prohibition_date || ""} ${prohibition_status ? document.getElementById(prohibition_status).nextElementSibling.textContent : ""}`
+        });
+    }
+
+    //  備考（テキスト） 
+    const remarks = document.getElementById("remarks");
+    if (remarks && remarks.value.trim()) {
+        data.items.push({
+            type: "text",
+            name: "remarks",
+            value: remarks.value.trim(),
+            cell: "F12",
+            text: remarks.value.trim()
+        });
+    }
+
+    console.log(data); // デバッグ用
+});
+
 });
