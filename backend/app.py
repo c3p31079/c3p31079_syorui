@@ -18,6 +18,7 @@ app = Flask(__name__)
 CORS(app)
 
 def insert_icon(ws, cell, icon_file, dx=0, dy=0):
+    """Excelの指定セルにアイコン画像を配置"""
     icon_path = os.path.join(ICON_DIR, icon_file)
     if not os.path.exists(icon_path):
         print(f"[WARN] icon not found: {icon_path}")
@@ -53,23 +54,31 @@ def generate_excel():
     wb = load_workbook(TEMPLATE_PATH)
     ws = wb.active
 
-    # ラジオボタン情報を反映
-    # data は { "radio_buttons": { "D6": "B", "D7": "C", ... } } の形式を想定
-    radio_buttons = data.get("radio_buttons", {})
-    for cell, value in radio_buttons.items():
-        if value == "A":
-            continue
-
-        # 結合セルの左上セルに修正
-        for merged_range in ws.merged_cells.ranges:
-            if cell in merged_range:
-                cell = merged_range.start_cell.coordinate
-                break
-
-        if value == "B":
-            insert_icon(ws, cell, "triangle.png")
-        elif value == "C":
-            insert_icon(ws, cell, "none.png")
+    # -------------------------------
+    # JSONの構造に合わせてアイコンを配置
+    # -------------------------------
+    # data = {
+    #   "inspection_sections": [
+    #       {
+    #           "items": [
+    #               { "type": "icon", "cell": "F6", "dx": 2, "dy": 4, "icon": "check.png" },
+    #               { "type": "text", "cell": "F8", "dx": 35, "dy": 0, "text": "2" },
+    #               ...
+    #           ]
+    #       }
+    #   ]
+    # }
+    sections = data.get("inspection_sections", [])
+    for section in sections:
+        for item in section.get("items", []):
+            if item.get("type") != "icon":
+                continue
+            cell = item.get("cell")
+            icon_file = item.get("icon")
+            dx = item.get("dx", 0)
+            dy = item.get("dy", 0)
+            if cell and icon_file:
+                insert_icon(ws, cell, icon_file, dx, dy)
 
     # ExcelをBytesIOに保存
     stream = io.BytesIO()
@@ -85,6 +94,4 @@ def generate_excel():
     )
 
 if __name__ == "__main__":
-    # 外部アクセスしたい場合は host='0.0.0.0' に変更
     app.run(debug=True)
-
