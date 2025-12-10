@@ -436,7 +436,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // ==========================
         // ●点検時に実施した措置 (F6:G9)
         // ==========================
-
+        
+        const greaseCount = document.getElementById("grease_count")?.value || 0;
+        const boltCount = document.getElementById("bolt_count")?.value || 0;
+        
         let actionText = "●点検時に実施した措置\n";
         actionText += `□グリース・オイル等の注入※1 (${greaseCount}箇所)\n`;
         actionText += `□ボルト・ナットの増し締め・交換 (${boltCount}箇所)\n`;
