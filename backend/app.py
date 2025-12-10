@@ -1,9 +1,9 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, jsonify
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
-from flask_cors import CORS
 from openpyxl.utils import column_index_from_string
+from flask_cors import CORS
 import io
 import os
 
@@ -40,21 +40,43 @@ def insert_icon(ws, cell, icon_file, dx=0, dy=0):
 
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
-    data = request.get_json()
+    data = request.get_json(silent=True)
+    if data is None:
+        return jsonify({"error": "JSONが正しく送信されていません"}), 400
+
+    print("[INFO] Received data:", data)
+
+    # Excel読み込み
+    if not os.path.exists(TEMPLATE_PATH):
+        return jsonify({"error": "テンプレートファイルが見つかりません"}), 500
 
     wb = load_workbook(TEMPLATE_PATH)
     ws = wb.active
 
-    for item in data.get("items", []):
-        if item.get("type") == "icon" and item.get("icon"):
-            insert_icon(ws, item["cell"], item["icon"], item.get("dx",0), item.get("dy",0))
-        elif item.get("type") == "text" and item.get("text"):
-            ws[item["cell"]] = item["text"]
+    # ラジオボタン情報を反映
+    # data は { "radio_buttons": { "D6": "B", "D7": "C", ... } } の形式を想定
+    radio_buttons = data.get("radio_buttons", {})
+    for cell, value in radio_buttons.items():
+        if value == "A":
+            continue
 
+        # 結合セルの左上セルに修正
+        for merged_range in ws.merged_cells.ranges:
+            if cell in merged_range:
+                cell = merged_range.start_cell.coordinate
+                break
+
+        if value == "B":
+            insert_icon(ws, cell, "triangle.png")
+        elif value == "C":
+            insert_icon(ws, cell, "none.png")
+
+    # ExcelをBytesIOに保存
     stream = io.BytesIO()
     wb.save(stream)
     stream.seek(0)
 
+    # ファイル送信
     return send_file(
         stream,
         as_attachment=True,
@@ -63,4 +85,5 @@ def generate_excel():
     )
 
 if __name__ == "__main__":
+    # 外部アクセスしたい場合は host='0.0.0.0' に変更
     app.run(debug=True)
