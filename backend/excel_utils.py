@@ -82,9 +82,9 @@
 
 
 
-
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
+from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
 from openpyxl.utils import column_index_from_string
 import os
 
@@ -92,36 +92,54 @@ BASE_DIR = os.path.dirname(__file__)
 TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
 ICON_DIR = os.path.join(BASE_DIR, "icons")
 
+EMU = 9525
 ICON_PX = 32
 
 def create_excel_template():
+    if not os.path.exists(TEMPLATE_PATH):
+        raise FileNotFoundError(f"template.xlsx not found: {TEMPLATE_PATH}")
     wb = load_workbook(TEMPLATE_PATH)
     ws = wb.active
     ws.title = "点検チェックシート"
-    ws['A1'] = 'テスト'  # 確認用
     return wb, ws
 
 def apply_items(ws, items):
     for item in items:
-        cell = item.get("cell")
-        if not cell or "type" not in item:
+        if "cell" not in item or "type" not in item:
             continue
 
+        cell = item["cell"]
+
+        # ---------- テキスト ----------
         if item["type"] == "text":
             ws[cell].value = str(item.get("text", ""))
-        elif item["type"] == "icon":
+            continue
+
+        # ---------- アイコン ----------
+        if item["type"] == "icon":
             icon_file = item.get("icon")
             if not icon_file:
                 continue
+
             icon_path = os.path.join(ICON_DIR, icon_file)
             if not os.path.exists(icon_path):
                 print(f"[WARN] icon not found: {icon_path}")
                 continue
-            _insert_image(ws, cell, icon_path)
 
-def _insert_image(ws, cell, icon_path):
+            _insert_image(ws, cell, icon_path, dx=item.get("dx", 0), dy=item.get("dy", 0))
+
+def _insert_image(ws, cell, icon_path, dx=0, dy=0):
     img = Image(icon_path)
     img.width = ICON_PX
     img.height = ICON_PX
-    img.anchor = cell  # シンプルにセルアンカー
+
+    col_letter = ''.join(filter(str.isalpha, cell))
+    row_number = int(''.join(filter(str.isdigit, cell)))
+
+    col = column_index_from_string(col_letter) - 1
+    row = row_number - 1
+
+    marker = AnchorMarker(col=col, colOff=dx * EMU, row=row, rowOff=dy * EMU)
+    anchor = OneCellAnchor(_from=marker, ext=(ICON_PX * EMU, ICON_PX * EMU))
+    img.anchor = anchor
     ws.add_image(img)
