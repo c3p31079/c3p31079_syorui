@@ -39,22 +39,21 @@
 #     app.run(host="127.0.0.1", port=5000, debug=True)
 
 
-
 from flask import Flask, request, send_file
 from flask_cors import CORS
 import io
 from excel_utils import create_excel_template, apply_items
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # 全オリジンからのアクセスを許可
 
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
     data = request.json
-    items = data.get("items", [])
-
     print("=== items received ===")
-    print(items)
+    print(data.get("items"))
+    
+    items = data.get("items", [])
 
     wb, ws = create_excel_template()
     apply_items(ws, items)
@@ -67,8 +66,7 @@ def generate_excel():
         output,
         as_attachment=True,
         download_name="点検チェックシート.xlsx",
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        cache_timeout=0
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
 @app.route("/")

@@ -1,44 +1,40 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>Excel ダウンロードテスト</title>
+    <meta charset="UTF-8">
+    <title>Excel ダウンロードテスト</title>
 </head>
 <body>
-<h1>Excel ダウンロードテスト</h1>
-<button id="download">Excel ダウンロード</button>
+    <h1>Excel ダウンロードテスト</h1>
+    <button id="downloadBtn">Excel生成・ダウンロード</button>
 
-<script>
-document.getElementById("download").onclick = async () => {
-    // 送信するデータ
-    const items = [
-        {"cell":"B2","type":"text","text":"OK"},
-        {"cell":"C2","type":"icon","icon":"check.png"}
-    ];
+    <script>
+        document.getElementById("downloadBtn").onclick = async () => {
+            const items = [
+                {cell: "B2", type: "text", text: "OK"},
+                {cell: "C2", type: "icon", icon: "check.png"}
+            ];
 
-    try {
-        const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({items})
-        });
+            try {
+                const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({items})
+                });
 
-        if (!response.ok) {
-            throw new Error("HTTP error " + response.status);
-        }
+                if (!response.ok) throw new Error("Excel生成失敗");
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "点検チェックシート.xlsx";
-        a.click();
-        window.URL.revokeObjectURL(url);
-    } catch (err) {
-        alert("エラーが発生しました: " + err);
-        console.error(err);
-    }
-};
-</script>
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "点検チェックシート.xlsx";
+                a.click();
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                alert(err);
+            }
+        };
+    </script>
 </body>
 </html>

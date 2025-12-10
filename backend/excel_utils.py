@@ -95,22 +95,12 @@ EMU = 9525          # 1px = 9525 EMU
 ICON_PX = 32        # PNGサイズ（32x32）
 
 def create_excel_template():
-    """
-    テンプレートを読み込み、ワークブックとシートを返す
-    """
     wb = load_workbook(TEMPLATE_PATH)
     ws = wb.active
     ws.title = "点検チェックシート"
     return wb, ws
 
 def apply_items(ws, items):
-    """
-    items を受け取り、セルにテキスト or アイコンを書き込む
-    items = [
-        {"cell": "B2", "type": "text", "text": "OK"},
-        {"cell": "C2", "type": "icon", "icon": "check.png"}
-    ]
-    """
     for item in items:
         if "cell" not in item or "type" not in item:
             continue
@@ -123,10 +113,10 @@ def apply_items(ws, items):
                 ws[cell].value = str(item.get("text", ""))
             except AttributeError:
                 # マージセルの場合は左上セルに書き込む
-                top_left = ws.merged_cells.ranges
                 for merged in ws.merged_cells.ranges:
                     if cell in str(merged):
-                        ws[merged.start_cell].value = str(item.get("text", ""))
+                        start_cell = f"{merged.min_col}{merged.min_row}"
+                        ws[start_cell].value = str(item.get("text", ""))
                         break
             continue
 
@@ -141,18 +131,9 @@ def apply_items(ws, items):
                 print(f"[WARN] icon not found: {icon_path}")
                 continue
 
-            _insert_image(
-                ws,
-                cell,
-                icon_path,
-                dx=item.get("dx", 0),
-                dy=item.get("dy", 0)
-            )
+            _insert_image(ws, cell, icon_path, dx=item.get("dx", 0), dy=item.get("dy", 0))
 
 def _insert_image(ws, cell, icon_path, dx=0, dy=0):
-    """
-    32x32 PNG を dx,dy(px) 指定でセル内に配置
-    """
     img = Image(icon_path)
     img.width = ICON_PX
     img.height = ICON_PX
@@ -163,18 +144,7 @@ def _insert_image(ws, cell, icon_path, dx=0, dy=0):
     col = column_index_from_string(col_letter) - 1
     row = row_number - 1
 
-    marker = AnchorMarker(
-        col=col,
-        colOff=dx * EMU,
-        row=row,
-        rowOff=dy * EMU
-    )
-
-    # XDRPositiveSize2D を使ってサイズ指定
-    anchor = OneCellAnchor(
-        _from=marker,
-        ext=XDRPositiveSize2D(ICON_PX * EMU, ICON_PX * EMU)
-    )
-
+    marker = AnchorMarker(col=col, colOff=dx * EMU, row=row, rowOff=dy * EMU)
+    anchor = OneCellAnchor(_from=marker, ext=XDRPositiveSize2D(ICON_PX * EMU, ICON_PX * EMU))
     img.anchor = anchor
     ws.add_image(img)
