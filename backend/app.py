@@ -7,6 +7,8 @@ from openpyxl.utils import column_index_from_string
 from flask_cors import CORS
 import io
 import os
+from openpyxl.utils import get_column_letter
+
 
 EMU = 9525
 ICON_PX = 32
@@ -40,14 +42,29 @@ def insert_icon(ws, cell, icon_file, dx=0, dy=0):
     img.anchor = anchor
     ws.add_image(img)
 
+
 def insert_text(ws, cell, text, dx=0, dy=0):
+    """
+    結合セルでもテキストを書き込めるように修正
+    """
     col_letter = ''.join(filter(str.isalpha, cell))
     row_number = int(''.join(filter(str.isdigit, cell)))
     col = column_index_from_string(col_letter) - 1
     row = row_number - 1
 
-    # dx, dy はピクセル単位だが openpyxl のセル値には直接反映できないので簡易処理（後で対処）
+    # 結合セルの左上を取得
+    for merged_range in ws.merged_cells.ranges:
+        if cell in merged_range:
+            cell = merged_range.start_cell.coordinate
+            col_letter = ''.join(filter(str.isalpha, cell))
+            row_number = int(''.join(filter(str.isdigit, cell)))
+            col = column_index_from_string(col_letter) - 1
+            row = row_number - 1
+            break
+
+    # 後で対処
     ws.cell(row=row+1, column=col+1, value=text)
+
 
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
