@@ -2,6 +2,7 @@ from flask import Flask, request, send_file, jsonify
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
+from openpyxl.drawing.xdr import XDRPositiveSize2D  # 追加
 from openpyxl.utils import column_index_from_string
 from flask_cors import CORS
 import io
@@ -34,7 +35,8 @@ def insert_icon(ws, cell, icon_file, dx=0, dy=0):
     row = row_number - 1
 
     marker = AnchorMarker(col=col, colOff=dx*EMU, row=row, rowOff=dy*EMU)
-    anchor = OneCellAnchor(_from=marker, ext=(ICON_PX*EMU, ICON_PX*EMU))
+    # 修正：tupleではなくXDRPositiveSize2Dを使用
+    anchor = OneCellAnchor(_from=marker, ext=XDRPositiveSize2D(ICON_PX*EMU, ICON_PX*EMU))
     img.anchor = anchor
     ws.add_image(img)
 
@@ -62,7 +64,7 @@ def generate_excel():
     ws = wb.active
 
     # ============================
-    # 1. ラジオボタン結果を反映 
+    # 1. ラジオボタン結果を反映
     # ============================
     radio_buttons = data.get("radio_buttons", {})
     for cell, value in radio_buttons.items():
