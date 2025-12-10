@@ -87,7 +87,6 @@ def generate_excel():
     for cell, value in radio_buttons.items():
         if value == "A":
             continue
-        # 結合セル対応
         for merged_range in ws.merged_cells.ranges:
             if cell in merged_range:
                 cell = merged_range.start_cell.coordinate
@@ -102,18 +101,22 @@ def generate_excel():
     # ============================
     items = data.get("items", [])
     for item in items:
-        cell = item.get("cell")
+        cell = item.get("cell")  # JS 側から送られた cell
         if not cell:
             continue
 
-        if item.get("type") == "icon" and item.get("icon"):
+        item_type = item.get("type")
+        if item_type == "icon" and item.get("icon"):
             dx = item.get("dx", 0)
             dy = item.get("dy", 0)
             insert_icon(ws, cell, item["icon"], dx=dx, dy=dy)
-        elif item.get("type") == "text" and item.get("text") is not None:
+        elif item_type in ("text", "number") and item.get("value") is not None:
             dx = item.get("dx", 0)
             dy = item.get("dy", 0)
-            insert_text(ws, cell, item["text"], dx=dx, dy=dy)
+            insert_text(ws, cell, str(item["value"]), dx=dx, dy=dy)
+        elif item_type == "checkbox":
+            if item.get("value"):
+                insert_icon(ws, cell, "check.png")
 
     # ExcelをBytesIOに保存
     stream = io.BytesIO()
