@@ -22,11 +22,8 @@ downloadBtn.addEventListener("click", async function (e) {
     // ============================
     // 2. データ構造作成
     // ============================
-    const data = {
-        search_park: document.getElementById("search_park")?.value || "",
-        inspection_year: document.getElementById("inspection_year")?.value || "",
-        install_year_num: document.getElementById("install_year_num")?.value || "",
-        inspection_sections: window.inspection_sections || [
+
+    const baseSections = window.inspection_sections ?? [
   {
     "section": "柱・梁（本体）",
     "items": [
@@ -382,7 +379,13 @@ downloadBtn.addEventListener("click", async function (e) {
 
 
 
-        ],
+        ];
+
+    const data = {
+        search_park: document.getElementById("search_park")?.value || "",
+        inspection_year: document.getElementById("inspection_year")?.value || "",
+        install_year_num: document.getElementById("install_year_num")?.value || "",
+        inspection_sections: JSON.parse(JSON.stringify(baseSections)),
         items:[]
     };
 
