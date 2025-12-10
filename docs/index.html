@@ -719,9 +719,17 @@
         </tr>
         <tr>
             <td>破損</td>
-            <td class="judge-td"><label><input type="radio" name="base_expose" value="A" checked><span class="mark">〇</span></label></td>
-            <td class="judge-td"><label><input type="radio" name="base_expose" value="B"><span class="mark">△</span></label></td>
-            <td class="judge-td"><label><input type="radio" name="base_expose" value="C"><span class="mark">×</span></label></td>
+            <td class="judge-td">
+                <label><input type="radio" name="base_expose" value="A" checked><span class="mark">〇</span>
+                </label>
+            </td>
+            <td class="judge-td">
+                <label><input type="radio" name="base_expose" value="B"><span class="mark">△</span>
+                </label>
+            </td>
+            <td class="judge-td"><label><input type="radio" name="base_expose" value="C"><span class="mark">×</span>
+            </label>
+            </td>
             <td></td>
         </tr>
 
@@ -872,89 +880,19 @@
                 <textarea id="remarks" name="remarks" class="result_long_opinion"></textarea><br>
 
                 <div class="CheckSheet_save_button">
-                    <button id="downloadExcelBtn" type="button">
+                    <button id="downloadBtn" type="button">
                          Excelダウンロード</button>
                 </div>
             </div>
         </div>
         </table>
     </form>
+    
+    <script src="../backend/script.js"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("checksheet_form");
-
-    // 総合結果の計算関数
-    function calculateOverall() {
-        const rows = form.querySelectorAll("tbody tr");
-        let overall = "A"; // 初期値「異常なし」
-
-        rows.forEach(row => {
-            const checked = row.querySelector('input[type="radio"]:checked');
-            if (!checked) return;
-            const value = checked.value;
-            if (value === "C") overall = "C";
-            else if (value === "B" && overall !== "C") overall = "B";
-        });
-
-        return overall;
-    }
-
-    // 「総合判定」表示用要素を追加
-    const resultDiv = document.createElement("div");
-    resultDiv.id = "overall_result";
-    resultDiv.style.marginTop = "10px";
-    resultDiv.style.fontWeight = "bold";
-    form.appendChild(resultDiv);
-
-    function updateResultDisplay() {
-        const result = calculateOverall();
-        let text = "";
-        if (result === "A") text = "総合結果：異常なし";
-        else if (result === "B") text = "総合結果：経過観察";
-        else if (result === "C") text = "総合結果：要対応";
-        resultDiv.textContent = text;
-    }
-
-    // 初回表示
-    updateResultDisplay();
-
-    // ラジオボタン変更時に更新
-    form.querySelectorAll('input[type="radio"]').forEach(radio => {
-        radio.addEventListener("change", updateResultDisplay);
-    });
-
-    // 措置欄の入力チェック（任意：チェックボックスと数量）
-    const actions = ["hanger", "chain", "seat"];
-    actions.forEach(name => {
-        const checkbox = document.getElementById(`action_${name}`);
-        const numberInput = document.getElementById(`${name}_count`);
-        if (!checkbox || !numberInput) return;
-
-        checkbox.addEventListener("change", () => {
-            if (!checkbox.checked) numberInput.value = "";
-        });
-    });
-
-    // フォーム送信イベント（ここでサーバ送信など可能）
-    form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-        data["overall_result"] = calculateOverall();
-        console.log("送信データ", data);
-
-        // ここに fetch でサーバ送信も可能
-        // fetch("/api/save", { method: "POST", body: JSON.stringify(data), headers: {'Content-Type':'application/json'} });
-        alert("データを確認しました。コンソールに出力しています。");
-    });
-});
-</script>
- 
     </body>
+    <!-- bodyの最後に追加 -->
+    
 </html>
 
 
