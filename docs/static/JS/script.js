@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         console.log("💾 Excelダウンロード処理開始");
 
+        // === 基本データ ===
         const data = {
             search_park: document.getElementById("search_park")?.value || "",
             inspection_year: document.getElementById("inspection_year")?.value || "",
@@ -477,6 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         appendItems(planMap);
 
+        // === 対応予定時期 ===
         const month = document.getElementById("response_month")?.value;
         ["period_early","period_mid","period_late"].forEach(id => {
             const radio = document.getElementById(id);
@@ -494,6 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // === 禁止措置 ===
         const prohibition_cb = document.getElementById("prohibition_measure");
         if (prohibition_cb && prohibition_cb.checked) {
             data.items.push({
@@ -517,6 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
+        // === 備考 ===
         const remarks = document.getElementById("remarks");
         if (remarks && remarks.value.trim()) {
             data.items.push({

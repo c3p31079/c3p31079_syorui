@@ -101,7 +101,7 @@ def generate_excel():
     # ============================
     items = data.get("items", [])
     for item in items:
-        cell = item.get("cell")  # JS 側から送られた cell
+        cell = item.get("cell")
         if not cell:
             continue
 
@@ -117,6 +117,7 @@ def generate_excel():
         elif item_type == "checkbox":
             if item.get("value"):
                 insert_icon(ws, cell, "check.png")
+
 
     # ExcelをBytesIOに保存
     stream = io.BytesIO()
