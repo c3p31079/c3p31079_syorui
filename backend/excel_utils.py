@@ -1,8 +1,6 @@
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.utils import column_index_from_string
-from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
-from openpyxl.drawing.xdr import XDRPositiveSize2D
 import os
 
 BASE_DIR = os.path.dirname(__file__)
@@ -52,13 +50,20 @@ def _insert_image(ws, cell, icon_path, dx, dy):
     # 列と行番号の取得
     col_letter = ''.join(filter(str.isalpha, cell))
     row_number = int(''.join(filter(str.isdigit, cell)))
-    col_index = column_index_from_string(col_letter) - 1
+    col_index = column_index_from_string(col_letter)
 
-    # px → EMU (Excel単位)
-    col_off = dx * 9525
-    row_off = dy * 9525
+    # openpyxl 3.1.5 では anchor に cell を直接設定
+    img.anchor = cell
 
-    marker = AnchorMarker(col=col_index, colOff=col_off, row=row_number-1, rowOff=row_off)
-    size = XDRPositiveSize2D(img.width * 9525, img.height * 9525)
-    img.anchor = OneCellAnchor(_from=marker, ext=size)
+    # オフセット(px)は img.drawing.left/top で調整
+    # EMU単位（1 px = 9525 EMU）
+    from openpyxl.drawing.spreadsheet_drawing import AnchorMarker
+    from openpyxl.drawing.xdr import XDRPositiveSize2D
+
+    # 画像サイズ変更（必要なら）
+    # img.width, img.height = img.width, img.height
+
+    # オフセット設定（3.0系以前は left/top）
+    img.offset = (dx, dy)  # px単位で微調整
+
     ws.add_image(img)
