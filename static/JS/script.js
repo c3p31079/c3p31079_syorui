@@ -1,3 +1,5 @@
+const downloadBtn = document.getElementById("downloadBtn");
+
 downloadBtn.addEventListener("click", async function (e) {
     e.preventDefault();
     e.stopPropagation();
@@ -5,14 +7,21 @@ downloadBtn.addEventListener("click", async function (e) {
     btn.disabled = true;
     console.log("💾 Excelダウンロード処理開始");
 
-    // 1. 判定結果収集（A/B/C 全部）
+    // ============================
+    // 1. tbody 全行から inspectionResults 作成
+    // ============================
     const inspectionResults = {};
-    document.querySelectorAll("input[type='radio']:checked").forEach(el => {
-        inspectionResults[el.name] = el.value;
+    document.querySelectorAll("tbody tr").forEach(tr => {
+        const radioChecked = tr.querySelector("input[type='radio']:checked");
+        if (radioChecked && radioChecked.name) {
+            inspectionResults[radioChecked.name] = radioChecked.value;
+        }
     });
     console.log("=== inspectionResults ===", inspectionResults);
 
+    // ============================
     // 2. データ構造作成
+    // ============================
     const data = {
         search_park: document.getElementById("search_park")?.value || "",
         inspection_year: document.getElementById("inspection_year")?.value || "",
@@ -377,146 +386,52 @@ downloadBtn.addEventListener("click", async function (e) {
         items:[]
     };
 
-        // Excel に反映する項目
+      // ============================
+    // 3. ハードコードの Excel 固定項目（後で編集するところ今は仮）
+    // ============================
     data.items.push(
-            // ==============================
-            // 実施措置（F6:G9）
-            // ==============================
-            {
-                "type": "icon",
-                "cell": "F6",
-                "dx": 2,
-                "dy": 4,
-                "icon": "check.png"
-            },
-            {
-                "type": "text",
-                "cell": "F8",
-                "dx": 35,
-                "dy": 0,
-                "text": "2"   // 吊金具交換 箇所数
-            },
-
-            // ==============================
-            // 所見（F10:G12）
-            // ==============================
-            {
-                "type": "text",
-                "cell": "F10",
-                "dx": 4,
-                "dy": 18,
-                "text": "吊金具に摩耗が見られる"
-            },
-
-            // ==============================
-            // 総合結果（F13:G15）
-            // ==============================
-            {
-                "type": "icon",
-                "cell": "F14",
-                "dx": 2,
-                "dy": 3,
-                "icon": "check.png"   // B:経過観察
-            },
-            {
-                "type": "text",
-                "cell": "F15",
-                "dx": 22,
-                "dy": 0,
-                "text": "落下防止のため使用注意"
-            },
-
-            // ==============================
-            // 対応方針（H6:H10）
-            // ==============================
-            {
-                "type": "icon",
-                "cell": "H7",
-                "dx": 1,
-                "dy": 3,
-                "icon": "check.png"
-            },
-            {
-                "type": "text",
-                "cell": "H10",
-                "dx": 14,
-                "dy": 0,
-                "text": "部品調達後対応"
-            },
-
-            // ==============================
-            // 対応予定時期（H10）
-            // ==============================
-            {
-                "type": "text",
-                "cell": "H11",
-                "dx": 8,
-                "dy": 0,
-                "text": "6"
-            },
-            {
-                "type": "icon",
-                "cell": "H11",
-                "dx": 30,
-                "dy": 3,
-                "icon": "circle.png"   // 上旬
-            },
-
-            // ==============================
-            // 本格的使用禁止（H11）
-            // ==============================
-            {
-                "type": "icon",
-                "cell": "H11",
-                "dx": 55,
-                "dy": 3,
-                "icon": "check.png"   // 実施予定
-            },
-
-            // ==============================
-            // 備考（H12:H15）
-            // ==============================
-            {
-                "type": "text",
-                "cell": "H12",
-                "dx": 2,
-                "dy": 18,
-                "text": "次回点検時に重点確認"
-            }
+        { type: "icon", cell: "F6", dx: 2, dy: 4, icon: "check.png" },
+        { type: "text", cell: "F8", dx: 35, dy: 0, text: "2" },
+        { type: "text", cell: "F10", dx: 4, dy: 18, text: "吊金具に摩耗が見られる" },
+        { type: "icon", cell: "F14", dx: 2, dy: 3, icon: "check.png" },
+        { type: "text", cell: "F15", dx: 22, dy: 0, text: "落下防止のため使用注意" },
+        { type: "icon", cell: "H7", dx: 1, dy: 3, icon: "check.png" },
+        { type: "text", cell: "H10", dx: 14, dy: 0, text: "部品調達後対応" },
+        { type: "text", cell: "H11", dx: 8, dy: 0, text: "6" },
+        { type: "icon", cell: "H11", dx: 30, dy: 3, icon: "circle.png" },
+        { type: "icon", cell: "H11", dx: 55, dy: 3, icon: "check.png" },
+        { type: "text", cell: "H12", dx: 2, dy: 18, text: "次回点検時に重点確認" }
     );
-    
-    
-        // ============================
-        // 3. B/C/A → Excel items 変換
-        // ============================
-        data.inspection_sections.forEach(section => {
-            section.items.forEach(item => {
-                const result = inspectionResults[item.name] || "A";
 
-                // Aは無視
-                if (result === "A") return;
+    // ============================
+    // 4. inspectionResults をもとに B/C の PNG を items に追加
+    // ============================
+    data.inspection_sections.forEach(section => {
+        section.items.forEach(item => {
+            const result = inspectionResults[item.name] || "A"; // 未選択は A
 
-                const excelDef = item.excel?.[result];
-                if (!excelDef) return;
+            if (result === "A") return; // A は無視
 
-                // Excel用itemsに追加
-                data.items.push({
-                    type: excelDef.type,
-                    cell: excelDef.cell,
-                    dx: excelDef.dx ?? 0,
-                    dy: excelDef.dy ?? 0,
-                    icon: excelDef.icon,
-                    text: excelDef.text ?? ""
-                });
+            const excelDef = item.excel?.[result];
+            if (!excelDef) return;
+
+            data.items.push({
+                type: excelDef.type,
+                cell: excelDef.cell,
+                dx: excelDef.dx ?? 0,
+                dy: excelDef.dy ?? 0,
+                icon: excelDef.icon,
+                text: excelDef.text ?? ""
             });
         });
+    });
 
-        console.log("=== Excelに送信される items ===", data.items);
+    console.log("=== Excelに送信される items ===", data.items);
 
-        // ============================
-        // Flask API に POST
-        // ============================
-        try {
+    // ============================
+    // 5. Flask API に POST
+    // ============================
+    try {
         const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
