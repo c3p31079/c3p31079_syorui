@@ -131,8 +131,8 @@
             <th>C<br>要対応</th>
         </tr>
     </thead>
-    </table>
-    </form>
+    
+    
     
 
     <tbody>
@@ -877,6 +877,9 @@
                 </div>
             </div>
         </div>
+        </table>
+    </form>
+
 <script>
 /* ① DOMContentLoaded 開始 */
 document.addEventListener("DOMContentLoaded", function () {
@@ -973,7 +976,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                 }
             }
+
         });
+        console.log("Excel出力用データ", items);
 
         // -----------------------------
         // Backend送信
@@ -986,10 +991,15 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         try {
-            const res = await fetch("/api/sheet-download", {
+            await fetch("/api/export-excel", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    parkName,
+                    inspectionYear,
+                    installYearNum,
+                    items
+                })
             });
 
             if (!res.ok) throw new Error("Excel生成失敗");
