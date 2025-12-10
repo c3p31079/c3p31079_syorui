@@ -386,6 +386,7 @@ downloadBtn.addEventListener("click", async function (e) {
         items:[]
     };
 
+     data.items = [];
       // ============================
     // 3. ハードコードの Excel 固定項目（後で編集するところ今は仮）
     // ============================
