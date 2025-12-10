@@ -4,6 +4,7 @@ from openpyxl.drawing.image import Image
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
 from openpyxl.drawing.xdr import XDRPositiveSize2D
 from openpyxl.utils import column_index_from_string
+from openpyxl.styles import Alignment
 from flask_cors import CORS
 import io
 import os
@@ -30,7 +31,6 @@ def insert_icon(ws, cell, icon_file, dx=0, dy=0):
 
     col_letter = ''.join(filter(str.isalpha, cell))
     row_number = int(''.join(filter(str.isdigit, cell)))
-
     col = column_index_from_string(col_letter) - 1
     row = row_number - 1
 
@@ -45,6 +45,7 @@ def insert_text(ws, cell, text, dx=0, dy=0):
     col = column_index_from_string(col_letter) - 1
     row = row_number - 1
 
+    # マージセル対応
     for merged_range in ws.merged_cells.ranges:
         if cell in merged_range:
             cell = merged_range.start_cell.coordinate
@@ -55,6 +56,7 @@ def insert_text(ws, cell, text, dx=0, dy=0):
             break
 
     ws.cell(row=row+1, column=col+1, value=text)
+    ws.cell(row=row+1, column=col+1).alignment = Alignment(wrap_text=True, vertical='top')
 
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
@@ -70,7 +72,7 @@ def generate_excel():
     wb = load_workbook(TEMPLATE_PATH)
     ws = wb.active
 
-    # items 配列反映（dx/dy もここで反映）
+    # items 配列反映
     items = data.get("items", [])
     for item in items:
         cell = item.get("cell")
@@ -87,8 +89,9 @@ def generate_excel():
             insert_text(ws, cell, str(item["value"]), dx=dx, dy=dy)
         elif item_type == "checkbox":
             if item.get("value"):
-                insert_icon(ws, cell, "check.png", dx=dx, dy=dy)
+                insert_icon(ws, cell, item.get("icon", "check.png"), dx=dx, dy=dy)
 
+    # Excel出力
     stream = io.BytesIO()
     wb.save(stream)
     stream.seek(0)

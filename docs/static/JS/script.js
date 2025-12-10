@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
             search_park: document.getElementById("search_park")?.value || "",
             inspection_year: document.getElementById("inspection_year")?.value || "",
             install_year_num: document.getElementById("install_year_num")?.value || "",
-            inspection_sections: window.inspection_sections ??[
+            inspection_sections: window.inspection_sections || [
   {
     "section": "柱・梁（本体）",
     "items": [
@@ -438,103 +438,189 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         };
 
-        const actionMap = {
-            "action_grease": { cell: "F6", dx: 0, dy: 0 },
-            "action_bolt": { cell: "F6", dx: 20, dy: 0 },
-            "action_hanger": { cell: "F6", dx: 0, dy: 20, inputId: "hanger_count" },
-            "action_chain": { cell: "F6", dx: 0, dy: 40, inputId: "chain_count" },
-            "action_seat": { cell: "F6", dx: 0, dy: 60, inputId: "seat_count" },
-            "action_removal": { cell: "F6", dx: 20, dy: 20 },
-            "action_other": { cell: "F6", dx: 20, dy: 40, inputId: "action_other_detail" }
-        };
-        appendItems(actionMap);
+                // ==========================
+        // ●点検時に実施した措置 (F6:G9)
+        // ==========================
+        const greaseCount = document.getElementById("action_grease_count")?.value || 0;
+        const boltCount = document.getElementById("action_bolt_count")?.value || 0;
+        const hangerCount = document.getElementById("hanger_count")?.value || 0;
+        const chainCount = document.getElementById("chain_count")?.value || 0;
+        const seatCount = document.getElementById("seat_count")?.value || 0;
+        const otherCount = document.getElementById("action_other_count")?.value || 0;
 
-        const observations = document.getElementById("observations");
-        if (observations && observations.value.trim()) {
-            data.items.push({
-                type: "text",
-                name: "observations",
-                value: observations.value.trim(),
-                cell: "F10",
-                text: observations.value.trim()
-            });
-        }
+        let actionText = "●点検時に実施した措置\n";
+        actionText += `□グリース・オイル等の注入※1 (${greaseCount}箇所)\n`;
+        actionText += `□ボルト・ナットの増し締め・交換 (${boltCount}箇所)\n`;
+        actionText += `□吊金具の交換 (${hangerCount}箇所)\n`;
+        actionText += `□チェーンの交換 (${chainCount}箇所)\n`;
+        actionText += `□座板の交換 (${seatCount}箇所)\n`;
+        actionText += `□石・異物の除去、枝の剪定\n`;
+        actionText += `□その他 (${otherCount}箇所)\n`;
 
-        const overallMap = {
-            "overall_a": { cell: "F13", dx: 0, dy: 0 },
-            "overall_b": { cell: "F13", dx: 0, dy: 20 },
-            "overall_c": { cell: "F13", dx: 0, dy: 40 },
-            "overall_d": { cell: "F13", dx: 0, dy: 60, inputId: "overall_d_detail" }
-        };
-        appendItems(overallMap, "radio");
+        data.items.push({
+            type: "text",
+            name: "action_text",
+            value: actionText,
+            cell: "F6",
+            text: actionText
+        });
 
-        const planMap = {
-            "plan_maintenance": { cell: "H6", dx: 0, dy: 0 },
-            "plan_repair": { cell: "H6", dx: 20, dy: 0 },
-            "plan_improvement": { cell: "H6", dx: 0, dy: 20 },
-            "plan_precision": { cell: "H6", dx: 20, dy: 20 },
-            "plan_removal": { cell: "H6", dx: 0, dy: 40 },
-            "plan_other": { cell: "H6", dx: 20, dy: 40, inputId: "plan_other_detail" }
-        };
-        appendItems(planMap);
+        // チェックボックスの配置
+        const actionChecks = [
+            {id: "check_grease", dx: 0, dy: 0},
+            {id: "check_bolt", dx: 0, dy: 120},
+            {id: "check_hanger", dx: 0, dy: 240},
+            {id: "check_chain", dx: 0, dy: 360},
+            {id: "check_seat", dx: 0, dy: 480},
+            {id: "check_other", dx: 0, dy: 600},
+        ];
 
-        // === 対応予定時期 ===
-        const month = document.getElementById("response_month")?.value;
-        ["period_early","period_mid","period_late"].forEach(id => {
-            const radio = document.getElementById(id);
-            if (radio && radio.checked) {
+        actionChecks.forEach(chk => {
+            const el = document.getElementById(chk.id);
+            if (el && el.checked) {
                 data.items.push({
-                    type: "radio",
-                    name: "period",
-                    value: radio.value,
-                    cell: "H10",
-                    dx: 0,
-                    dy: 0,
-                    icon: "icons/check.png",
-                    text: month ? `${month}月 ${radio.nextElementSibling.textContent}` : radio.nextElementSibling.textContent
+                    type: "icon",
+                    cell: "F6",
+                    icon: "check.png",
+                    dx: chk.dx,
+                    dy: chk.dy
                 });
             }
         });
 
-        // === 禁止措置 ===
-        const prohibition_cb = document.getElementById("prohibition_measure");
-        if (prohibition_cb && prohibition_cb.checked) {
-            data.items.push({
-                type: "checkbox",
-                name: "prohibition_measure",
-                value: prohibition_cb.value,
-                cell: "H11",
-                dx: 0,
-                dy: 0,
-                icon: "icons/check.png"
-            });
-        }
-        const prohibition_date = document.getElementById("prohibition_date")?.value;
-        const prohibition_status = ["prohibition_done","prohibition_planned"].find(id => document.getElementById(id)?.checked);
-        if (prohibition_date || prohibition_status) {
+        // ==========================
+        // ●所見 (F10:G12)
+        // ==========================
+        const observations = document.getElementById("observations")?.value || "";
+        if (observations.trim()) {
             data.items.push({
                 type: "text",
-                name: "prohibition_detail",
-                cell: "H11",
-                text: `${prohibition_date || ""} ${prohibition_status ? document.getElementById(prohibition_status).nextElementSibling.textContent : ""}`
+                name: "observations",
+                value: "●所見\n" + observations,
+                cell: "F10",
+                text: "●所見\n" + observations
             });
         }
 
-        // === 備考 ===
-        const remarks = document.getElementById("remarks");
-        if (remarks && remarks.value.trim()) {
+        // ==========================
+        // ●総合結果 (F13:G15)
+        // ==========================
+        const totalResultRadios = document.getElementsByName("total_result");
+        let totalText = "●総合結果※2\n";
+        let dText = "";
+        totalResultRadios.forEach(r => {
+            if (r.checked) {
+                const val = r.value;
+                if (val === "A") totalText += "A:健全(△・×なし)\n";
+                else if (val === "B") totalText += "B:経過観察(△あり、×なし)\n";
+                else if (val === "C") totalText += "C:要修繕・要対応(×あり)\n";
+                else if (val === "D") {
+                    const inputD = document.getElementById("total_result_D_text")?.value || "";
+                    dText = `D:使用禁止措置\n（${inputD}）\n`;
+                }
+                // アイコン設置
+                data.items.push({
+                    type: "icon",
+                    cell: "F13",
+                    icon: "check.png",
+                    dx: 0,
+                    dy: val === "A" ? 0 : val === "B" ? 120 : val === "C" ? 240 : 360
+                });
+            }
+        });
+        totalText += dText;
+        data.items.push({
+            type: "text",
+            name: "total_result_text",
+            value: totalText,
+            cell: "F13",
+            text: totalText
+        });
+
+        // ==========================
+        // ●対応方針・対応予定時期 (H6:H10)
+        // ==========================
+        let policyText = "●対応方針\n";
+        const policyChecks = [
+            {id: "policy1", label: "整備班で対応予定", dy:0},
+            {id: "policy2", label: "修繕・修繕工事で対応予定", dy:120},
+            {id: "policy3", label: "施設改良工事で対応予定", dy:240},
+            {id: "policy4", label: "精密点検予定", dy:360},
+            {id: "policy5", label: "撤去予定", dy:480},
+        ];
+        policyChecks.forEach(chk => {
+            const el = document.getElementById(chk.id);
+            if (el && el.checked) {
+                policyText += `□ ${chk.label}\n`;
+                data.items.push({
+                    type: "icon",
+                    cell: "H6",
+                    icon: "check.png",
+                    dx: 0,
+                    dy: chk.dy
+                });
+            }
+        });
+        const policyOther = document.getElementById("policy_other_text")?.value || "";
+        if (policyOther) {
+            policyText += `□その他(${policyOther})\n`;
+        }
+        const schedule = document.getElementById("schedule_text")?.value || "";
+        if (schedule) {
+            policyText += `●対応予定時期\n　${schedule} 月 上・中・下 旬頃`;
+        }
+        data.items.push({
+            type: "text",
+            name: "policy_text",
+            value: policyText,
+            cell: "H6",
+            text: policyText
+        });
+
+        // ==========================
+        // □本格的な使用禁止措置 (H11)
+        // ==========================
+        const prohibitMonth = document.getElementById("prohibit_month")?.value || "";
+        const prohibitDay = document.getElementById("prohibit_day")?.value || "";
+        const prohibitStatus = document.querySelector('input[name="prohibit_status"]:checked')?.value || "";
+        if (prohibitMonth || prohibitDay || prohibitStatus) {
+            const prohibitText = `□本格的な使用禁止措置\n　${prohibitMonth}月 ${prohibitDay}日 ${prohibitStatus}`;
             data.items.push({
                 type: "text",
-                name: "remarks",
-                value: remarks.value.trim(),
+                name: "prohibit_text",
+                value: prohibitText,
+                cell: "H11",
+                text: prohibitText
+            });
+            // チェックボックス（ラジオ）も反映
+            if (prohibitStatus) {
+                data.items.push({
+                    type: "icon",
+                    cell: "H11",
+                    icon: "check.png",
+                    dx: 0,
+                    dy: 0
+                });
+            }
+        }
+
+        // ==========================
+        // ●備考 (F12:G15)
+        // ==========================
+        const remarks = document.getElementById("remarks")?.value || "";
+        if (remarks.trim()) {
+            data.items.push({
+                type: "text",
+                name: "remarks_text",
+                value: "●備考\n" + remarks,
                 cell: "F12",
-                text: remarks.value.trim()
+                text: "●備考\n" + remarks
             });
         }
 
-        console.log("=== Excelに送信される items ===", data.items);
-
-        // === Flask API へ POST ===
+        // ==========================
+        // Flask API へ送信
+        // ==========================
         try {
             const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
                 method: "POST",
