@@ -131,10 +131,12 @@
             <th>C<br>要対応</th>
         </tr>
     </thead>
+    </table>
+    </form>
+    
 
     <tbody>
 
-                <tbody>
 
     <!-- ================= 柱・梁（本体） ================= -->
     <tr>
@@ -876,27 +878,30 @@
             </div>
         </div>
 <script>
+/* ① DOMContentLoaded 開始 */
 document.addEventListener("DOMContentLoaded", function () {
+
     const saveBtn = document.getElementById("downloadExcelBtn");
 
+    /* ② click イベント開始 */
     saveBtn.addEventListener("click", async (e) => {
         e.preventDefault();
         e.stopPropagation();
 
         console.log("Excelダウンロード処理開始");
 
-        // =============================
+        // -----------------------------
         // 基本情報
-        // =============================
+        // -----------------------------
         const parkName = document.getElementById("search_park")?.value || "";
         const inspectionYear = document.getElementById("inspection_year")?.value || "";
         const installYearNum = document.getElementById("install_year_num")?.value || "";
 
         let items = [];
 
-        // =============================
-        // 点検結果（例：柱・梁 ぐらつき）
-        // =============================
+        // -----------------------------
+        // 点検結果
+        // -----------------------------
         const inspectionMap = {
             pillar_wobble: { cell: "D6" }
         };
@@ -908,14 +913,29 @@ document.addEventListener("DOMContentLoaded", function () {
             const grade = checked.value;
             const cell = inspectionMap[name].cell;
 
-            if (grade === "A") items.push({ type: "circle", cell });
-            if (grade === "B") items.push({ type: "triangle", cell });
-            if (grade === "C") items.push({ type: "cross", cell });
+            if (grade === "A") return;
+
+            if (grade === "B") {
+                items.push({
+                    type: "icon",
+                    cell: cell,
+                    icon: "triangle.png"
+                });
+            }
+
+            if (grade === "C") {
+                items.push({
+                    type: "icon",
+                    cell: cell,
+                    icon: "none.png"
+                });
+            }
+
         });
 
-        // =============================
+        // -----------------------------
         // 措置
-        // =============================
+        // -----------------------------
         const actionCheckboxes = [
             {id:"action_grease", cell:"F6"},
             {id:"action_bolt", cell:"F7"},
@@ -930,7 +950,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const cb = document.getElementById(a.id);
             if (!cb || !cb.checked) return;
 
-            items.push({ type: "check", cell: a.cell });
+            items.push({ type: "icon", cell: a.cell, icon: "check.png" });
 
             if (a.num_id) {
                 const numEl = document.getElementById(a.num_id);
@@ -955,9 +975,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-        // =============================
-        // Backend に送信 → Excel 生成
-        // =============================
+        // -----------------------------
+        // Backend送信
+        // -----------------------------
         const payload = {
             park_name: parkName,
             inspection_year: inspectionYear,
@@ -983,16 +1003,18 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.appendChild(a);
             a.click();
             a.remove();
-
             window.URL.revokeObjectURL(url);
 
         } catch (err) {
             console.error(err);
             alert("Excelのダウンロードに失敗しました");
         }
-    });
-});
+
+    }); // ←② click の終わり
+
+}); // ←① DOMContentLoaded の終わり
 </script>
+
 
 
  <!-- <script>
