@@ -1573,4 +1573,33 @@ label {
     cursor: pointer;
 }
 
+/* ラジオボタン非表示 */
+.judge-td input[type="radio"] {
+    display: none;
+}
 
+/* markを中央に配置して初期は非表示 */
+.judge-td .mark {
+    visibility: hidden;
+    font-size: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #333;
+}
+
+/* ラベル全体をクリック可能に */
+.judge-td label {
+    display: block;
+    width: 36px;
+    height: 36px;
+    position: relative;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* ラジオボタンが選択されたらmarkを表示 */
+.judge-td input[type="radio"]:checked + .mark {
+    visibility: visible;
+}
