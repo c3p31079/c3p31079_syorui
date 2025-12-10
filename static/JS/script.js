@@ -436,7 +436,7 @@ downloadBtn.addEventListener("click", async function (e) {
     // 5. Flask API に POST
     // ============================
     try {
-        const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
+        const response = await fetch("http://127.0.0.1:5000/api/sheet-download", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
