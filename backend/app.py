@@ -1,69 +1,34 @@
-from openpyxl import load_workbook
-from openpyxl.drawing.image import Image
-from openpyxl.utils import column_index_from_string
-import os
+from flask import Flask, request, send_file
+from flask_cors import CORS
+import io
+from excel_utils import create_excel_template, apply_items
 
-BASE_DIR = os.path.dirname(__file__)
-TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
-ICON_DIR = os.path.join(BASE_DIR, "icons")
+app = Flask(__name__)
+CORS(app)
 
-def create_excel_template():
-    wb = load_workbook(TEMPLATE_PATH)
-    ws = wb.active
-    ws.title = "点検チェックシート"
-    return wb, ws
+@app.route("/api/generate_excel", methods=["POST"])
+def generate_excel():
+    data = request.json
+    items = data.get("items", [])
 
-def apply_items(ws, items):
-    for item in items:
-        if "cell" not in item or "type" not in item:
-            continue
+    wb, ws = create_excel_template()
+    apply_items(ws, items)
 
-        cell = item["cell"]
-        dx = item.get("dx", 0)
-        dy = item.get("dy", 0)
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
 
-        # ======================
-        # テキスト
-        # ======================
-        if item["type"] == "text":
-            ws[cell].value = str(item.get("text", ""))
-            continue
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="点検チェックシート.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
-        # ======================
-        # PNGアイコン
-        # ======================
-        if item["type"] == "icon":
-            icon_file = item.get("icon")
-            if not icon_file:
-                continue
+@app.route("/")
+def home():
+    return "Backend running"
 
-            icon_path = os.path.join(ICON_DIR, icon_file)
-            if not os.path.exists(icon_path):
-                print(f"[WARN] icon not found: {icon_path}")
-                continue
-
-            _insert_image(ws, cell, icon_path, dx, dy)
-
-def _insert_image(ws, cell, icon_path, dx, dy):
-    img = Image(icon_path)
-
-    # 列と行番号の取得
-    col_letter = ''.join(filter(str.isalpha, cell))
-    row_number = int(''.join(filter(str.isdigit, cell)))
-    col_index = column_index_from_string(col_letter)
-
-    # openpyxl 3.1.5 では anchor に cell を直接設定
-    img.anchor = cell
-
-    # オフセット(px)は img.drawing.left/top で調整
-    # EMU単位（1 px = 9525 EMU）
-    from openpyxl.drawing.spreadsheet_drawing import AnchorMarker
-    from openpyxl.drawing.xdr import XDRPositiveSize2D
-
-    # 画像サイズ変更（必要なら）
-    # img.width, img.height = img.width, img.height
-
-    # オフセット設定（3.0系以前は left/top）
-    img.offset = (dx, dy)  # px単位で微調整
-
-    ws.add_image(img)
+if __name__ == "__main__":
+    # 他端末からアクセス可能にする場合 host=0.0.0.0 に変更
+    app.run(host="127.0.0.1", port=5000, debug=True)
