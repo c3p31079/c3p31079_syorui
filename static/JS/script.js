@@ -1,34 +1,23 @@
-const downloadBtn = document.getElementById("downloadExcelBtn");
+downloadBtn.addEventListener("click", async function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const btn = this;
+    btn.disabled = true;
+    console.log("💾 Excelダウンロード処理開始");
 
-if (downloadBtn) {
-    downloadBtn.type = "button"; // ★重要
-    downloadBtn.addEventListener("click", async function (e) {
-        e.preventDefault();
-        e.stopPropagation();
+    // 1. 判定結果収集（A/B/C 全部）
+    const inspectionResults = {};
+    document.querySelectorAll("input[type='radio']:checked").forEach(el => {
+        inspectionResults[el.name] = el.value;
+    });
+    console.log("=== inspectionResults ===", inspectionResults);
 
-        const btn = this;
-        btn.disabled = true;
-        console.log("💾 Excelダウンロード処理開始");
-
-        // ============================
-        // 判定結果をHTMLから収集
-        // ============================
-        const inspectionResults = {};
-        document.querySelectorAll("input[type='radio']:checked").forEach(el => {
-            if (["B","C"].includes(el.value)) {
-                inspectionResults[el.name] = el.value;
-            }
-        });
-        console.log("=== inspectionResults ===", inspectionResults);
-
-        // ============================
-        // データ構造作成
-        // ============================
-        const data = {
-            search_park: document.getElementById("search_park")?.value || "",
-            inspection_year: document.getElementById("inspection_year")?.value || "",
-            install_year_num: document.getElementById("install_year_num")?.value || "",
-            inspection_sections: window.inspection_sections || [
+    // 2. データ構造作成
+    const data = {
+        search_park: document.getElementById("search_park")?.value || "",
+        inspection_year: document.getElementById("inspection_year")?.value || "",
+        install_year_num: document.getElementById("install_year_num")?.value || "",
+        inspection_sections: window.inspection_sections || [
   {
     "section": "柱・梁（本体）",
     "items": [
@@ -497,23 +486,20 @@ if (downloadBtn) {
     );
     
     
-    // ============================
-        // B / C → Excel アイテム変換
-        // ============================
+        // 3. B/C/A → Excel items 変換
         data.inspection_sections.forEach(section => {
             section.items.forEach(item => {
-                const result = inspectionResults[item.name];
-                if (!["B","C"].includes(result)) return;
-
+                const result = inspectionResults[item.name] || "A";
                 const excelDef = item.excel?.[result];
                 if (!excelDef) return;
 
                 data.items.push({
-                    type: "icon",
+                    type: excelDef.type,
                     cell: excelDef.cell,
                     dx: excelDef.dx ?? 0,
                     dy: excelDef.dy ?? 0,
-                    icon: excelDef.icon
+                    icon: excelDef.icon,
+                    text: excelDef.text
                 });
             });
         });
@@ -524,30 +510,27 @@ if (downloadBtn) {
         // Flask API に POST
         // ============================
         try {
-            const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
+        const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
 
-            if (!response.ok) throw new Error("Excel生成に失敗しました");
+        if (!response.ok) throw new Error("Excel生成に失敗しました");
 
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "点検チェックシート.xlsx";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-
-        } catch (error) {
-            alert(error.message);
-            console.error(error);
-        } finally {
-            btn.disabled = false;
-        }
-    });
-}
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "点検チェックシート.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        alert(error.message);
+        console.error(error);
+    } finally {
+        btn.disabled = false;
+    }
+});
