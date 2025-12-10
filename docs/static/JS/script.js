@@ -437,6 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // ●点検時に実施した措置 (F6:G9)
         // ==========================
         
+        
         const greaseCount = document.getElementById("grease_count")?.value || 0;
         const boltCount = document.getElementById("bolt_count")?.value || 0;
         
