@@ -1,77 +1,64 @@
-# from flask import Flask, request, send_file
-# from flask_cors import CORS
-# import io
-# from excel_utils import create_excel_template, apply_items
-
-# app = Flask(__name__)
-# CORS(app)
-
-# @app.route("/api/generate_excel", methods=["POST"])
-# def generate_excel():
-#     data = request.json
-
-#     print("=== フロントから受信した items ===")
-#     print(data.get("items"))
-
-#     items = data.get("items", [])
-
-#     wb, ws = create_excel_template()
-#     apply_items(ws, items)
-
-#     output = io.BytesIO()
-#     wb.save(output)
-#     output.seek(0)
-
-#     return send_file(
-#         output,
-#         as_attachment=True,
-#         download_name="点検チェックシート.xlsx",
-#         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-#     )
-    
-
-# @app.route("/")
-# def home():
-#     return "Backend running"
-
-# if __name__ == "__main__":
-#     # 他端末からアクセス可能にする場合 host=0.0.0.0 に変更
-#     app.run(host="127.0.0.1", port=5000, debug=True)
-
 from flask import Flask, request, send_file
-from flask_cors import CORS
+from openpyxl import load_workbook
+from openpyxl.drawing.image import Image
+from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
+from openpyxl.utils import column_index_from_string
 import io
-from excel_utils import create_excel_template, apply_items
+import os
+
+EMU = 9525
+ICON_PX = 32
+
+BASE_DIR = os.path.dirname(__file__)
+TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
+ICON_DIR = os.path.join(BASE_DIR, "icons")
 
 app = Flask(__name__)
-# GitHub Pages など任意のオリジンを許可
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+def insert_icon(ws, cell, icon_file, dx=0, dy=0):
+    icon_path = os.path.join(ICON_DIR, icon_file)
+    if not os.path.exists(icon_path):
+        print(f"[WARN] icon not found: {icon_path}")
+        return
+
+    img = Image(icon_path)
+    img.width = ICON_PX
+    img.height = ICON_PX
+
+    col_letter = ''.join(filter(str.isalpha, cell))
+    row_number = int(''.join(filter(str.isdigit, cell)))
+
+    col = column_index_from_string(col_letter) - 1
+    row = row_number - 1
+
+    marker = AnchorMarker(col=col, colOff=dx*EMU, row=row, rowOff=dy*EMU)
+    anchor = OneCellAnchor(_from=marker, ext=(ICON_PX*EMU, ICON_PX*EMU))
+    img.anchor = anchor
+    ws.add_image(img)
 
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
-    data = request.json
-    print("=== items received ===")
-    print(data.get("items"))
+    data = request.get_json()
 
-    items = data.get("items", [])
+    wb = load_workbook(TEMPLATE_PATH)
+    ws = wb.active
 
-    wb, ws = create_excel_template()
-    apply_items(ws, items)
+    for item in data.get("items", []):
+        if item.get("type") == "icon" and item.get("icon"):
+            insert_icon(ws, item["cell"], item["icon"], item.get("dx",0), item.get("dy",0))
+        elif item.get("type") == "text" and item.get("text"):
+            ws[item["cell"]] = item["text"]
 
-    output = io.BytesIO()
-    wb.save(output)
-    output.seek(0)
+    stream = io.BytesIO()
+    wb.save(stream)
+    stream.seek(0)
 
     return send_file(
-        output,
+        stream,
         as_attachment=True,
         download_name="点検チェックシート.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
-@app.route("/")
-def home():
-    return "Backend running"
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)
