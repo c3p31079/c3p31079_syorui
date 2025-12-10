@@ -390,43 +390,27 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         // ============================
-        // 3. 固定 Excel 項目
-        // ============================
-        data.items.push(
-            { type: "icon", cell: "F6", dx: 2, dy: 4, icon: "check.png" },
-            { type: "text", cell: "F8", dx: 35, dy: 0, text: "2" },
-            { type: "text", cell: "F10", dx: 4, dy: 18, text: "吊金具に摩耗が見られる" },
-            { type: "icon", cell: "F14", dx: 2, dy: 3, icon: "check.png" },
-            { type: "text", cell: "F15", dx: 22, dy: 0, text: "落下防止のため使用注意" },
-            { type: "icon", cell: "H7", dx: 1, dy: 3, icon: "check.png" },
-            { type: "text", cell: "H10", dx: 14, dy: 0, text: "部品調達後対応" },
-            { type: "text", cell: "H11", dx: 8, dy: 0, text: "6" },
-            { type: "icon", cell: "H11", dx: 30, dy: 3, icon: "circle.png" },
-            { type: "icon", cell: "H11", dx: 55, dy: 3, icon: "check.png" },
-            { type: "text", cell: "H12", dx: 2, dy: 18, text: "次回点検時に重点確認" }
-        );
-
-        // ============================
         // 4. ラジオボタン結果を反映
         // ============================
         baseSections.forEach(section => {
-            section.items.forEach(item => {
-                const result = inspectionResults[item.name] || "A"; // 未選択は A
-                if (result === "A") return; // 無視
+          section.items.forEach(item => {
+            const result = inspectionResults[item.name] || "A"; // 未選択は A
+            if (result === "A") return; // 無視
 
-                const excelDef = item.excel?.[result];
-                if (!excelDef) return;
+            const excelDef = item.excel?.[result];
+            if (!excelDef) return;
 
-                data.items.push({
-                    type: excelDef.type,
-                    cell: excelDef.cell,
-                    dx: excelDef.dx ?? 0,
-                    dy: excelDef.dy ?? 0,
-                    icon: excelDef.icon,
-                    text: excelDef.text ?? ""
-                });
+            data.items.push({
+                type: excelDef.type,
+                cell: excelDef.cell,
+                dx: excelDef.dx ?? 0,
+                dy: excelDef.dy ?? 0,
+                icon: excelDef.icon,
+                text: excelDef.text ?? ""
             });
+          });
         });
+
 
         console.log("=== Excelに送信される items ===", data.items);
 
