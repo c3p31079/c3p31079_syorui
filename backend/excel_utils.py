@@ -83,6 +83,7 @@
 from openpyxl import load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.drawing.spreadsheet_drawing import AnchorMarker, OneCellAnchor
+from openpyxl.drawing.xdr import XDRPositiveSize2D
 from openpyxl.utils import column_index_from_string
 import os
 
@@ -94,12 +95,22 @@ EMU = 9525          # 1px = 9525 EMU
 ICON_PX = 32        # PNGサイズ（32x32）
 
 def create_excel_template():
+    """
+    テンプレートを読み込み、ワークブックとシートを返す
+    """
     wb = load_workbook(TEMPLATE_PATH)
     ws = wb.active
     ws.title = "点検チェックシート"
     return wb, ws
 
 def apply_items(ws, items):
+    """
+    items を受け取り、セルにテキスト or アイコンを書き込む
+    items = [
+        {"cell": "B2", "type": "text", "text": "OK"},
+        {"cell": "C2", "type": "icon", "icon": "check.png"}
+    ]
+    """
     for item in items:
         if "cell" not in item or "type" not in item:
             continue
@@ -108,8 +119,15 @@ def apply_items(ws, items):
 
         # ---------- テキスト ----------
         if item["type"] == "text":
-            safe_cell = _get_top_left_cell(ws, cell)
-            ws[safe_cell].value = str(item.get("text", ""))
+            try:
+                ws[cell].value = str(item.get("text", ""))
+            except AttributeError:
+                # マージセルの場合は左上セルに書き込む
+                top_left = ws.merged_cells.ranges
+                for merged in ws.merged_cells.ranges:
+                    if cell in str(merged):
+                        ws[merged.start_cell].value = str(item.get("text", ""))
+                        break
             continue
 
         # ---------- アイコン ----------
@@ -130,13 +148,6 @@ def apply_items(ws, items):
                 dx=item.get("dx", 0),
                 dy=item.get("dy", 0)
             )
-
-def _get_top_left_cell(ws, cell):
-    """MergedCell の場合、左上セルに変換"""
-    for merged_range in ws.merged_cells.ranges:
-        if cell in merged_range:
-            return merged_range.start_cell.coordinate
-    return cell
 
 def _insert_image(ws, cell, icon_path, dx=0, dy=0):
     """
@@ -159,9 +170,10 @@ def _insert_image(ws, cell, icon_path, dx=0, dy=0):
         rowOff=dy * EMU
     )
 
+    # XDRPositiveSize2D を使ってサイズ指定
     anchor = OneCellAnchor(
         _from=marker,
-        ext=(ICON_PX * EMU, ICON_PX * EMU)
+        ext=XDRPositiveSize2D(ICON_PX * EMU, ICON_PX * EMU)
     )
 
     img.anchor = anchor
