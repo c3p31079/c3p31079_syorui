@@ -2,13 +2,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const downloadBtn = document.getElementById("downloadBtn");
     if (!downloadBtn) return;
 
-    downloadBtn.addEventListener("click", async function (e) {
+    downloadBtn.addEventListener("click", async (e) => {
         e.preventDefault();
-        this.disabled = true;
-
+        downloadBtn.disabled = true;
         console.log("💾 Excelダウンロード処理開始");
 
-        // === 基本データ ===
         const data = {
             search_park: document.getElementById("search_park")?.value || "",
             inspection_year: document.getElementById("inspection_year")?.value || "",
@@ -373,7 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
             items: []
         };
 
-// === 点検結果取得 ===
+// 点検結果取得
         const inspectionResults = {};
         document.querySelectorAll("tbody tr").forEach(tr => {
             const radioChecked = tr.querySelector("input[type='radio']:checked");
@@ -382,7 +380,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // inspection_sectionsに基づいてExcel用items作成
+        // Excel items 作成
         data.inspection_sections.forEach(section => {
             section.items.forEach(item => {
                 const result = inspectionResults[item.name] || "A";
@@ -402,17 +400,14 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        // === CheckSheet_measure_area 入力 ===
-        const measureArea = document.querySelector(".CheckSheet_measure_area");
-        if (measureArea) {
-            measureArea.querySelectorAll("input,textarea").forEach(input => {
-                if ((input.type === "checkbox" || input.type === "radio") && input.checked) {
-                    data.items.push({ type: input.type, name: input.name, value: input.value });
-                } else if ((input.type === "text" || input.type === "number") && input.value.trim()) {
-                    data.items.push({ type: input.type, name: input.name, value: input.value.trim() });
-                }
-            });
-        }
+        // CheckSheet_measure_area 入力反映
+        document.querySelectorAll(".CheckSheet_measure_area input, .CheckSheet_measure_area textarea").forEach(input => {
+            if ((input.type === "checkbox" || input.type === "radio") && input.checked) {
+                data.items.push({ type: input.type, name: input.name, value: input.value });
+            } else if ((input.type === "text" || input.type === "number") && input.value.trim()) {
+                data.items.push({ type: input.type, name: input.name, value: input.value.trim() });
+            }
+        });
 
         // === 措置・所見・総合結果・対応方針・対応予定時期・禁止措置・備考 ===
         const appendItems = (map, type="checkbox") => {
@@ -438,24 +433,18 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         };
 
-                // ==========================
+        // ==========================
         // ●点検時に実施した措置 (F6:G9)
         // ==========================
-        const greaseCount = document.getElementById("action_grease_count")?.value || 0;
-        const boltCount = document.getElementById("action_bolt_count")?.value || 0;
-        const hangerCount = document.getElementById("hanger_count")?.value || 0;
-        const chainCount = document.getElementById("chain_count")?.value || 0;
-        const seatCount = document.getElementById("seat_count")?.value || 0;
-        const otherCount = document.getElementById("action_other_count")?.value || 0;
 
         let actionText = "●点検時に実施した措置\n";
         actionText += `□グリース・オイル等の注入※1 (${greaseCount}箇所)\n`;
         actionText += `□ボルト・ナットの増し締め・交換 (${boltCount}箇所)\n`;
-        actionText += `□吊金具の交換 (${hangerCount}箇所)\n`;
-        actionText += `□チェーンの交換 (${chainCount}箇所)\n`;
-        actionText += `□座板の交換 (${seatCount}箇所)\n`;
+        actionText += `□吊金具の交換 (${document.getElementById("hanger_count")?.value || 0}箇所)\n`;
+        actionText += `□チェーンの交換 (${document.getElementById("chain_count")?.value || 0}箇所)\n`;
+        actionText += `□座板の交換 (${document.getElementById("seat_count")?.value || 0}箇所)\n`;
         actionText += `□石・異物の除去、枝の剪定\n`;
-        actionText += `□その他 (${otherCount}箇所)\n`;
+        actionText += `□その他 (${document.getElementById("action_other_count")?.value || 0})\n`;
 
         data.items.push({
             type: "text",

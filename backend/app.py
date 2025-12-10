@@ -19,6 +19,7 @@ ICON_DIR = os.path.join(BASE_DIR, "icons")
 app = Flask(__name__)
 CORS(app)
 
+
 def insert_icon(ws, cell, icon_file, dx=0, dy=0):
     icon_path = os.path.join(ICON_DIR, icon_file)
     if not os.path.exists(icon_path):
@@ -34,12 +35,13 @@ def insert_icon(ws, cell, icon_file, dx=0, dy=0):
     col = column_index_from_string(col_letter) - 1
     row = row_number - 1
 
-    marker = AnchorMarker(col=col, colOff=dx*EMU, row=row, rowOff=dy*EMU)
-    anchor = OneCellAnchor(_from=marker, ext=XDRPositiveSize2D(ICON_PX*EMU, ICON_PX*EMU))
+    marker = AnchorMarker(col=col, colOff=dx * EMU, row=row, rowOff=dy * EMU)
+    anchor = OneCellAnchor(_from=marker, ext=XDRPositiveSize2D(ICON_PX * EMU, ICON_PX * EMU))
     img.anchor = anchor
     ws.add_image(img)
 
-def insert_text(ws, cell, text, dx=0, dy=0):
+
+def insert_text(ws, cell, text):
     col_letter = ''.join(filter(str.isalpha, cell))
     row_number = int(''.join(filter(str.isdigit, cell)))
     col = column_index_from_string(col_letter) - 1
@@ -55,8 +57,9 @@ def insert_text(ws, cell, text, dx=0, dy=0):
             row = row_number - 1
             break
 
-    ws.cell(row=row+1, column=col+1, value=text)
-    ws.cell(row=row+1, column=col+1).alignment = Alignment(wrap_text=True, vertical='top')
+    ws.cell(row=row + 1, column=col + 1, value=text)
+    ws.cell(row=row + 1, column=col + 1).alignment = Alignment(wrap_text=True, vertical='top')
+
 
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
@@ -64,17 +67,13 @@ def generate_excel():
     if data is None:
         return jsonify({"error": "JSONが正しく送信されていません"}), 400
 
-    print("[INFO] Received data:", data)
-
     if not os.path.exists(TEMPLATE_PATH):
         return jsonify({"error": "テンプレートファイルが見つかりません"}), 500
 
     wb = load_workbook(TEMPLATE_PATH)
     ws = wb.active
 
-    # items 配列反映
-    items = data.get("items", [])
-    for item in items:
+    for item in data.get("items", []):
         cell = item.get("cell")
         if not cell:
             continue
@@ -86,12 +85,11 @@ def generate_excel():
         if item_type == "icon" and item.get("icon"):
             insert_icon(ws, cell, item["icon"], dx=dx, dy=dy)
         elif item_type in ("text", "number") and item.get("value") is not None:
-            insert_text(ws, cell, str(item["value"]), dx=dx, dy=dy)
+            insert_text(ws, cell, str(item["value"]))
         elif item_type == "checkbox":
             if item.get("value"):
                 insert_icon(ws, cell, item.get("icon", "check.png"), dx=dx, dy=dy)
 
-    # Excel出力
     stream = io.BytesIO()
     wb.save(stream)
     stream.seek(0)
@@ -102,6 +100,7 @@ def generate_excel():
         download_name="点検チェックシート.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
 
 if __name__ == "__main__":
     app.run(debug=True)
