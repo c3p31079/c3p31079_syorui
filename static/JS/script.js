@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const btn = this;
         btn.disabled = true;
         console.log("💾 Excelダウンロード処理開始");
+        document.getElementById("downloadBtn")
 
         // ============================
         // 1. tbody 全行から inspectionResults 作成
