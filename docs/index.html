@@ -876,7 +876,119 @@
             </div>
         </div>
 
- <script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const saveBtn = document.getElementById("downloadExcelBtn");
+
+    saveBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log("💾 Excelダウンロード処理開始");
+
+        let items = [];
+
+        // =============================
+        // 点検結果（例：柱・梁のぐらつきのみ）
+        // =============================
+        const inspectionMap = {
+            pillar_wobble: { cell: "D6" }
+        };
+
+        Object.keys(inspectionMap).forEach(name => {
+            const checked = document.querySelector(`input[name="${name}"]:checked`);
+            if (!checked) return;
+
+            const grade = checked.value;
+            const cell = inspectionMap[name].cell;
+
+            if (grade === "A") items.push({ type: "circle", cell });
+            if (grade === "B") items.push({ type: "triangle", cell });
+            if (grade === "C") items.push({ type: "cross", cell });
+        });
+
+        // =============================
+        // 措置
+        // =============================
+        const actionCheckboxes = [
+            { id:"action_grease", cell:"F6" },
+            { id:"action_bolt", cell:"F7" },
+            { id:"action_hanger", cell:"F8", num_id:"hanger_count" },
+            { id:"action_chain", cell:"F9", num_id:"chain_count" },
+            { id:"action_seat", cell:"F10", num_id:"seat_count" },
+            { id:"action_removal", cell:"F11" },
+            { id:"action_other", cell:"F12", text_id:"action_other_detail" }
+        ];
+
+        actionCheckboxes.forEach(a => {
+            const cb = document.getElementById(a.id);
+            if (!cb || !cb.checked) return;
+
+            items.push({ type: "check", cell: a.cell });
+
+            if (a.num_id) {
+                const numEl = document.getElementById(a.num_id);
+                if (numEl && numEl.value) {
+                    items.push({
+                        type: "text",
+                        cell: a.cell,
+                        text: `(${numEl.value}箇所)`,
+                        x_offset: 1,
+                        y_offset: 0
+                    });
+                }
+            }
+
+            if (a.text_id) {
+                const textEl = document.getElementById(a.text_id);
+                if (textEl && textEl.value) {
+                    items.push({
+                        type: "text",
+                        cell: a.cell,
+                        text: textEl.value,
+                        x_offset: 1,
+                        y_offset: 0
+                    });
+                }
+            }
+        });
+
+        // =============================
+        // Backendへ送信 → Excel取得
+        // =============================
+        const res = await fetch("/api/sheet-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items })
+        });
+
+        if (!res.ok) {
+            alert("Excel生成に失敗しました");
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "checksheet.xlsx";
+        a.click();
+        URL.revokeObjectURL(url);
+
+        console.log("✅ Excelダウンロード完了");
+    });
+});
+</script>
+
+
+    </body>
+</html>
+
+
+
+
+ <!-- <script>
 document.addEventListener("DOMContentLoaded", function () {
     const saveBtn = document.getElementById("downloadExcelBtn");
 
@@ -1111,8 +1223,4 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mark) mark.style.visibility = "visible";
     });
 });
-</script>
-
-
-    </body>
-</html>
+</script> -->

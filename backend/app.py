@@ -9,6 +9,10 @@ CORS(app)
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
     data = request.json
+
+    print("=== フロントから受信した items ===")
+    print(data.get("items"))
+    
     items = data.get("items", [])
 
     wb, ws = create_excel_template()
@@ -24,6 +28,7 @@ def generate_excel():
         download_name="点検チェックシート.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+    
 
 @app.route("/")
 def home():
