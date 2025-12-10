@@ -91,8 +91,8 @@ BASE_DIR = os.path.dirname(__file__)
 TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
 ICON_DIR = os.path.join(BASE_DIR, "icons")
 
-EMU = 9525          # 1px = 9525 EMU
-ICON_PX = 32        # PNGサイズ（32x32）
+EMU = 9525
+ICON_PX = 32
 
 def create_excel_template():
     wb = load_workbook(TEMPLATE_PATH)
@@ -109,15 +109,8 @@ def apply_items(ws, items):
 
         # ---------- テキスト ----------
         if item["type"] == "text":
-            try:
-                ws[cell].value = str(item.get("text", ""))
-            except AttributeError:
-                # マージセルの場合は左上セルに書き込む
-                for merged in ws.merged_cells.ranges:
-                    if cell in str(merged):
-                        start_cell = f"{merged.min_col}{merged.min_row}"
-                        ws[start_cell].value = str(item.get("text", ""))
-                        break
+            target_cell = _get_top_left_cell(ws, cell)
+            target_cell.value = str(item.get("text", ""))
             continue
 
         # ---------- アイコン ----------
@@ -125,13 +118,20 @@ def apply_items(ws, items):
             icon_file = item.get("icon")
             if not icon_file:
                 continue
-
             icon_path = os.path.join(ICON_DIR, icon_file)
             if not os.path.exists(icon_path):
                 print(f"[WARN] icon not found: {icon_path}")
                 continue
-
             _insert_image(ws, cell, icon_path, dx=item.get("dx", 0), dy=item.get("dy", 0))
+
+def _get_top_left_cell(ws, cell_str):
+    """
+    マージセルの場合は左上セルを返す
+    """
+    for merged in ws.merged_cells.ranges:
+        if cell_str in str(merged):
+            return ws.cell(row=merged.min_row, column=merged.min_col)
+    return ws[cell_str]
 
 def _insert_image(ws, cell, icon_path, dx=0, dy=0):
     img = Image(icon_path)
