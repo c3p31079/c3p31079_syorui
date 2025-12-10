@@ -7,35 +7,33 @@ if (downloadBtn) {
     downloadBtn.type = "button"; // ★これが最重要っぽい
 }
 
-
-
-document.getElementById("downloadExcelBtn").addEventListener("click", async function (e) {
+downloadBtn.addEventListener("click", async function (e) {
     e.preventDefault();
     e.stopPropagation();
 
-    this.disabled = true;
+    const btn = this;   // ★thisを固定
+    btn.disabled = true;
     console.log("💾 Excelダウンロード処理開始");
 
     // ============================
-    // 判定結果をHTMLから収集（★必須）
+    // 判定結果をHTMLから収集
     // ============================
     const inspectionResults = {};
-
     document.querySelectorAll("input[type='radio']:checked").forEach(el => {
-        if (["A", "B", "C"].includes(el.value)) {
+        if (["B","C"].includes(el.value)) {
             inspectionResults[el.name] = el.value;
         }
     });
 
     console.log("=== inspectionResults ===", inspectionResults);
 
-
-    
+    // ============================
+    // データ構造作成
+    // ============================
     const data = {
         search_park: document.getElementById("search_park")?.value || "",
         inspection_year: document.getElementById("inspection_year")?.value || "",
         install_year_num: document.getElementById("install_year_num")?.value || "",
-
         inspection_sections: [
   {
     "section": "柱・梁（本体）",
@@ -396,7 +394,7 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
         items:[]
     };
 
-        // Excel に反映する項目（仮：既存ロジック維持）
+        // Excel に反映する項目
     data.items.push(
             // ==============================
             // 実施措置（F6:G9）
@@ -505,36 +503,28 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     );
     
     
-    // ==============================
-    // B / C → Excel Items 変換（強制反映版）
-    // ==============================
-
+    // ============================
+    // B / C → Excel Items 変換
+    // ============================
     data.inspection_sections.forEach(section => {
         section.items.forEach(item => {
             const result = inspectionResults[item.name];
-            if (result !== "B" && result !== "C") return;
+            if (!["B","C"].includes(result)) return;
 
             const excelDef = item.excel?.[result];
             if (!excelDef) return;
 
             data.items.push({
-            type: "icon",
-            cell: excelDef.cell,
-            dx: excelDef.dx ?? 0,
-            dy: excelDef.dy ?? 0,
-            icon: excelDef.icon
+                type: "icon",
+                cell: excelDef.cell,
+                dx: excelDef.dx ?? 0,
+                dy: excelDef.dy ?? 0,
+                icon: excelDef.icon
             });
         });
     });
 
-
-
     console.log("=== Excelに送信される items ===", data.items);
-    console.log("inspectionResults keys", Object.keys(inspectionResults));
-    //console.log("section item name", item.name);
-
-
-    
 
 
     // ============================
@@ -544,21 +534,11 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
     try {
         const response = await fetch("http://127.0.0.1:5000/api/generate_excel", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         });
 
-        if (!response.ok) {
-            throw new Error("Excel生成に失敗しました");
-        }
-
-        //ここに追加？
-
-        // ============================
-        // Blob としてダウンロード
-        // ============================
+        if (!response.ok) throw new Error("Excel生成に失敗しました");
 
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -567,18 +547,14 @@ document.getElementById("downloadExcelBtn").addEventListener("click", async func
         a.href = url;
         a.download = "点検チェックシート.xlsx";
         document.body.appendChild(a);
-
-        a.click();   // ← ここでは disabled を触らない
-
+        a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
-
 
     } catch (error) {
         alert(error.message);
         console.error(error);
     } finally {
-        this.disabled = false;   // ✅ 必ず戻す
+        btn.disabled = false;   // ✅ 必ず元に戻す
     }
-
 });
