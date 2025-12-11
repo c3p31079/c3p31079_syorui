@@ -62,8 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       { "name": "joint_deform", "label": "変形",
         "excel": {
-            "B": { "type": "icon", "cell": "D7", "dx": 20, "dy": -5 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D7", "dx": 20, "dy": -5, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D7", "dx": 24, "dy": -5 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D7", "dx": 24, "dy": -5, "icon" : "none.png" } } },
 
       { "name": "joint_corrosion", "label": "腐食",
         "excel": {
@@ -87,43 +87,43 @@ document.addEventListener("DOMContentLoaded", () => {
     "items": [
       { "name": "hanger_damage", "label": "破損",
         "excel": {
-            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": -5 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": -5, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 5, "dy": -5 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D8", "dx": 5, "dy": -5, "icon" : "none.png" } } },
 
       { "name": "hanger_deform", "label": "変形",
         "excel": {
-            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 24, "dy": -5 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D8", "dx": 24, "dy": -5, "icon" : "none.png" } } },
 
       { "name": "hanger_corrosion", "label": "腐食",
         "excel": {
-            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 60, "dy": -5 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D8", "dx": 60, "dy": -5, "icon" : "none.png" } } },
 
       { "name": "hanger_noise", "label": "異音",
         "excel": {
-            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 90, "dy": -5, "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D8", "dx": 90, "dy": -5, "icon" : "none.png" } } },
 
       { "name": "hanger_shift", "label": "金具本体のずれ",
         "excel": {
-            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 130, "dy": -5, "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D8", "dx": 130, "dy": -5, "icon" : "none.png" } } },
 
       { "name": "hanger_wear_13", "label": "摩耗（×：1/3以上）",
         "excel": {
-            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 40, "dy": 7, "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D8", "dx": 40, "dy": 7, "icon" : "none.png" } } },
 
       { "name": "hanger_wear_12", "label": "摩耗（×：1/2以上 使用禁止）",
         "excel": {
-            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D8", "dx": 115, "dy": 7 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D8", "dx": 115, "dy": 7, "icon" : "none.png" } } },
 
       { "name": "hanger_bolt", "label": "ボルトの緩み／欠落",
         "excel": {
-            "B": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D8", "dx": 2, "dy": 2, "icon" : "none.png" } } }
+            "B": { "type": "icon", "cell": "D8", "dx": 40, "dy": 19 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D8", "dx": 40, "dy": 19, "icon" : "none.png" } } }
     ]
   },
 
