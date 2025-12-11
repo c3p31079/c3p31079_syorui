@@ -92,6 +92,10 @@ def generate_excel():
         elif item_type in ("text", "number"):
             insert_text(ws, cell, str(item.get("value", "")))
 
+        elif item["type"] == "text":
+            cell = ws[item["cell"]]
+            cell.value = item["text"]
+
         elif item_type == "checkbox":
             if item.get("value"):
                 insert_icon(ws, cell, item.get("icon", "check.png"), dx=dx, dy=dy)
