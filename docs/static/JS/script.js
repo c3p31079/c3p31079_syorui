@@ -27,13 +27,13 @@ document.addEventListener("DOMContentLoaded", () => {
     "items": [
       { "name": "pillar_wobble", "label": "ぐらつき",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 20, "dy": -5, "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 20, "dy": -5, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 15, "dy": -5, "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": 15, "dy": -5, "icon" : "none.png" } } },
 
       { "name": "pillar_damage", "label": "破損",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 60, "dy": -5, "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 60, "dy": -5, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 32, "dy": -5, "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": 32, "dy": -5, "icon" : "none.png" } } },
 
       { "name": "pillar_deform", "label": "変形",
         "excel": {
@@ -47,8 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       { "name": "pillar_joint_loose", "label": "〔接合部・ボルト〕緩み",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 10, "dy": 20 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 10, "dy": 20, "icon" : "none.png" } } }
+            "B": { "type": "icon", "cell": "D6", "dx": 20, "dy": 20 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": 20, "dy": 20, "icon" : "none.png" } } }
     ]
   },
 
