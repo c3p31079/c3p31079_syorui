@@ -516,40 +516,75 @@ document.addEventListener("DOMContentLoaded", () => {
             data.items.push({
                 type:"text",
                 name:"observations",
-                value:"●所見\r\n"+observations,
+                value:"●所見\n"+observations,
                 cell:"F10",
-                text:"●所見\r\n"+observations
+                text:"●所見\n"+observations
             });
         }
 
         // ==========================
         // ●総合結果 (F13:G15)
         // ==========================
-        const totalResultRadios = document.querySelectorAll('input[name="total_result"]');
-        totalResultRadios.forEach(r=>{
-            if(r.checked){
+
+        // F13 に書き込む「固定文章」
+        const overallFixedText =
+        "●総合結果※2\n" +
+        "　A:健全(△・×なし)\n" +
+        "　B:経過観察(△あり、×なし)\n" +
+        "　C:要修繕・要対応(×あり)\n" +
+        "　D:使用禁止措置\n" +
+        "　　　（ ";   // ←この最後の「（ 」の後に D の場合のみ内容を入れる
+
+        let overallResultText = overallFixedText;
+
+        const overallRadios = document.querySelectorAll('input[name="overall_result"]');
+        overallRadios.forEach(r => {
+            if (r.checked) {
+
                 const val = r.value;
-                let dxVal = val==="A"?0:val==="B"?120:val==="C"?240:360;
-                let totalText="";
-                if(val==="D"){
-                    const dDetail=document.getElementById("total_result_D_text")?.value || "";
-                    const totalText=`D:使用禁止措置\r\n（${dDetail}）`;
+
+                // チェックアイコンの x 位置
+                let dxVal = val === "A" ? 0 : val === "B" ? 120 : val === "C" ? 240 : 360;
+
+                // A/B/C → アイコンのみ配置
+                if (val !== "D") {
                     data.items.push({
-                        type:"text",
-                        name:"total_result_text",
-                        value:totalText,
-                        cell:"F13",
-                        text:totalText
+                        type: "icon",
+                        cell: "F13",
+                        icon: "check.png",
+                        dx: dxVal,
+                        dy: 0
                     });
-                    data.items.push({
-                        type:"icon",
-                        cell:"F13",
-                        icon:"check.png",
-                        dx:360, // D の列位置に合わせる
-                        dy:0
-                    });
+                    // A/B/C はテキスト書き込みなし
+                    return;
                 }
 
+                // D の場合 → 固定文 + 入力内容を埋め込み
+                if (val === "D") {
+
+                    const dDetail = document.getElementById("overall_d_detail")?.value || "";
+
+                    // D の詳細付きの全文を生成
+                    overallResultText = overallFixedText + dDetail + " ）";
+
+                    // F13 にテキスト書き込み
+                    data.items.push({
+                        type: "text",
+                        name: "overall_result_text",
+                        value: overallResultText,
+                        cell: "F13",
+                        text: overallResultText
+                    });
+
+                    // アイコン：D 
+                    data.items.push({
+                        type: "icon",
+                        cell: "F13",
+                        icon: "check.png",
+                        dx: 360,
+                        dy: 0
+                    });
+                }
             }
         });
 
@@ -648,26 +683,60 @@ document.addEventListener("DOMContentLoaded", () => {
         // ==========================
         // □本格的な使用禁止措置 (H11)
         // ==========================
-        const prohibitedDate=document.getElementById("prohibited_date")?.value;
-        const prohibitedStatus=document.querySelector('input[name="prohibited_status"]:checked')?.value || "";
-        if(prohibitedDate && prohibitedStatus){
-            const d=new Date(prohibitedDate);
-            const txt=`□本格的な使用禁止措置\n　${d.getMonth()+1}月 ${d.getDate()}日 上・中・下　旬　頃`;
-            data.items.push({
-                type:"text",
-                name:"prohibited_action",
-                value:txt,
-                cell:"H11",
-                text:txt
-            });
-            data.items.push({
-                type:"icon",
-                cell:"H11",
-                icon:"check.png",
-                dx:0,
-                dy:0
-            });
+
+        // チェックボックスを確認
+        const prohibitChk = document.getElementById("prohibition_measure");
+
+        if (prohibitChk && prohibitChk.checked) {
+
+            // 入力された日付
+            const dateVal = document.getElementById("prohibition_date")?.value || "";
+            // 実施済み or 実施予定
+            const statusVal = document.querySelector('input[name="prohibition_status"]:checked')?.value || "";
+
+            // date が未入力、またはラジオ未選択なら処理しない
+            if (dateVal && statusVal) {
+
+                // 何月・何日へ変換
+                const d = new Date(dateVal);
+                const month = d.getMonth() + 1;   // 月（0始まりなので +1）
+                const day = d.getDate();          // 日
+
+                // 実施済み・実施予定で dx,dy を分ける
+                // 例：実施済み(dx=0,dy=0)、実施予定(dx=0,dy=120)
+                const statusPos = {
+                    "done":    { dx: 0, dy: 0 },
+                    "planned": { dx: 0, dy: 120 }
+                };
+
+                const pos = statusPos[statusVal] || { dx: 0, dy: 0 };
+
+                // 固定文 + 日付
+                // 固定部分は絶対に変更しない！
+                const txt =
+                    "□本格的な使用禁止措置\n" +
+                    `　${month}月 ${day}日  ${statusVal==="done"?"実施済み":"実施予定"}`;
+
+                // Excel にテキスト書き込み
+                data.items.push({
+                    type: "text",
+                    name: "prohibited_action",
+                    value: txt,
+                    cell: "H11",
+                    text: txt
+                });
+
+                // check.png の描画
+                data.items.push({
+                    type: "icon",
+                    cell: "H11",
+                    icon: "check.png",
+                    dx: pos.dx,
+                    dy: pos.dy
+                });
+            }
         }
+
 
 
         // ==========================
@@ -678,9 +747,9 @@ document.addEventListener("DOMContentLoaded", () => {
             data.items.push({
                 type:"text",
                 name:"remarks",
-                value:"●備考\r\n"+remarks,
+                value:"●備考\n"+remarks,
                 cell:"H12",
-                text:"●備考\r\n"+remarks
+                text:"●備考\n"+remarks
             });
         }
 
