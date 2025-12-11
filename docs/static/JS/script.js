@@ -27,8 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "items": [
       { "name": "pillar_wobble", "label": "ぐらつき",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 5, "dy": 0 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 5, "dy": 0, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D6", "dx": -10, "dy": 20 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": -10, "dy": 20, "icon" : "none.png" } } },
 
       { "name": "pillar_damage", "label": "破損",
         "excel": {
