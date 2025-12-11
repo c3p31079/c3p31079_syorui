@@ -205,29 +205,38 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
     {
-      "name": "seat_metal_wear_13","label": "金具の摩耗（×：1/3以上）",
+      "name": "seat_metal_13","label": "金具の摩耗（×：1/3以上）",
       "excel": {
         "B": { "type": "icon", "cell": "D11", "dx": 40, "dy": 7, "icon" : "triangle.png"},
         "C": { "type": "icon", "cell": "D11", "dx": 40, "dy": 7, "icon" : "none.png" }
       }
     },
     {
-      "name": "seat_metal_wear_12","label": "金属の摩耗（×：1/2以上 使用禁止）",
+      "name": "seat_metal_12","label": "金属の摩耗（×：1/2以上 使用禁止）",
       "excel": {
         "B": { "type": "icon", "cell": "D11", "dx": 115, "dy": 7, "icon" : "triangle.png"},
         "C": { "type": "icon", "cell": "D11", "dx": 115, "dy": 7, "icon" : "none.png" }
       }
     },
+    ,
     {
-      "name": "seat_bolt_loose",
-      "label": "ボルト・袋ナットの緩み",
+      "name": "seat_bolt",
+      "label": "ボルトの緩み",
       "excel": {
         "B": { "type": "icon", "cell": "D11", "dx": 5, "dy": 19, "icon" : "triangle.png"},
         "C": { "type": "icon", "cell": "D11", "dx": 5, "dy": 19, "icon" : "none.png" }
       }
     },
     {
-      "name": "seat_bolt_missing","label": "欠落",
+      "name": "seat_nut",
+      "label": "袋ナットの緩み",
+      "excel": {
+        "B": { "type": "icon", "cell": "D11", "dx": 25, "dy": 19, "icon" : "triangle.png"},
+        "C": { "type": "icon", "cell": "D11", "dx": 25, "dy": 19, "icon" : "none.png" }
+      }
+    },
+    {
+      "name": "seat_missing","label": "欠落",
       "excel": {
         "B": { "type": "icon", "cell": "D11", "dx": 90, "dy": 19, "icon" : "triangle.png"},
         "C": { "type": "icon", "cell": "D11", "dx": 90, "dy": 19, "icon" : "none.png" }
@@ -267,7 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
     {
-      "name": "fence_joint_loose","label": "〔接合部・ボルト〕緩み",
+      "name": "fence_loose","label": "〔接合部・ボルト〕緩み",
       "excel": {
         "B": { "type": "icon", "cell": "D12", "dx": 30, "dy": 7, "icon" : "triangle.png"},
         "C": { "type": "icon", "cell": "D12", "dx": 30, "dy": 7, "icon" : "none.png" }
@@ -590,12 +599,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // チェックボックスに対応する check.png を配置
         const actionChecks = [
-            {id: "check_grease", dx:0, dy:7},
-            {id: "check_bolt", dx:0, dy:19},
-            {id: "check_hanger", dx:0, dy:31},
-            {id: "check_chain", dx:0, dy:43},
-            {id: "check_seat", dx:0, dy:55},
-            {id: "check_other", dx:0, dy:67},
+            {id: "action_grease", dx:0, dy:7},
+            {id: "action_bolt", dx:0, dy:19},
+            {id: "action_hanger", dx:0, dy:31},
+            {id: "action_chain", dx:0, dy:43},
+            {id: "action_seat", dx:0, dy:55},
+            {id: "action_other", dx:0, dy:67},
         ];
         actionChecks.forEach(chk=>{
             const el=document.getElementById(chk.id);
@@ -664,7 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // D の場合 → 固定文 + 入力内容を埋め込み
                 if (val === "D") {
 
-                    const dDetail = document.getElementById("overall_d_detail")?.value || "";
+                    const dDetail = document.getElementById("overall_result")?.value || "";
 
                     // D の詳細付きの全文を生成
                     overallResultText = overallFixedText + dDetail + " ）";
@@ -672,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     // F13 にテキスト書き込み
                     data.items.push({
                         type: "text",
-                        name: "overall_result_text",
+                        name: "overall_result",
                         value: overallResultText,
                         cell: "F13",
                         text: overallResultText
@@ -707,8 +716,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // dx,dy はあなたの Excel レイアウトに合わせて自由に調整可能
         const policyChecks = [
             { id: "plan_maintenance", label: "整備班で対応予定", dx: 0,  dy: 7   },
-            { id: "plan_repair",      label: "修繕・修繕工事で対応予定", dx: 0,  dy: 19 },
-            { id: "plan_improvement", label: "施設改良工事で対応予定", dx: 0,  dy: 31 },
+            { id: "plan_improvementlan_repair",      label: "修繕・修繕工事で対応予定", dx: 0,  dy: 19 },
+            { id: "plan_precision", label: "施設改良工事で対応予定", dx: 0,  dy: 31 },
             { id: "plan_precision",   label: "精密点検予定", dx: 0,  dy: 43 },
             { id: "plan_removal",     label: "撤去予定", dx: 0,  dy: 55 },
             { id: "plan_other",       label: "その他", dx: 0,  dy: 67 }
@@ -849,68 +858,66 @@ document.addEventListener("DOMContentLoaded", () => {
         // ネイティブアプリのやつ
         // ==========================
         //td をタップしたら Android の関数を呼ぶ
+        // ==============================
+        // 点検項目クリック → Androidへ通知
+        // ==============================
         function bindDamageCell(id, name) {
             const cell = document.getElementById(id);
             if (!cell) return;
 
             cell.addEventListener("click", () => {
                 window.lastSelectedItem = name;
-
-                // Android アプリと接続時
                 if (window.AndroidInterface && window.AndroidInterface.startAR) {
                     window.AndroidInterface.startAR(name);
                 } else {
-                    // Web上単体でテストするとき
-                    alert("Android 接続なし（Web テスト）");
+                    alert("Android接続なし（Webテスト）");
                 }
             });
         }
 
-        // td と項目名の紐付け
-        bindDamageCell("pillar_damage_td", "pillar_damage");
-        bindDamageCell("joint_damage_td", "joint_damage");
-        bindDamageCell("hanger_damage_td", "hanger_damage");
-        bindDamageCell("chain_damage_td", "chain_damage");
-        bindDamageCell("seat_crack_td", "seat_crack");
-        bindDamageCell("seat_break_td", "seat_break");
-        bindDamageCell("seat_damage_td", "seat_damage");
-        bindDamageCell("fence_damage_td", "fence_damage");
-        bindDamageCell("base_crack_td", "base_crack");
-        bindDamageCell("base_expose_td", "base_expose");
+        // 連結
+        bindDamageCell("pillar_damage_td","pillar_damage");
+        bindDamageCell("joint_damage_td","joint_damage");
+        bindDamageCell("hanger_damage_td","hanger_damage");
+        bindDamageCell("chain_damage_td","chain_damage");
+        bindDamageCell("seat_crack_td","seat_crack");
+        bindDamageCell("seat_break_td","seat_break");
+        bindDamageCell("seat_damage_td","seat_damage");
+        bindDamageCell("fence_damage_td","fence_damage");
+        bindDamageCell("base_crack_td","base_crack");
+        bindDamageCell("base_expose_td","base_expose");
 
+        // ===========================================
+        // Android → Web（ラジオ自動選択処理）
+        // ===========================================
+       window.setMeasuredLength = function(length_cm, tdId) {
+          console.log("受信: " + length_cm + "cm / tdId=" + tdId);
 
-        // ==========================
-        // Android → Web: ラジオボタン変更
-        // ==========================
-        window.updateDamageValue = function(name, value) {
-            const target = document.querySelector(
-                `input[name="${name}"][value="${value}"]`
-            );
-            if (target) target.checked = true;
-        };
+          // ランクへ変換
+          let grade = "A";  // default
+          if (length_cm >= 25) grade = "C";
+          else if (length_cm >= 10) grade = "B";
 
+          // ラジオボタン自動選択
+          const radios = document.querySelectorAll(`input[name='${tdId}']`);
+          radios.forEach(r => {
+              if (r.value === grade) r.checked = true;
+          });
 
-        // ==========================
-        // Android → Web: cm に応じて A/B/C 自動選択
-        // ==========================
-        window.setMeasuredLength = function(length_cm) {
-            console.log("受信した長さ(cm):", length_cm);
+          // PNG アイコン設定
+          let iconFile = "circle.png"; // A
+          if (grade === "B") iconFile = "triangle.png";
+          if (grade === "C") iconFile = "none.png";
 
-            let value;
-
-            if (length_cm < 3) {
-                value = "A";
-            } else if (length_cm < 10) {
-                value = "B";
-            } else {
-                value = "C";
-            }
-
-            // lastSelectedItem に対して value を適用
-            if (window.lastSelectedItem) {
-                window.updateDamageValue(window.lastSelectedItem, value);
-            }
-        };
+          // items[] に push（Excel 書込用）
+          items.push({
+              type: "icon",
+              cell: td_to_cell_map[tdId],   // ←あなたの既存のマッピングを利用
+              icon: iconFile,
+              dx: adjust_dx[tdId] || 0,
+              dy: adjust_dy[tdId] || 0
+          });
+      };
 
         // ==========================
         // Flask API へ送信

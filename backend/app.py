@@ -101,16 +101,17 @@ def generate_excel():
                 insert_icon(ws, cell, item.get("icon", "check.png"), dx=dx, dy=dy)
 
     stream = io.BytesIO()
+    output_path = "backend/output.xlsx"
     wb.save(stream)
     stream.seek(0)
 
     return send_file(
         stream,
+        output_path,
         as_attachment=True,
         download_name="点検チェックシート.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
 
 if __name__ == "__main__":
     app.run(debug=True)
