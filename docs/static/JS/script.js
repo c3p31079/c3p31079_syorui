@@ -525,6 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // ●総合結果 (F13:G15)
         // ==========================
         let totalText = "";
+        const totalResultRadios = document.querySelectorAll('input[name="total_result"]');
         totalResultRadios.forEach(r => {
             if (r.checked) {
                 const val = r.value;
@@ -546,7 +547,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         text: totalText
                     });
                 } else {
-                    // A/B/C の場合はアイコンのみ
                     const dxVal = val === "A" ? 0 : val === "B" ? 120 : 240;
                     data.items.push({
                         type: "icon",
@@ -559,9 +559,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // ==========================
-        // ●対応方針・対応予定時期 (H6:H10)
-        // ==========================
+
         // ==========================
         // ●対応方針・対応予定時期 (H6:H10)
         // ==========================
