@@ -747,34 +747,19 @@ document.addEventListener("DOMContentLoaded", () => {
         // 上旬
         if (document.getElementById("period_early")?.checked) {
             periodText = "上旬頃";
-            periodElement = { dx: 160, dy: 0 };
         }
         // 中旬
         else if (document.getElementById("period_mid")?.checked) {
             periodText = "中旬頃";
-            periodElement = { dx: 160, dy: 120 };
         }
         // 下旬
         else if (document.getElementById("period_late")?.checked) {
             periodText = "下旬頃";
-            periodElement = { dx: 160, dy: 240 };
         }else{
             periodText = " 上・中・下　旬　頃";
-            periodElement = { dx: 160, dy: 240 };
         }
 
         policyText += `　${month} 月 ${periodText}\n`;
-
-        // 予定時期のラジオに応じて check.png を配置
-        if (periodElement) {
-            data.items.push({
-                type: "icon",
-                cell: "H6",
-                icon: "check.png",
-                dx: periodElement.dx,
-                dy: periodElement.dy
-            });
-        }
 
         // 最後に Excel にテキストを挿入
         data.items.push({
