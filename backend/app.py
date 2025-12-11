@@ -107,7 +107,6 @@ def generate_excel():
 
     return send_file(
         stream,
-        output_path,
         as_attachment=True,
         download_name="点検チェックシート.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
