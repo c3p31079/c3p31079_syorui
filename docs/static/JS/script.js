@@ -556,37 +556,93 @@ document.addEventListener("DOMContentLoaded", () => {
         // ==========================
         // ●対応方針・対応予定時期 (H6:H10)
         // ==========================
-        let policyText="●対応方針\n";
-        policyChecks.forEach(chk=>{
-            const el=document.getElementById(chk.id);
-            if(el && el.checked){
-                policyText+=`□ ${chk.label}\n`;
+
+        // 固定文ベース
+        let policyText = "●対応方針\n";
+        policyText += "□ 整備班で対応予定\n";
+        policyText += "□ 修繕・修繕工事で対応予定\n";
+        policyText += "□ 施設改良工事で対応予定\n";
+        policyText += "□ 精密点検予定\n";
+        policyText += "□ 撤去予定\n";
+
+        // チェックボックス → Excel アイコン描画設定
+        // dx,dy はあなたの Excel レイアウトに合わせて自由に調整可能
+        const policyChecks = [
+            { id: "plan_maintenance", label: "整備班で対応予定", dx: 0,  dy: 0   },
+            { id: "plan_repair",      label: "修繕・修繕工事で対応予定", dx: 0,  dy: 120 },
+            { id: "plan_improvement", label: "施設改良工事で対応予定", dx: 0,  dy: 240 },
+            { id: "plan_precision",   label: "精密点検予定", dx: 0,  dy: 360 },
+            { id: "plan_removal",     label: "撤去予定", dx: 0,  dy: 480 },
+            { id: "plan_other",       label: "その他", dx: 0,  dy: 600 }
+        ];
+
+        // 各チェックボックスがチェックされていたら → icon を置く
+        policyChecks.forEach(chk => {
+            const el = document.getElementById(chk.id);
+            if (el && el.checked) {
                 data.items.push({
-                    type:"icon",
-                    cell:"H6",
-                    icon:"check.png",
-                    dx:0,
-                    dy:chk.dy
+                    type: "icon",
+                    cell: "H6",
+                    icon: "check.png",
+                    dx: chk.dx,
+                    dy: chk.dy
                 });
             }
         });
 
-        const policyOther=document.getElementById("policy_other_text")?.value;
-        if(policyOther) policyText+=`□その他 (${policyOther})\n`;
-
-        const scheduleMonth=document.getElementById("schedule_month")?.value || "";
-        const scheduleTerm=document.getElementById("schedule_term")?.value || "";
-        if(scheduleMonth || scheduleTerm){
-            policyText+=`●対応予定時期\n　${scheduleMonth}月 ${scheduleTerm} 旬頃`;
+        // 「その他」の詳細テキスト
+        const policyOtherDetail = document.getElementById("plan_other_detail")?.value || "";
+        if (document.getElementById("plan_other")?.checked && policyOtherDetail) {
+            policyText += `□ その他 (${policyOtherDetail})\n`;
         }
 
+        // --------------------------
+        // ●対応予定時期
+        // --------------------------
+        policyText += "●対応予定時期\n";
+
+        const month = document.getElementById("response_month")?.value || "";
+        let periodText = "";
+        let periodElement = null;
+
+        // 上旬
+        if (document.getElementById("period_early")?.checked) {
+            periodText = "上旬頃";
+            periodElement = { dx: 160, dy: 0 };
+        }
+        // 中旬
+        else if (document.getElementById("period_mid")?.checked) {
+            periodText = "中旬頃";
+            periodElement = { dx: 160, dy: 120 };
+        }
+        // 下旬
+        else if (document.getElementById("period_late")?.checked) {
+            periodText = "下旬頃";
+            periodElement = { dx: 160, dy: 240 };
+        }
+
+        policyText += `　${month} 月 ${periodText}\n`;
+
+        // 予定時期のラジオに応じて check.png を配置
+        if (periodElement) {
+            data.items.push({
+                type: "icon",
+                cell: "H6",
+                icon: "check.png",
+                dx: periodElement.dx,
+                dy: periodElement.dy
+            });
+        }
+
+        // 最後に Excel にテキストを挿入
         data.items.push({
-            type:"text",
-            name:"policy_text",
-            value:policyText,
-            cell:"H6",
-            text:policyText
+            type: "text",
+            name: "policy_text",
+            value: policyText,
+            cell: "H6",
+            text: policyText
         });
+
 
 
         // ==========================
