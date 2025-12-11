@@ -27,13 +27,13 @@ document.addEventListener("DOMContentLoaded", () => {
     "items": [
       { "name": "pillar_wobble", "label": "ぐらつき",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 0, "dy": 0 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": 0, "dy": 0, "icon" : "none.png" } } },
 
       { "name": "pillar_damage", "label": "破損",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 30, "dy": 0 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": 30, "dy": 0, "icon" : "none.png" } } },
 
       { "name": "pillar_deform", "label": "変形",
         "excel": {
