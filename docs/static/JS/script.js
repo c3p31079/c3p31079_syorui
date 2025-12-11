@@ -574,8 +574,10 @@ document.addEventListener("DOMContentLoaded", () => {
         actionText += `□チェーンの交換 (${actionCounts["チェーン"]}箇所)\n`;
         actionText += `□座板の交換 (${actionCounts["座板"]}箇所)\n`;
         actionText += `□石・異物の除去、枝の剪定\n`;
+        actionText += `□その他 (`;
         const otherText = document.getElementById("action_other_detail")?.value || "";
-        if (otherText) actionText += `□その他 (${otherText})\n`;
+        if (otherText) actionText += `${otherText}\n`;
+        actionText += `)`;
 
 
         data.items.push({
@@ -588,12 +590,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // チェックボックスに対応する check.png を配置
         const actionChecks = [
-            {id: "check_grease", dx:0, dy:0},
-            {id: "check_bolt", dx:0, dy:120},
-            {id: "check_hanger", dx:0, dy:240},
-            {id: "check_chain", dx:0, dy:360},
-            {id: "check_seat", dx:0, dy:480},
-            {id: "check_other", dx:0, dy:600},
+            {id: "check_grease", dx:0, dy:7},
+            {id: "check_bolt", dx:0, dy:19},
+            {id: "check_hanger", dx:0, dy:31},
+            {id: "check_chain", dx:0, dy:43},
+            {id: "check_seat", dx:0, dy:55},
+            {id: "check_other", dx:0, dy:67},
         ];
         actionChecks.forEach(chk=>{
             const el=document.getElementById(chk.id);
@@ -644,7 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const val = r.value;
 
                 // チェックアイコンの x 位置
-                let dxVal = val === "A" ? 0 : val === "B" ? 120 : val === "C" ? 240 : 360;
+                let dxVal = val === "A" ? 7 : val === "B" ? 19 : val === "C" ? 31 : 43;
 
                 // A/B/C → アイコンのみ配置
                 if (val !== "D") {
@@ -652,8 +654,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         type: "icon",
                         cell: "F13",
                         icon: "check.png",
-                        dx: dxVal,
-                        dy: 0
+                        dx: 0,
+                        dy: dxVal
                     });
                     // A/B/C はテキスト書き込みなし
                     return;
@@ -699,16 +701,17 @@ document.addEventListener("DOMContentLoaded", () => {
         policyText += "□ 施設改良工事で対応予定\n";
         policyText += "□ 精密点検予定\n";
         policyText += "□ 撤去予定\n";
+        policyText += "□ その他 (";
 
         // チェックボックス → Excel アイコン描画設定
         // dx,dy はあなたの Excel レイアウトに合わせて自由に調整可能
         const policyChecks = [
-            { id: "plan_maintenance", label: "整備班で対応予定", dx: 0,  dy: 0   },
-            { id: "plan_repair",      label: "修繕・修繕工事で対応予定", dx: 0,  dy: 120 },
-            { id: "plan_improvement", label: "施設改良工事で対応予定", dx: 0,  dy: 240 },
-            { id: "plan_precision",   label: "精密点検予定", dx: 0,  dy: 360 },
-            { id: "plan_removal",     label: "撤去予定", dx: 0,  dy: 480 },
-            { id: "plan_other",       label: "その他", dx: 0,  dy: 600 }
+            { id: "plan_maintenance", label: "整備班で対応予定", dx: 0,  dy: 7   },
+            { id: "plan_repair",      label: "修繕・修繕工事で対応予定", dx: 0,  dy: 19 },
+            { id: "plan_improvement", label: "施設改良工事で対応予定", dx: 0,  dy: 31 },
+            { id: "plan_precision",   label: "精密点検予定", dx: 0,  dy: 43 },
+            { id: "plan_removal",     label: "撤去予定", dx: 0,  dy: 55 },
+            { id: "plan_other",       label: "その他", dx: 0,  dy: 67 }
         ];
 
         // 各チェックボックスがチェックされていたら → icon を置く
@@ -728,8 +731,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // 「その他」の詳細テキスト
         const policyOtherDetail = document.getElementById("plan_other_detail")?.value || "";
         if (document.getElementById("plan_other")?.checked && policyOtherDetail) {
-            policyText += `□ その他 (${policyOtherDetail})\n`;
+            policyText += `${policyOtherDetail}`;
         }
+        policyText += "）\n";
 
         // --------------------------
         // ●対応予定時期
@@ -753,6 +757,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // 下旬
         else if (document.getElementById("period_late")?.checked) {
             periodText = "下旬頃";
+            periodElement = { dx: 160, dy: 240 };
+        }else{
+            periodText = " 上・中・下　旬　頃";
             periodElement = { dx: 160, dy: 240 };
         }
 
