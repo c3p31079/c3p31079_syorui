@@ -21,24 +21,21 @@ CORS(app)
 
 
 def insert_icon(ws, cell, icon_file, dx=0, dy=0):
-    icon_path = os.path.join(ICON_DIR, icon_file)
-    if not os.path.exists(icon_path):
-        print(f"[WARN] icon not found: {icon_path}")
-        return
-
-    img = Image(icon_path)
+    img_path = os.path.join(ICON_DIR, icon_file)
+    if not os.path.exists(img_path): return
+    img = Image(img_path)
     img.width = ICON_PX
     img.height = ICON_PX
 
     col_letter = ''.join(filter(str.isalpha, cell))
     row_number = int(''.join(filter(str.isdigit, cell)))
-    col = column_index_from_string(col_letter) - 1
-    row = row_number - 1
+    col_idx = column_index_from_string(col_letter) - 1
 
-    marker = AnchorMarker(col=col, colOff=dx * EMU, row=row, rowOff=dy * EMU)
-    anchor = OneCellAnchor(_from=marker, ext=XDRPositiveSize2D(ICON_PX * EMU, ICON_PX * EMU))
-    img.anchor = anchor
-    ws.add_image(img)
+    marker = AnchorMarker(col=col_idx, colOff=dx*EMU,
+                          row=row_number-1, rowOff=dy*EMU)
+    anchor = OneCellAnchor(_from=marker, ext=XDRPositiveSize2D(EMU*img.width, EMU*img.height))
+    anchor.graphicFrame = img._data
+    ws.add_image(img, cell)
 
 
 def insert_text(ws, cell, text):

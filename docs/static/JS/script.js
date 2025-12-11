@@ -477,6 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const otherText = document.getElementById("action_other_text")?.value || "";
         if (otherText) actionText += `□その他 (${otherText})\n`;
 
+
         data.items.push({
             type: "text",
             name: "action_text",
@@ -532,7 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 let totalText="";
                 if(val==="D"){
                     const dDetail=document.getElementById("total_result_D_text")?.value || "";
-                    totalText=`D:使用禁止措置\r\n（${dDetail}）`;
+                    const totalText=`D:使用禁止措置\r\n（${dDetail}）`;
                     data.items.push({
                         type:"text",
                         name:"total_result_text",
@@ -540,14 +541,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         cell:"F13",
                         text:totalText
                     });
+                    data.items.push({
+                        type:"icon",
+                        cell:"F13",
+                        icon:"check.png",
+                        dx:360, // D の列位置に合わせる
+                        dy:0
+                    });
                 }
-                data.items.push({
-                    type:"icon",
-                    cell:"F13",
-                    icon:"check.png",
-                    dx:dxVal,
-                    dy:0
-                });
+
             }
         });
 
@@ -555,17 +557,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // ●対応方針・対応予定時期 (H6:H10)
         // ==========================
         let policyText="●対応方針\n";
-        const policyChecks=[
-            {id:"policy1",label:"整備班で対応予定",dy:0},
-            {id:"policy2",label:"修繕・修繕工事で対応予定",dy:120},
-            {id:"policy3",label:"施設改良工事で対応予定",dy:240},
-            {id:"policy4",label:"精密点検予定",dy:360},
-            {id:"policy5",label:"撤去予定",dy:480},
-        ];
         policyChecks.forEach(chk=>{
             const el=document.getElementById(chk.id);
             if(el && el.checked){
-                policyText+=`□その他 ${chk.label}\n`;
+                policyText+=`□ ${chk.label}\n`;
                 data.items.push({
                     type:"icon",
                     cell:"H6",
@@ -575,10 +570,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
         });
+
         const policyOther=document.getElementById("policy_other_text")?.value;
-        if(policyOther) policyText+=`□その他(${policyOther})\n`;
-        const schedule=document.getElementById("schedule_text")?.value;
-        if(schedule) policyText+=`●対応予定時期\n　${schedule} 月 上・中・下 旬頃`;
+        if(policyOther) policyText+=`□その他 (${policyOther})\n`;
+
+        const scheduleMonth=document.getElementById("schedule_month")?.value || "";
+        const scheduleTerm=document.getElementById("schedule_term")?.value || "";
+        if(scheduleMonth || scheduleTerm){
+            policyText+=`●対応予定時期\n　${scheduleMonth}月 ${scheduleTerm} 旬頃`;
+        }
 
         data.items.push({
             type:"text",
@@ -588,16 +588,15 @@ document.addEventListener("DOMContentLoaded", () => {
             text:policyText
         });
 
+
         // ==========================
         // □本格的な使用禁止措置 (H11)
         // ==========================
         const prohibitedDate=document.getElementById("prohibited_date")?.value;
-        if(prohibitedDate){
+        const prohibitedStatus=document.querySelector('input[name="prohibited_status"]:checked')?.value || "";
+        if(prohibitedDate && prohibitedStatus){
             const d=new Date(prohibitedDate);
-            const month=d.getMonth()+1;
-            const day=d.getDate();
-            const status=document.querySelector('input[name="prohibited_status"]:checked')?.value || "";
-            const txt=`□本格的な使用禁止措置\n　${month}月 ${day}日  ${status}`;
+            const txt=`□本格的な使用禁止措置\n　${d.getMonth()+1}月 ${d.getDate()}日 上・中・下　旬　頃`;
             data.items.push({
                 type:"text",
                 name:"prohibited_action",
@@ -605,7 +604,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 cell:"H11",
                 text:txt
             });
-            // アイコンも必ず貼る
             data.items.push({
                 type:"icon",
                 cell:"H11",
@@ -614,6 +612,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 dy:0
             });
         }
+
 
         // ==========================
         // ●備考 (F12:G15)
@@ -624,7 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 type:"text",
                 name:"remarks",
                 value:"●備考\r\n"+remarks,
-                cell:"F12",
+                cell:"H12",
                 text:"●備考\r\n"+remarks
             });
         }
