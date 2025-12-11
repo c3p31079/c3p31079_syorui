@@ -17,27 +17,22 @@ TEMPLATE_PATH = os.path.join(BASE_DIR, "template.xlsx")
 ICON_DIR = os.path.join(BASE_DIR, "icons")
 
 app = Flask(__name__)
-CORS(app)
+
+# GitHub Pages からのアクセスを許可
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
-def insert_icon(ws, cell, icon_file, dx=0, dy=0):
-    img_path = os.path.join(ICON_DIR, icon_file)
-    if not os.path.exists(img_path): return
-    img = Image(img_path)
-    img.width = ICON_PX
-    img.height = ICON_PX
-
-    col_letter = ''.join(filter(str.isalpha, cell))
-    row_number = int(''.join(filter(str.isdigit, cell)))
-    col_idx = column_index_from_string(col_letter) - 1
-
-    marker = AnchorMarker(col=col_idx, colOff=dx*EMU,
-                          row=row_number-1, rowOff=dy*EMU)
-    anchor = OneCellAnchor(_from=marker, ext=XDRPositiveSize2D(EMU*img.width, EMU*img.height))
-    anchor.graphicFrame = img._data
-    ws.add_image(img, cell)
+# ---------------------------
+# TEXT 用の関数
+# ---------------------------
+def insert_text(ws, cell, value):
+    ws[cell] = value
+    ws[cell].alignment = Alignment(wrap_text=True, vertical="top")
 
 
+# ---------------------------
+# ICON 挿入関数（正しい版）
+# ---------------------------
 def insert_icon(ws, cell, icon_file, dx=0, dy=0):
     img_path = os.path.join(ICON_DIR, icon_file)
     if not os.path.exists(img_path):
@@ -52,9 +47,13 @@ def insert_icon(ws, cell, icon_file, dx=0, dy=0):
     row_number = int(''.join(filter(str.isdigit, cell)))
     col_idx = column_index_from_string(col_letter) - 1
 
-    # Anchor 設定（こちらが最重要）
-    marker = AnchorMarker(col=col_idx, colOff=dx * EMU,
-                          row=row_number - 1, rowOff=dy * EMU)
+    marker = AnchorMarker(
+        col=col_idx,
+        colOff=dx * EMU,
+        row=row_number - 1,
+        rowOff=dy * EMU
+    )
+
     img.anchor = OneCellAnchor(
         _from=marker,
         ext=XDRPositiveSize2D(EMU * img.width, EMU * img.height)
@@ -63,7 +62,9 @@ def insert_icon(ws, cell, icon_file, dx=0, dy=0):
     ws.add_image(img)
 
 
-
+# ---------------------------
+#   Excel 生成 API
+# ---------------------------
 @app.route("/api/generate_excel", methods=["POST"])
 def generate_excel():
     data = request.get_json(silent=True)
@@ -87,8 +88,10 @@ def generate_excel():
 
         if item_type == "icon" and item.get("icon"):
             insert_icon(ws, cell, item["icon"], dx=dx, dy=dy)
-        elif item_type in ("text", "number") and item.get("value") is not None:
-            insert_text(ws, cell, str(item["value"]))
+
+        elif item_type in ("text", "number"):
+            insert_text(ws, cell, str(item.get("value", "")))
+
         elif item_type == "checkbox":
             if item.get("value"):
                 insert_icon(ws, cell, item.get("icon", "check.png"), dx=dx, dy=dy)
