@@ -38,24 +38,30 @@ def insert_icon(ws, cell, icon_file, dx=0, dy=0):
     ws.add_image(img, cell)
 
 
-def insert_text(ws, cell, text):
+def insert_icon(ws, cell, icon_file, dx=0, dy=0):
+    img_path = os.path.join(ICON_DIR, icon_file)
+    if not os.path.exists(img_path):
+        return
+
+    img = Image(img_path)
+    img.width = ICON_PX
+    img.height = ICON_PX
+
+    # セル位置
     col_letter = ''.join(filter(str.isalpha, cell))
     row_number = int(''.join(filter(str.isdigit, cell)))
-    col = column_index_from_string(col_letter) - 1
-    row = row_number - 1
+    col_idx = column_index_from_string(col_letter) - 1
 
-    # マージセル対応
-    for merged_range in ws.merged_cells.ranges:
-        if cell in merged_range:
-            cell = merged_range.start_cell.coordinate
-            col_letter = ''.join(filter(str.isalpha, cell))
-            row_number = int(''.join(filter(str.isdigit, cell)))
-            col = column_index_from_string(col_letter) - 1
-            row = row_number - 1
-            break
+    # Anchor 設定（こちらが最重要）
+    marker = AnchorMarker(col=col_idx, colOff=dx * EMU,
+                          row=row_number - 1, rowOff=dy * EMU)
+    img.anchor = OneCellAnchor(
+        _from=marker,
+        ext=XDRPositiveSize2D(EMU * img.width, EMU * img.height)
+    )
 
-    ws.cell(row=row + 1, column=col + 1, value=text)
-    ws.cell(row=row + 1, column=col + 1).alignment = Alignment(wrap_text=True, vertical='top')
+    ws.add_image(img)
+
 
 
 @app.route("/api/generate_excel", methods=["POST"])

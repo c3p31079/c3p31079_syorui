@@ -474,7 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
         actionText += `□チェーンの交換 (${actionCounts["チェーン"]}箇所)\n`;
         actionText += `□座板の交換 (${actionCounts["座板"]}箇所)\n`;
         actionText += `□石・異物の除去、枝の剪定\n`;
-        const otherText = document.getElementById("action_other_text")?.value || "";
+        const otherText = document.getElementById("action_other_detail")?.value || "";
         if (otherText) actionText += `□その他 (${otherText})\n`;
 
 
