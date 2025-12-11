@@ -27,8 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "items": [
       { "name": "pillar_wobble", "label": "ぐらつき",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 0, "dy": 0 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 0, "dy": 0, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 5, "dy": 0 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": 5, "dy": 0, "icon" : "none.png" } } },
 
       { "name": "pillar_damage", "label": "破損",
         "excel": {
@@ -37,18 +37,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       { "name": "pillar_deform", "label": "変形",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 60, "dy": 0 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": 60, "dy": 0, "icon" : "none.png" } } },
 
       { "name": "pillar_corrosion", "label": "腐食（腐朽）",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2, "icon" : "none.png" } } },
+            "B": { "type": "icon", "cell": "D6", "dx": 90, "dy": 0 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": 90, "dy": 0, "icon" : "none.png" } } },
 
       { "name": "pillar_joint_loose", "label": "〔接合部・ボルト〕緩み",
         "excel": {
-            "B": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2 , "icon" : "triangle.png"},
-            "C": { "type": "icon", "cell": "D6", "dx": 2, "dy": 2, "icon" : "none.png" } } }
+            "B": { "type": "icon", "cell": "D6", "dx": 10, "dy": 10 , "icon" : "triangle.png"},
+            "C": { "type": "icon", "cell": "D6", "dx": 10, "dy": 2, "icon" : "none.png" } } }
     ]
   },
 
