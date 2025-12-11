@@ -2,6 +2,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const downloadBtn = document.getElementById("downloadBtn");
     if (!downloadBtn) return;
 
+    // helper: get dx/dy adjustment inputs for an element id
+    const getAdj = (baseId) => {
+        let dxAdj = 0, dyAdj = 0;
+        const dxEl = document.getElementById(baseId + "_dx");
+        const dyEl = document.getElementById(baseId + "_dy");
+        if (dxEl) dxAdj = parseInt(dxEl.value) || 0;
+        if (dyEl) dyAdj = parseInt(dyEl.value) || 0;
+        return { dxAdj, dyAdj };
+    };
+
     downloadBtn.addEventListener("click", async (e) => {
         e.preventDefault();
         downloadBtn.disabled = true;
@@ -422,36 +432,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // ========================================
-        // 点検年度 → H2
+        // 点検年度 → H2 
         // ========================================
-        const inspectionYear = document.getElementById("inspection_year")?.value || "";
-
-        if (inspectionYear) {
-            // selected の option の表示名を取得（例：令和７年度）
-            const yearLabel = document.querySelector("#inspection_year option:checked")?.textContent || "";
-
+        const inspectionYearLabel = document.querySelector("#inspection_year option:checked")?.textContent || "";
+        if (inspectionYearLabel) {
             data.items.push({
                 type: "text",
                 name: "inspection_year",
-                value: yearLabel,
+                value: inspectionYearLabel,
                 cell: "H2",
-                text: yearLabel
+                text: inspectionYearLabel
             });
         }
 
         // ========================================
         // 設置年度 → H3
         // ========================================
-        const era = document.getElementById("install_era")?.value || "";  
-        const yearNum = document.getElementById("install_year_num")?.value || "";
-
-        // 表示名（例：令和, 平成）
         const eraLabel = document.querySelector("#install_era option:checked")?.textContent || "";
-        const yearLabel = document.querySelector("#install_year_num option:checked")?.textContent || "";
-
-        if (eraLabel && yearLabel) {
-            const installText = eraLabel + yearLabel;  //「令和3年度」の形式
-
+        const installYearLabel = document.querySelector("#install_year_num option:checked")?.textContent || "";
+        if (eraLabel && installYearLabel) {
+            const installText = eraLabel + installYearLabel;
             data.items.push({
                 type: "text",
                 name: "install_year",
@@ -461,22 +461,15 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-
-
         // ========================================
-        // 点検日 → A11 （固定文＋月/日）
+        // 点検日 → A11
         // ========================================
         const inspectionDateVal = document.getElementById("inspection_date")?.value || "";
-
         if (inspectionDateVal) {
-
             const d = new Date(inspectionDateVal);
             const month = d.getMonth() + 1;
             const day = d.getDate();
-
-            const inspectionText =
-                "点検日\n\n\n\n\n" + `${month} ／ ${day}`;
-
+            const inspectionText = "点検日\n\n\n\n\n" + `${month} ／ ${day}`;
             data.items.push({
                 type: "text",
                 name: "inspection_date",
