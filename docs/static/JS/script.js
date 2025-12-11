@@ -407,6 +407,85 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
+        // ========================================
+        // 公園名入力 → C2
+        // ========================================
+        const parkName = document.getElementById("search_park")?.value || "";
+        if (parkName) {
+            data.items.push({
+                type: "text",
+                name: "park_name",
+                value: parkName,
+                cell: "C2",
+                text: parkName
+            });
+        }
+
+        // ========================================
+        // 点検年度 → H2
+        // ========================================
+        const inspectionYear = document.getElementById("inspection_year")?.value || "";
+
+        if (inspectionYear) {
+            // selected の option の表示名を取得（例：令和７年度）
+            const yearLabel = document.querySelector("#inspection_year option:checked")?.textContent || "";
+
+            data.items.push({
+                type: "text",
+                name: "inspection_year",
+                value: yearLabel,
+                cell: "H2",
+                text: yearLabel
+            });
+        }
+
+        // ========================================
+        // 設置年度 → H3
+        // ========================================
+        const era = document.getElementById("install_era")?.value || "";  
+        const yearNum = document.getElementById("install_year_num")?.value || "";
+
+        // 表示名（例：令和, 平成）
+        const eraLabel = document.querySelector("#install_era option:checked")?.textContent || "";
+        const yearLabel = document.querySelector("#install_year_num option:checked")?.textContent || "";
+
+        if (eraLabel && yearLabel) {
+            const installText = eraLabel + yearLabel;  //「令和3年度」の形式
+
+            data.items.push({
+                type: "text",
+                name: "install_year",
+                value: installText,
+                cell: "H3",
+                text: installText
+            });
+        }
+
+
+
+        // ========================================
+        // 点検日 → A11 （固定文＋月/日）
+        // ========================================
+        const inspectionDateVal = document.getElementById("inspection_date")?.value || "";
+
+        if (inspectionDateVal) {
+
+            const d = new Date(inspectionDateVal);
+            const month = d.getMonth() + 1;
+            const day = d.getDate();
+
+            const inspectionText =
+                "点検日\n\n\n\n\n" + `${month} ／ ${day}`;
+
+            data.items.push({
+                type: "text",
+                name: "inspection_date",
+                value: inspectionText,
+                cell: "A11",
+                text: inspectionText
+            });
+        }
+
         // CheckSheet_measure_area 入力反映（dx/dy微調整も対応）
         document.querySelectorAll(".CheckSheet_measure_area input, .CheckSheet_measure_area textarea").forEach(input => {
             let dxAdj = 0, dyAdj = 0;
