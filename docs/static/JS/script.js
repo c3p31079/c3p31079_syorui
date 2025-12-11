@@ -338,21 +338,21 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
     {
-      "name": "ground_exposed_stone_root","label": "石や根の露出",
+      "name": "ground_root","label": "石や根の露出",
       "excel": {
         "B": { "type": "icon", "cell": "D15", "dx": 50, "dy": -5, "icon" : "triangle.png"},
         "C": { "type": "icon", "cell": "D15", "dx": 50, "dy": -5, "icon" : "none.png" }
       }
     },
     {
-      "name": "ground_foreign_object","label": "異物",
+      "name": "ground_object","label": "異物",
       "excel": {
         "B": { "type": "icon", "cell": "D15", "dx": 130, "dy": -5, "icon" : "triangle.png"},
         "C": { "type": "icon", "cell": "D15", "dx": 130, "dy": -5, "icon" : "none.png" }
       }
     },
     {
-      "name": "ground_mat_flip","label": "マットのめくれ",
+      "name": "ground_mat_peel","label": "マットのめくれ",
       "excel": {
         "B": { "type": "icon", "cell": "D15", "dx": 20, "dy": 7, "icon" : "triangle.png"},
         "C": { "type": "icon", "cell": "D15", "dx": 20, "dy": 7, "icon" : "none.png" }
