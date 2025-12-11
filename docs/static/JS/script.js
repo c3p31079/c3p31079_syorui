@@ -462,19 +462,20 @@ document.addEventListener("DOMContentLoaded", () => {
         // ==========================
         // ●点検時に実施した措置 (F6:G9)
         // ==========================
-        
-        
         let actionText = "●点検時に実施した措置\n";
+        const actionCounts = {
+            "吊金具": document.getElementById("hanger_count")?.value || 0,
+            "チェーン": document.getElementById("chain_count")?.value || 0,
+            "座板": document.getElementById("seat_count")?.value || 0
+        };
         actionText += `□グリース・オイル等の注入※1\n`;
         actionText += `□ボルト・ナットの増し締め・交換 \n`;
-        actionText += `□吊金具の交換 (${document.getElementById("hanger_count")?.value || 0}箇所)\n`;
-        actionText += `□チェーンの交換 (${document.getElementById("chain_count")?.value || 0}箇所)\n`;
-        actionText += `□座板の交換 (${document.getElementById("seat_count")?.value || 0}箇所)\n`;
+        actionText += `□吊金具の交換 (${actionCounts["吊金具"]}箇所)\n`;
+        actionText += `□チェーンの交換 (${actionCounts["チェーン"]}箇所)\n`;
+        actionText += `□座板の交換 (${actionCounts["座板"]}箇所)\n`;
         actionText += `□石・異物の除去、枝の剪定\n`;
-
-        // 「その他」の自由テキスト
         const otherText = document.getElementById("action_other_text")?.value || "";
-        actionText += `□その他 (${otherText})\n`;
+        if (otherText) actionText += `□その他 (${otherText})\n`;
 
         data.items.push({
             type: "text",
@@ -484,25 +485,24 @@ document.addEventListener("DOMContentLoaded", () => {
             text: actionText
         });
 
-        // チェックボックスの配置
+        // チェックボックスに対応する check.png を配置
         const actionChecks = [
-            {id: "check_grease", dx: 0, dy: 0},
-            {id: "check_bolt", dx: 0, dy: 120},
-            {id: "check_hanger", dx: 0, dy: 240},
-            {id: "check_chain", dx: 0, dy: 360},
-            {id: "check_seat", dx: 0, dy: 480},
-            {id: "check_other", dx: 0, dy: 600},
+            {id: "check_grease", dx:0, dy:0},
+            {id: "check_bolt", dx:0, dy:120},
+            {id: "check_hanger", dx:0, dy:240},
+            {id: "check_chain", dx:0, dy:360},
+            {id: "check_seat", dx:0, dy:480},
+            {id: "check_other", dx:0, dy:600},
         ];
-
-        actionChecks.forEach(chk => {
-            const el = document.getElementById(chk.id);
-            if (el && el.checked) {
+        actionChecks.forEach(chk=>{
+            const el=document.getElementById(chk.id);
+            if(el && el.checked){
                 data.items.push({
-                    type: "icon",
-                    cell: "F6",
-                    icon: "check.png",
-                    dx: chk.dx,
-                    dy: chk.dy
+                    type:"icon",
+                    cell:"F6",
+                    icon:"check.png",
+                    dx:chk.dx,
+                    dy:chk.dy
                 });
             }
         });
@@ -511,131 +511,121 @@ document.addEventListener("DOMContentLoaded", () => {
         // ●所見 (F10:G12)
         // ==========================
         const observations = document.getElementById("observations")?.value.trim();
-        if (observations) {
+        if(observations){
             data.items.push({
-                type: "text",
-                name: "observations",
-                value: "●所見\r\n" + observations,
-                cell: "F10",
-                text: "●所見\r\n" + observations
+                type:"text",
+                name:"observations",
+                value:"●所見\r\n"+observations,
+                cell:"F10",
+                text:"●所見\r\n"+observations
             });
         }
 
         // ==========================
         // ●総合結果 (F13:G15)
         // ==========================
-        let totalText = "";
         const totalResultRadios = document.querySelectorAll('input[name="total_result"]');
-        totalResultRadios.forEach(r => {
-            if (r.checked) {
+        totalResultRadios.forEach(r=>{
+            if(r.checked){
                 const val = r.value;
-                if (val === "D") {
-                    const dDetail = document.getElementById("total_result_D_text")?.value || "";
-                    totalText = `D:使用禁止措置\r\n（${dDetail}）`;
+                let dxVal = val==="A"?0:val==="B"?120:val==="C"?240:360;
+                let totalText="";
+                if(val==="D"){
+                    const dDetail=document.getElementById("total_result_D_text")?.value || "";
+                    totalText=`D:使用禁止措置\r\n（${dDetail}）`;
                     data.items.push({
-                        type: "icon",
-                        cell: "F13",
-                        icon: "check.png",
-                        dx: 360,
-                        dy: 0
-                    });
-                    data.items.push({
-                        type: "text",
-                        name: "total_result_text",
-                        value: totalText,
-                        cell: "F13",
-                        text: totalText
-                    });
-                } else {
-                    const dxVal = val === "A" ? 0 : val === "B" ? 120 : 240;
-                    data.items.push({
-                        type: "icon",
-                        cell: "F13",
-                        icon: "check.png",
-                        dx: dxVal,
-                        dy: 0
+                        type:"text",
+                        name:"total_result_text",
+                        value:totalText,
+                        cell:"F13",
+                        text:totalText
                     });
                 }
-            }
-        });
-
-
-        // ==========================
-        // ●対応方針・対応予定時期 (H6:H10)
-        // ==========================
-        let policyText = "●対応方針\n";
-        const policyChecks = [
-            {id: "policy1", label: "整備班で対応予定", dy:0},
-            {id: "policy2", label: "修繕・修繕工事で対応予定", dy:120},
-            {id: "policy3", label: "施設改良工事で対応予定", dy:240},
-            {id: "policy4", label: "精密点検予定", dy:360},
-            {id: "policy5", label: "撤去予定", dy:480},
-        ];
-
-        policyChecks.forEach(chk => {
-            const el = document.getElementById(chk.id);
-            if (el && el.checked) {
-                policyText += `□ ${chk.label}\n`;
                 data.items.push({
-                    type: "icon",
-                    cell: "H6",
-                    icon: "check.png",
-                    dx: 0,
-                    dy: chk.dy
+                    type:"icon",
+                    cell:"F13",
+                    icon:"check.png",
+                    dx:dxVal,
+                    dy:0
                 });
             }
         });
 
-        // □その他 は入力がある場合のみ
-        const policyOther = document.getElementById("policy_other_text")?.value || "";
-        if (policyOther) {
-            policyText += `□その他(${policyOther})\n`;
-        }
-
-        // 対応予定時期は常に更新
-        const schedule = document.getElementById("schedule_text")?.value || "";
-        if (schedule) {
-            policyText += `●対応予定時期\n　${schedule} 月 上・中・下 旬頃`;
-        }
+        // ==========================
+        // ●対応方針・対応予定時期 (H6:H10)
+        // ==========================
+        let policyText="●対応方針\n";
+        const policyChecks=[
+            {id:"policy1",label:"整備班で対応予定",dy:0},
+            {id:"policy2",label:"修繕・修繕工事で対応予定",dy:120},
+            {id:"policy3",label:"施設改良工事で対応予定",dy:240},
+            {id:"policy4",label:"精密点検予定",dy:360},
+            {id:"policy5",label:"撤去予定",dy:480},
+        ];
+        policyChecks.forEach(chk=>{
+            const el=document.getElementById(chk.id);
+            if(el && el.checked){
+                policyText+=`□その他 ${chk.label}\n`;
+                data.items.push({
+                    type:"icon",
+                    cell:"H6",
+                    icon:"check.png",
+                    dx:0,
+                    dy:chk.dy
+                });
+            }
+        });
+        const policyOther=document.getElementById("policy_other_text")?.value;
+        if(policyOther) policyText+=`□その他(${policyOther})\n`;
+        const schedule=document.getElementById("schedule_text")?.value;
+        if(schedule) policyText+=`●対応予定時期\n　${schedule} 月 上・中・下 旬頃`;
 
         data.items.push({
-            type: "text",
-            name: "policy_text",
-            value: policyText,
-            cell: "H6",
-            text: policyText
+            type:"text",
+            name:"policy_text",
+            value:policyText,
+            cell:"H6",
+            text:policyText
         });
 
         // ==========================
         // □本格的な使用禁止措置 (H11)
         // ==========================
-        const prohibitedDate = document.getElementById("prohibited_date")?.value; // yyyy-mm-dd
-        if (prohibitedDate) {
-            const d = new Date(prohibitedDate);
-            const month = d.getMonth() + 1;
-            const day = d.getDate();
-            const status = document.querySelector('input[name="prohibited_status"]:checked')?.value || "";
+        const prohibitedDate=document.getElementById("prohibited_date")?.value;
+        if(prohibitedDate){
+            const d=new Date(prohibitedDate);
+            const month=d.getMonth()+1;
+            const day=d.getDate();
+            const status=document.querySelector('input[name="prohibited_status"]:checked')?.value || "";
+            const txt=`□本格的な使用禁止措置\n　${month}月 ${day}日  ${status}`;
             data.items.push({
-                type: "text",
-                name: "prohibited_action",
-                value: `□本格的な使用禁止措置\n　${month}月 ${day}日  ${status}`,
-                cell: "H11",
-                text: `□本格的な使用禁止措置\n　${month}月 ${day}日  ${status}`
+                type:"text",
+                name:"prohibited_action",
+                value:txt,
+                cell:"H11",
+                text:txt
+            });
+            // アイコンも必ず貼る
+            data.items.push({
+                type:"icon",
+                cell:"H11",
+                icon:"check.png",
+                dx:0,
+                dy:0
             });
         }
-
 
         // ==========================
         // ●備考 (F12:G15)
         // ==========================
-        const remarks = document.getElementById("remarks")?.value.trim();
-        if (remarks) {
+        const remarks=document.getElementById("remarks")?.value.trim();
+        if(remarks){
             data.items.push({
-                type: "text",
-                name: "remarks",
-                value: "●備考\r\n" + remarks,
-                cell: "F12",
-                text: "●備考\r\n" + remarks
+                type:"text",
+                name:"remarks",
+                value:"●備考\r\n"+remarks,
+                cell:"F12",
+                text:"●備考\r\n"+remarks
             });
         }
 
