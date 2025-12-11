@@ -340,15 +340,15 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       "name": "ground_root","label": "石や根の露出",
       "excel": {
-        "B": { "type": "icon", "cell": "D15", "dx": 50, "dy": -5, "icon" : "triangle.png"},
-        "C": { "type": "icon", "cell": "D15", "dx": 50, "dy": -5, "icon" : "none.png" }
+        "B": { "type": "icon", "cell": "D15", "dx": 80, "dy": -5, "icon" : "triangle.png"},
+        "C": { "type": "icon", "cell": "D15", "dx": 80, "dy": -5, "icon" : "none.png" }
       }
     },
     {
       "name": "ground_object","label": "異物",
       "excel": {
-        "B": { "type": "icon", "cell": "D15", "dx": 130, "dy": -5, "icon" : "triangle.png"},
-        "C": { "type": "icon", "cell": "D15", "dx": 130, "dy": -5, "icon" : "none.png" }
+        "B": { "type": "icon", "cell": "D15", "dx": 125, "dy": -5, "icon" : "triangle.png"},
+        "C": { "type": "icon", "cell": "D15", "dx": 125, "dy": -5, "icon" : "none.png" }
       }
     },
     {
@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
     {
-      "name": "ground_tree_branch","label": "樹木の枝",
+      "name": "ground_tree","label": "樹木の枝",
       "excel": {
         "B": { "type": "icon", "cell": "D15", "dx": 115, "dy": 7, "icon" : "triangle.png"},
         "C": { "type": "icon", "cell": "D15", "dx": 115, "dy": 7, "icon" : "none.png" }
@@ -852,16 +852,21 @@ document.addEventListener("DOMContentLoaded", () => {
         function bindDamageCell(id, name) {
             const cell = document.getElementById(id);
             if (!cell) return;
+
             cell.addEventListener("click", () => {
-                window.lastSelectedItem = name; 
+                window.lastSelectedItem = name;
+
+                // Android アプリと接続時
                 if (window.AndroidInterface && window.AndroidInterface.startAR) {
-                  window.AndroidInterface.startAR(name);  // ← startAR に統一
+                    window.AndroidInterface.startAR(name);
                 } else {
-                  alert("Android接続なし（Webテスト）");
+                    // Web上単体でテストするとき
+                    alert("Android 接続なし（Web テスト）");
                 }
             });
         }
 
+        // td と項目名の紐付け
         bindDamageCell("pillar_damage_td", "pillar_damage");
         bindDamageCell("joint_damage_td", "joint_damage");
         bindDamageCell("hanger_damage_td", "hanger_damage");
@@ -873,45 +878,38 @@ document.addEventListener("DOMContentLoaded", () => {
         bindDamageCell("base_crack_td", "base_crack");
         bindDamageCell("base_expose_td", "base_expose");
 
-        // ② Androidから呼び出す関数 = ラジオボタンの値を変更する
-        window.updateDamageValue = function(name, value) {
-            const target = document.querySelector(
-                `input[name="${name}"][value="${value}"]`
-            );
-            if (target) {
-                target.checked = true;
-            }
-        };
 
-        function setMeasuredLength(cm) {
-            console.log("Received length:", cm);
-
-            if (!window.lastSelectedItem) {
-                alert("エラー：呼び出し元項目が不明です");
-                return;
-            }
-
-            const name = window.lastSelectedItem;
-
-            // ランク判定（調整可能）
-            let grade = "A";
-            if (cm >= 3) grade = "C";
-            else if (cm >= 1) grade = "B";
-
-            // ラジオボタン変更
-            const radio = document.querySelector(`input[name="${name}"][value="${grade}"]`);
-            if (radio) radio.checked = true;
-
-            alert(`AR測定結果：${cm}cm → ${name} = ${grade}`);
-        }
-        // ============================================
-        // Android側から任意の値を反映
-        // ============================================
+        // ==========================
+        // Android → Web: ラジオボタン変更
+        // ==========================
         window.updateDamageValue = function(name, value) {
             const target = document.querySelector(
                 `input[name="${name}"][value="${value}"]`
             );
             if (target) target.checked = true;
+        };
+
+
+        // ==========================
+        // Android → Web: cm に応じて A/B/C 自動選択
+        // ==========================
+        window.setMeasuredLength = function(length_cm) {
+            console.log("受信した長さ(cm):", length_cm);
+
+            let value;
+
+            if (length_cm < 3) {
+                value = "A";
+            } else if (length_cm < 10) {
+                value = "B";
+            } else {
+                value = "C";
+            }
+
+            // lastSelectedItem に対して value を適用
+            if (window.lastSelectedItem) {
+                window.updateDamageValue(window.lastSelectedItem, value);
+            }
         };
 
         // ==========================
