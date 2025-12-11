@@ -163,7 +163,10 @@
         <td></td>
     </tr>
     <tr>
-        <td id="pillar_damage_td">破損</td>
+        <td id="pillar_damage_td"
+        onclick="requestAR('pillar_damage')"
+                style="cursor:pointer; background:#eef;">
+                破損</td>
         <td class="judge-td">
             <label>
                 <input type="radio" name="pillar_damage" value="A" checked>
@@ -254,7 +257,9 @@
     <!-- ================= 接合部（継ぎ手） ================= -->
     <tr>
         <td rowspan="5">接合部（継ぎ手）</td>
-        <td id="joint_damage_td">破損</td>
+        <td id="joint_damage_td"
+            onclick="requestAR('joint_damage')"
+                style="cursor:pointer; background:#eef;">破損</td>
         <td class="judge-td">
             <label>
                 <input type="radio" name="joint_damage" value="A" checked>
@@ -367,7 +372,10 @@
     <!-- ================= 吊金具 ================= -->
         <tr>
             <td rowspan="8">吊金具</td>
-            <td id="hanger_damage_td">破損</td>
+            <td id="hanger_damage_td"
+            onclick="requestAR('hanger_damage')"
+                style="cursor:pointer; background:#eef;">
+                破損</td>
             <td class="judge-td">
                 <label><input type="radio" name="hanger_damage" value="A" checked><span class="mark">〇</span></label>
             </td>
@@ -500,7 +508,9 @@
             <td></td>
         </tr>
         <tr>
-            <td id="chain_damage_td">破損</td>
+            <td id="chain_damage_td"
+            onclick="requestAR('chain_damage')"
+                style="cursor:pointer; background:#eef;">破損</td>
             <td class="judge-td">
                 <label><input type="radio" name="chain_damage" value="A" checked><span class="mark">〇</span></label>
             </td>
@@ -569,14 +579,20 @@
         <!-- ================= 揺動部（座板・座面） ================= -->
         <tr>
             <td rowspan="10">揺動部（座板・座面）</td>
-            <td id="seat_crack_td">ヒビ</td>
+            <td id="seat_crack_td"
+            onclick="requestAR('seat_crack')"
+                style="cursor:pointer; background:#eef;">
+                ヒビ</td>
             <td class="judge-td"><label><input type="radio" name="seat_crack" value="A" checked><span class="mark">〇</span></label></td>
             <td class="judge-td"><label><input type="radio" name="seat_crack" value="B"><span class="mark">△</span></label></td>
             <td class="judge-td"><label><input type="radio" name="seat_crack" value="C"><span class="mark">×</span></label></td>
             <td></td>
         </tr>
         <tr>
-            <td id="seat_break_td">割れ</td>
+            <td id="seat_break_td"
+            onclick="requestAR('seat_break')"
+                style="cursor:pointer; background:#eef;">
+                割れ</td>
             <td class="judge-td"><label><input type="radio" name="seat_break" value="A" checked><span class="mark">〇</span></label></td>
             <td class="judge-td"><label><input type="radio" name="seat_break" value="B"><span class="mark">△</span></label></td>
             <td class="judge-td"><label><input type="radio" name="seat_break" value="C"><span class="mark">×</span></label></td>
@@ -590,7 +606,10 @@
             <td></td>
         </tr>
         <tr>
-            <td id="seat_damage_td">破損</td>
+            <td id="seat_damage_td"
+            onclick="requestAR('seat_damage')"
+                style="cursor:pointer; background:#eef;">
+                >破損</td>
             <td class="judge-td"><label><input type="radio" name="seat_damage" value="A" checked><span class="mark">〇</span></label></td>
             <td class="judge-td"><label><input type="radio" name="seat_damage" value="B"><span class="mark">△</span></label></td>
             <td class="judge-td"><label><input type="radio" name="seat_damage" value="C"><span class="mark">×</span></label></td>
@@ -649,7 +668,10 @@
             <td></td>
         </tr>
         <tr>
-            <td id="fence_damage_td">破損</td>
+            <td id="fence_damage_td"
+            onclick="requestAR('fence_damage')"
+                style="cursor:pointer; background:#eef;">
+                破損</td>
             <td class="judge-td"><label><input type="radio" name="fence_damage" value="A" checked><span class="mark">〇</span></label></td>
             <td class="judge-td"><label><input type="radio" name="fence_damage" value="B"><span class="mark">△</span></label></td>
             <td class="judge-td"><label><input type="radio" name="fence_damage" value="C"><span class="mark">×</span></label></td>
@@ -711,14 +733,20 @@
             <td></td>
         </tr>
         <tr>
-            <td id="base_crack_td">亀裂</td>
+            <td id="base_crack_td"
+            onclick="requestAR('base_crack')"
+                style="cursor:pointer; background:#eef;">
+                亀裂</td>
             <td class="judge-td"><label><input type="radio" name="base_crack" value="A" checked><span class="mark">〇</span></label></td>
             <td class="judge-td"><label><input type="radio" name="base_crack" value="B"><span class="mark">△</span></label></td>
             <td class="judge-td"><label><input type="radio" name="base_crack" value="C"><span class="mark">×</span></label></td>
             <td></td>
         </tr>
         <tr>
-            <td id="base_expose_td">破損</td>
+            <td id="base_expose_td"
+            onclick="requestAR('base_expose')"
+                style="cursor:pointer; background:#eef;">
+                破損</td>
             <td class="judge-td">
                 <label><input type="radio" name="base_expose" value="A" checked><span class="mark">〇</span>
                 </label>
@@ -772,7 +800,10 @@
             <td></td>
         </tr>
         <tr>
-            <td id="ground_mat_damage_td">マットの破損</td>
+            <td id="ground_mat_damage_td"
+            onclick="requestAR('ground_mat_damage')"
+                style="cursor:pointer; background:#eef;">
+                マットの破損</td>
             <td class="judge-td"><label><input type="radio" name="ground_mat_damage" value="A" checked><span class="mark">〇</span></label></td>
             <td class="judge-td"><label><input type="radio" name="ground_mat_damage" value="B"><span class="mark">△</span></label></td>
             <td class="judge-td"><label><input type="radio" name="ground_mat_damage" value="C"><span class="mark">×</span></label></td>
