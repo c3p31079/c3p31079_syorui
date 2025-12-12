@@ -101,7 +101,6 @@ def generate_excel():
                 insert_icon(ws, cell, item.get("icon", "check.png"), dx=dx, dy=dy)
 
     stream = io.BytesIO()
-    output_path = "backend/output.xlsx"
     wb.save(stream)
     stream.seek(0)
 

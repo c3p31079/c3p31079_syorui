@@ -218,7 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "C": { "type": "icon", "cell": "D11", "dx": 115, "dy": 7, "icon" : "none.png" }
       }
     },
-    ,
     {
       "name": "seat_bolt",
       "label": "ボルトの緩み",
@@ -857,67 +856,71 @@ document.addEventListener("DOMContentLoaded", () => {
         // ==========================
         // ネイティブアプリのやつ
         // ==========================
-        //td をタップしたら Android の関数を呼ぶ
-        // ==============================
-        // 点検項目クリック → Androidへ通知
-        // ==============================
-        function bindDamageCell(id, name) {
-            const cell = document.getElementById(id);
-            if (!cell) return;
+        //------------------------------------------------------------
+        // Android ← クリック時の AR 計測開始要求
+        //------------------------------------------------------------
+        document.addEventListener("DOMContentLoaded", () => {
 
-            cell.addEventListener("click", () => {
-                window.lastSelectedItem = name;
-                if (window.AndroidInterface && window.AndroidInterface.startAR) {
-                    window.AndroidInterface.startAR(name);
+    function bindDamageCell(id, tdId) {
+        const cell = document.getElementById(id);
+        if (!cell) return;
+
+        cell.addEventListener("click", () => {
+            console.log("td clicked:", tdId);
+            window.lastSelectedItem = tdId;
+
+            if (window.AndroidInterface && window.AndroidInterface.startAR) {
+                window.AndroidInterface.startAR(tdId);
+            } else {
+                alert("Android 接続なし（Web テストモード）");
+            }
+        });
+    }
+
+    // td のリスト
+    const tdList = [
+          bindDamageCell("pillar_damage_td","pillar_damage"),
+          bindDamageCell("joint_damage_td","joint_damage"),
+          bindDamageCell("hanger_damage_td","hanger_damage"),
+          bindDamageCell("chain_damage_td","chain_damage"),
+          bindDamageCell("seat_crack_td","seat_crack"),
+          bindDamageCell("seat_break_td","seat_break"),
+          bindDamageCell("seat_damage_td","seat_damage"),
+          bindDamageCell("fence_damage_td","fence_damage"),
+          bindDamageCell("base_crack_td","base_crack"),
+          bindDamageCell("base_expose_td","base_expose")];
+
+            tdList.forEach(([id, tdId]) => bindDamageCell(id, tdId));
+
+            // Android → Web 自動ラジオ選択
+            window.setMeasuredLength = function(length_cm, tdId) {
+                console.log("ARから受信:", length_cm, tdId);
+
+                let grade = "A";
+                if (length_cm >= 25) grade = "C";
+                else if (length_cm >= 10) grade = "B";
+
+                const radios = document.querySelectorAll(`input[name='${tdId}']`);
+                radios.forEach(r => { if (r.value === grade) r.checked = true; });
+
+                // Excel 用アイコン決定
+                let iconFile = "";
+                if (grade === "B") iconFile = "triangle.png";
+                if (grade === "C") iconFile = "none.png";
+
+                const cell = window.td_to_cell_map?.[tdId] ?? null;
+                const dx = window.adjust_dx?.[tdId] ?? 0;
+                const dy = window.adjust_dy?.[tdId] ?? 0;
+
+                if (cell) {
+                    window.items = window.items || [];
+                    window.items.push({ type: "icon", cell, icon: iconFile, dx, dy });
                 } else {
-                    alert("Android接続なし（Webテスト）");
+                    console.warn("tdId -> Excel cell mapping が見つかりません:", tdId);
                 }
-            });
-        }
+            };
 
-        // 連結
-        bindDamageCell("pillar_damage_td","pillar_damage");
-        bindDamageCell("joint_damage_td","joint_damage");
-        bindDamageCell("hanger_damage_td","hanger_damage");
-        bindDamageCell("chain_damage_td","chain_damage");
-        bindDamageCell("seat_crack_td","seat_crack");
-        bindDamageCell("seat_break_td","seat_break");
-        bindDamageCell("seat_damage_td","seat_damage");
-        bindDamageCell("fence_damage_td","fence_damage");
-        bindDamageCell("base_crack_td","base_crack");
-        bindDamageCell("base_expose_td","base_expose");
-
-        // ===========================================
-        // Android → Web（ラジオ自動選択処理）
-        // ===========================================
-       window.setMeasuredLength = function(length_cm, tdId) {
-          console.log("受信: " + length_cm + "cm / tdId=" + tdId);
-
-          // ランクへ変換
-          let grade = "A";  // default
-          if (length_cm >= 25) grade = "C";
-          else if (length_cm >= 10) grade = "B";
-
-          // ラジオボタン自動選択
-          const radios = document.querySelectorAll(`input[name='${tdId}']`);
-          radios.forEach(r => {
-              if (r.value === grade) r.checked = true;
-          });
-
-          // PNG アイコン設定
-          let iconFile = "circle.png"; // A
-          if (grade === "B") iconFile = "triangle.png";
-          if (grade === "C") iconFile = "none.png";
-
-          // items[] に push（Excel 書込用）
-          items.push({
-              type: "icon",
-              cell: td_to_cell_map[tdId],   // ←あなたの既存のマッピングを利用
-              icon: iconFile,
-              dx: adjust_dx[tdId] || 0,
-              dy: adjust_dy[tdId] || 0
-          });
-      };
+        });
 
         // ==========================
         // Flask API へ送信
