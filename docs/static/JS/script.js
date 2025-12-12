@@ -716,8 +716,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // dx,dy はあなたの Excel レイアウトに合わせて自由に調整可能
         const policyChecks = [
             { id: "plan_maintenance", label: "整備班で対応予定", dx: 0,  dy: 7   },
-            { id: "plan_improvementlan_repair",      label: "修繕・修繕工事で対応予定", dx: 0,  dy: 19 },
-            { id: "plan_precision", label: "施設改良工事で対応予定", dx: 0,  dy: 31 },
+            { id: "plan_repair",      label: "修繕・修繕工事で対応予定", dx: 0,  dy: 19 },
+            { id: "plan_imporvement", label: "施設改良工事で対応予定", dx: 0,  dy: 31 },
             { id: "plan_precision",   label: "精密点検予定", dx: 0,  dy: 43 },
             { id: "plan_removal",     label: "撤去予定", dx: 0,  dy: 55 },
             { id: "plan_other",       label: "その他", dx: 0,  dy: 67 }
