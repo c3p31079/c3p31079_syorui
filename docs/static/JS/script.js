@@ -231,8 +231,8 @@ document.addEventListener("DOMContentLoaded", () => {
       "name": "seat_nut",
       "label": "袋ナットの緩み",
       "excel": {
-        "B": { "type": "icon", "cell": "D11", "dx": 25, "dy": 19, "icon" : "triangle.png"},
-        "C": { "type": "icon", "cell": "D11", "dx": 25, "dy": 19, "icon" : "none.png" }
+        "B": { "type": "icon", "cell": "D11", "dx": 50, "dy": 19, "icon" : "triangle.png"},
+        "C": { "type": "icon", "cell": "D11", "dx": 50, "dy": 19, "icon" : "none.png" }
       }
     },
     {
